@@ -5,6 +5,7 @@
 #include "DW1000.h"
 
 #define PI 3.14159265359
+#define DATA_RATE 100 // 100 Hz
 
 // leftmost two bytes below will become the "short address"
 char anchor_addr[] = "80:00:5B:D5:A9:9A:E2:9C";
@@ -55,6 +56,7 @@ void setup() {
 void loop() {
   DW1000Ranging.loop();
   sendSensorDataSquare();
+  delay(1000 / DATA_RATE); // Controll the data rate.
 }
 
 void setupUWBAnchor() {
@@ -118,7 +120,7 @@ void sendSensorData(float distance, float heading) {
     UWBAnchorSensorData.writeValue((uint8_t*)&data, sizeof(data));
 
     Serial.printf("Sent via BLE: distance=%f, heading=%f\n", distance, heading);
-    Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+    //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
     lastPingTime = millis();
   } else {
     Serial.println("Disconnected from central, reconnecting...");
@@ -167,7 +169,7 @@ void sendSensorDataWayPoints(const float waypoints[][2], int waypointCount) {
 
   static float posX = 0;  // Current X position
   static float posY = 0;  // Current Y position
-  const float stepSize = 0.1;  // Movement per step
+  const float stepSize = float(1) / float(DATA_RATE);  // Movement per step
 
   // Get the target waypoint
   float targetX = waypoints[currentWaypointIndex][0];

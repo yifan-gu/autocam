@@ -149,7 +149,7 @@ void scanForUWBAnchor() {
     connectToUWBAnchor();
     return;
   }
-  delay(2000);
+  delay(1000);
 }
 
 void connectToUWBAnchor() {
@@ -174,7 +174,19 @@ void connectToUWBAnchor() {
     UWBAnchor.disconnect();
     return;
   }
-  Serial.println("Found sensor data characteristic!");
+
+  if (!UWBAnchorSensorData.canSubscribe()) {
+    Serial.println("Cannot subscribe sensor data characteristic! Disconnecting...");
+    UWBAnchor.disconnect();
+    return;
+  }
+
+  if (!UWBAnchorSensorData.subscribe()) {
+    Serial.println("Failed to subscribe sensor data characteristic! Disconnecting...");
+    UWBAnchor.disconnect();
+    return;
+  }
+  Serial.println("Found sensor data characteristic and successfully subscribed!");
 }
 
 void setupESC() {
@@ -288,12 +300,12 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 
 // Receive data from the UWB Anchor.
 void receiveUWBAnchorData() {
-  if (UWBAnchorSensorData && UWBAnchorSensorData.canRead()) {
+  if (UWBAnchorSensorData.valueUpdated()) {
     UWBAnchorSensorData.readValue((uint8_t*)&receivedData, sizeof(receivedData));
     Serial.printf("Received distance: %f, heading: %f\n", receivedData.distance, receivedData.heading);
     distance = receivedData.distance;
     heading = receivedData.heading;
-    Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+    //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
     lastPingTime = millis();
   }
 }
