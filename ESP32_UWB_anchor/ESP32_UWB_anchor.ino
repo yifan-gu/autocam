@@ -25,14 +25,18 @@ const uint8_t PIN_SS = 4;   // spi select pin
 float distance = 0;
 float heading = 0;
 
-// BLE Service and Characteristics
+struct SensorData {
+  float distance;
+  float heading;
+};
+
+// BLE Service and Characteristic
 BLEService UWBAnchorService("e2b221c6-7a26-49f4-80cc-0cd58a53041d");
-//BLEService UWBAnchorService("180F");
-BLEFloatCharacteristic UWBAnchorDistanceData ("A319", BLERead | BLENotify);
-BLEFloatCharacteristic UWBAnchorHeadingData ("A31A", BLERead | BLENotify);
+BLECharacteristic UWBAnchorSensorData("A319", BLERead | BLENotify, sizeof(SensorData), true);
 
 BLEDevice BLECentral;
 
+unsigned int lastPingTime = 0;
 
 void setup() {
   // Start Serial for debugging
@@ -75,20 +79,20 @@ void setupBLEPeripheral() {
     Serial.println("Failed to start BLE module!");
     while (1);
   }
+  BLE.setConnectionInterval(6, 6);
   BLE.setLocalName("UWB Anchor");
   BLE.setDeviceName("uwb-anchor");
   BLE.setAdvertisedService(UWBAnchorService);
 
   // add the characteristic to the service
-  UWBAnchorService.addCharacteristic(UWBAnchorDistanceData);
-  UWBAnchorService.addCharacteristic(UWBAnchorHeadingData);
+  UWBAnchorService.addCharacteristic(UWBAnchorSensorData);
 
   // add service
   BLE.addService(UWBAnchorService);
 
   // set the initial value for the characeristic:
-  UWBAnchorDistanceData.writeValue(0);
-  UWBAnchorHeadingData.writeValue(0);
+  SensorData data = {0, 0};
+  UWBAnchorSensorData.writeValue((uint8_t*)&data, sizeof(data));
 
   // start advertising
   BLE.advertise();
@@ -110,10 +114,12 @@ void connectToCentral() {
 
 void sendSensorData(float distance, float heading) {
   if (BLECentral && BLECentral.connected()) {
-    UWBAnchorDistanceData.writeValue(distance);
-    UWBAnchorHeadingData.writeValue(heading);
+    SensorData data = {distance, heading};
+    UWBAnchorSensorData.writeValue((uint8_t*)&data, sizeof(data));
+
     Serial.printf("Sent via BLE: distance=%f, heading=%f\n", distance, heading);
-    delay(10);
+    Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+    lastPingTime = millis();
   } else {
     Serial.println("Disconnected from central, reconnecting...");
     connectToCentral();
@@ -158,19 +164,10 @@ void sendSensorDataSquare() {
 
 void sendSensorDataWayPoints(const float waypoints[][2], int waypointCount) {
   static int currentWaypointIndex = 0;  // Index of the current waypoint
-  static unsigned long lastUpdateTime = 0;  // Time tracking for updates
-  const unsigned long updateInterval = 100;  // Update every 100 ms
 
   static float posX = 0;  // Current X position
   static float posY = 0;  // Current Y position
   const float stepSize = 0.1;  // Movement per step
-
-  // Check if it's time to update
-  unsigned long currentTime = millis();
-  if (currentTime - lastUpdateTime < updateInterval) {
-    return;  // Wait until the next update interval
-  }
-  lastUpdateTime = currentTime;
 
   // Get the target waypoint
   float targetX = waypoints[currentWaypointIndex][0];
@@ -208,9 +205,9 @@ void sendSensorDataWayPoints(const float waypoints[][2], int waypointCount) {
   sendSensorData(distance, heading);
 
   // Print debugging information
-  Serial.println("Position: (" + String(posX, 2) + ", " + String(posY, 2) +
+  /*Serial.println("Position: (" + String(posX, 2) + ", " + String(posY, 2) +
                  ") | Distance: " + String(distance, 2) +
                  " | Heading: " + String(heading, 2) +
-                 " | Target: (" + String(targetX, 2) + ", " + String(targetY, 2) + ")");
+                 " | Target: (" + String(targetX, 2) + ", " + String(targetY, 2) + ")");*/
 }
 

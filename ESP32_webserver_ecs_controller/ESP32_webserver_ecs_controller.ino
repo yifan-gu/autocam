@@ -86,16 +86,20 @@ float maxMoveSteering = 500;  // Maximum steering value in practice.
 float lastDeltaTimeMillis = 0; // Used to calculate ki, and Kd in the PID system.
 float minDeltaTimeMillis = 10; // Control the rate of PID update.
 
+struct SensorData {
+  float distance;
+  float heading;
+};
+
+SensorData receivedData;
+
 // BLE variables
 BLEDevice UWBAnchor;
 BLEService UWBAnchorService;
 
 const char UWBAnchorServiceUUID[] = "e2b221c6-7a26-49f4-80cc-0cd58a53041d";
-//const char UWBAnchorServiceUUID[] = "180F";
-const char UWBAnchorCharacteristicDistanceUUID[] = "A319";
-const char UWBAnchorCharacteristicHeadingUUID[] = "A31A";
-BLECharacteristic UWBAnchorDistanceData;
-BLECharacteristic UWBAnchorHeadingData;
+const char UWBAnchorCharacteristicSensorDataUUID[] = "A319";
+BLECharacteristic UWBAnchorSensorData;
 
 void setup() {
   // Start Serial for debugging
@@ -130,6 +134,7 @@ void setupBLECentral() {
     while (1);
   }
   Serial.println("BLE Central initialized.");
+  BLE.setConnectionInterval(6, 6);
 }
 
 void scanForUWBAnchor() {
@@ -162,10 +167,9 @@ void connectToUWBAnchor() {
     
   UWBAnchorService = UWBAnchor.service(UWBAnchorServiceUUID);
   Serial.printf("UWB device name: %s, UWB advertised svc: %d, Real svc count: %d, characteristics count: %d\n", UWBAnchor.deviceName(), UWBAnchor.advertisedServiceUuidCount(), UWBAnchor.serviceCount(), UWBAnchorService.characteristicCount());
-  UWBAnchorDistanceData = UWBAnchorService.characteristic(UWBAnchorCharacteristicDistanceUUID);
-  UWBAnchorHeadingData = UWBAnchorService.characteristic(UWBAnchorCharacteristicHeadingUUID);
+  UWBAnchorSensorData = UWBAnchorService.characteristic(UWBAnchorCharacteristicSensorDataUUID);
 
-  if (!UWBAnchorDistanceData || !UWBAnchorHeadingData) {
+  if (!UWBAnchorSensorData) {
     Serial.println("Failed to find sensor data characteristic! Disconnecting...");
     UWBAnchor.disconnect();
     return;
@@ -284,19 +288,12 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 
 // Receive data from the UWB Anchor.
 void receiveUWBAnchorData() {
-  boolean hasNewData = false;
-  if (UWBAnchorDistanceData && UWBAnchorDistanceData.canRead()) {
-    UWBAnchorDistanceData.readValue(&distance, 4);
-    hasNewData = true;
-    //Serial.println("Received distance from UWBAnchor: " + String(distance));
-
-  }
-  if (UWBAnchorHeadingData && UWBAnchorHeadingData.canRead()) {
-    UWBAnchorHeadingData.readValue(&heading, 4);
-    //Serial.println("Received heading from UWBAnchor: " + String(heading));
-    hasNewData = true;
-  }
-  if (hasNewData) {
+  if (UWBAnchorSensorData && UWBAnchorSensorData.canRead()) {
+    UWBAnchorSensorData.readValue((uint8_t*)&receivedData, sizeof(receivedData));
+    Serial.printf("Received distance: %f, heading: %f\n", receivedData.distance, receivedData.heading);
+    distance = receivedData.distance;
+    heading = receivedData.heading;
+    Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
     lastPingTime = millis();
   }
 }
