@@ -375,7 +375,12 @@ void calculateSteeringThrottle() {
   }
 
   // Calculate steering.
-  float headingDiff = heading - targetHeading; // headingDiff < 0 means it's turning clockwise; headingDiff > 0 means it's turning counterclockwise.
+  float headingDiff = heading - targetHeading; // headingDiff < 0 means the target is turning clockwise; headingDiff > 0 means the target is turning counterclockwise.
+  if (headingDiff > 180) {
+    headingDiff -= 360;
+  } else if (headingDiff < -180) {
+    headingDiff += 360;
+  }
   float steeringDiff = calculateSteeringDiff(headingDiff, deltaTimeMillis);
   if (moveForward) {
     setSteering(steeringDiff);
