@@ -1,9 +1,9 @@
+#include <ArduinoBLE.h>
 #include <ESP32Servo.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
 #include <math.h>
 #include <WiFi.h>
-#include <WiFiUdp.h>
 
 #include "index_html.h"
 
@@ -17,9 +17,6 @@
 const char* ssid = "RC-Controller";
 const char* password = "12345678"; // Minimum 8 characters
 const char* hostname = "autocam"; // mDNS hostname
-
-WiFiUDP udpServer;
-unsigned int udpPort = 12345; // UDP port for receiving data
 
 // Async WebSocket server
 AsyncWebServer server(80);
@@ -57,8 +54,6 @@ float currentX = 0, currentY = 0;
 // The target coordinates to match.
 float targetX = 0, targetY = 0;
 
-
-
 // Heartbeat tracking
 unsigned long lastPingTime = 0;           // Time of last received ping
 const unsigned long heartbeatTimeout = 1000; // 1 second timeout
@@ -91,6 +86,17 @@ float maxMoveSteering = 500;  // Maximum steering value in practice.
 float lastDeltaTimeMillis = 0; // Used to calculate ki, and Kd in the PID system.
 float minDeltaTimeMillis = 10; // Control the rate of PID update.
 
+// BLE variables
+BLEDevice UWBAnchor;
+BLEService UWBAnchorService;
+
+const char UWBAnchorServiceUUID[] = "e2b221c6-7a26-49f4-80cc-0cd58a53041d";
+//const char UWBAnchorServiceUUID[] = "180F";
+const char UWBAnchorCharacteristicDistanceUUID[] = "A319";
+const char UWBAnchorCharacteristicHeadingUUID[] = "A31A";
+BLECharacteristic UWBAnchorDistanceData;
+BLECharacteristic UWBAnchorHeadingData;
+
 void setup() {
   // Start Serial for debugging
   unsigned long startTime = millis();
@@ -103,14 +109,68 @@ void setup() {
 
   setupESC();
   setupServer();
+  setupBLECentral();
 }
 
 void loop() {
-  receiveUDPData();
+  if (UWBAnchor.connected()) {
+    receiveUWBAnchorData();
+  } else {
+    scanForUWBAnchor();
+  }
   calculateCoordinates();
   calculateSteeringThrottle();
   runESCController();
   runHealthCheck();
+}
+
+void setupBLECentral() {
+  if (!BLE.begin()) {
+    Serial.println("Starting BLE failed!");
+    while (1);
+  }
+  Serial.println("BLE Central initialized.");
+}
+
+void scanForUWBAnchor() {
+  Serial.println("Scanning for UWB Anchor...");
+  BLE.scanForUuid(UWBAnchorServiceUUID);
+
+  UWBAnchor = BLE.available();
+  if (UWBAnchor) {
+    Serial.print("Found UWB Anchor: ");
+    Serial.println(UWBAnchor.deviceName());
+    BLE.stopScan();
+    connectToUWBAnchor();
+    return;
+  }
+  delay(2000);
+}
+
+void connectToUWBAnchor() {
+  if (!UWBAnchor.connect()) {
+    Serial.println("Failed to connect to UWBAnchor.");
+    return;
+  }
+
+  Serial.println("Connected to UWBAnchor!");
+  if (!UWBAnchor.discoverAttributes()) {
+    Serial.println("Attribute discovery failed! Disconnecting...");
+    UWBAnchor.disconnect();
+    return;
+  }
+    
+  UWBAnchorService = UWBAnchor.service(UWBAnchorServiceUUID);
+  Serial.printf("UWB device name: %s, UWB advertised svc: %d, Real svc count: %d, characteristics count: %d\n", UWBAnchor.deviceName(), UWBAnchor.advertisedServiceUuidCount(), UWBAnchor.serviceCount(), UWBAnchorService.characteristicCount());
+  UWBAnchorDistanceData = UWBAnchorService.characteristic(UWBAnchorCharacteristicDistanceUUID);
+  UWBAnchorHeadingData = UWBAnchorService.characteristic(UWBAnchorCharacteristicHeadingUUID);
+
+  if (!UWBAnchorDistanceData || !UWBAnchorHeadingData) {
+    Serial.println("Failed to find sensor data characteristic! Disconnecting...");
+    UWBAnchor.disconnect();
+    return;
+  }
+  Serial.println("Found sensor data characteristic!");
 }
 
 void setupESC() {
@@ -128,7 +188,7 @@ void setupESC() {
   Serial.println("ESC Initialized!");
 }
 
-// WiFi, WebServer, UDP, and WebSocket setup
+// WiFi, WebServer, and WebSocket setup
 void setupServer() {
   // Start Access Point
   WiFi.softAP(ssid, password);
@@ -147,11 +207,6 @@ void setupServer() {
   Serial.print("Access the device at http://");
   Serial.print(hostname);
   Serial.println(".local");
-
-  // Start UDP
-  udpServer.begin(udpPort);
-  Serial.print("Listening for UDP on port ");
-  Serial.println(udpPort);
 
   // Configure WebSocket events
   ws.onEvent(onWebSocketEvent);
@@ -227,33 +282,21 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
   }
 }
 
-// Receive UDP data
-void receiveUDPData() {
-  int packetSize = udpServer.parsePacket();
-  if (packetSize) {
-    char packetBuffer[256];
-    int len = udpServer.read(packetBuffer, sizeof(packetBuffer) - 1);
-    if (len > 0) packetBuffer[len] = '\0';
-    if (len == sizeof(packetBuffer) - 1) {
-      Serial.println("Packet truncated due to buffer size.");
-      return;
-    }
-    String message = String(packetBuffer);
+// Receive data from the UWB Anchor.
+void receiveUWBAnchorData() {
+  boolean hasNewData = false;
+  if (UWBAnchorDistanceData && UWBAnchorDistanceData.canRead()) {
+    UWBAnchorDistanceData.readValue(&distance, 4);
+    hasNewData = true;
+    //Serial.println("Received distance from UWBAnchor: " + String(distance));
 
-    // Parse the received data in the format "distance=x&heading=y"
-    int distanceIndex = message.indexOf("distance=");
-    int headingIndex = message.indexOf("heading=");
-
-    if (distanceIndex != -1 && headingIndex != -1) {
-      String distanceValue = message.substring(distanceIndex + 9, message.indexOf("&"));
-      String headingValue = message.substring(headingIndex + 8);
-
-      // Convert and store values
-      distance = distanceValue.toFloat();  // Assuming distance[0] for storage
-      heading = headingValue.toFloat();    // Assuming heading[0] for storage
-    }
-
-    // Update the last ping time
+  }
+  if (UWBAnchorHeadingData && UWBAnchorHeadingData.canRead()) {
+    UWBAnchorHeadingData.readValue(&heading, 4);
+    //Serial.println("Received heading from UWBAnchor: " + String(heading));
+    hasNewData = true;
+  }
+  if (hasNewData) {
     lastPingTime = millis();
   }
 }

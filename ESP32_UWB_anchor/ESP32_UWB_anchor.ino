@@ -1,4 +1,4 @@
-#include <WiFi.h>
+#include <ArduinoBLE.h>
 #include <SPI.h>
 
 #include "DW1000Ranging.h"
@@ -22,21 +22,17 @@ const uint8_t PIN_RST = 27; // reset pin
 const uint8_t PIN_IRQ = 34; // irq pin
 const uint8_t PIN_SS = 4;   // spi select pin
 
-// Replace with your WiFi credentials
-const char* ssid = "RC-Controller";
-const char* password = "12345678";
-
-// Replace with your server's address and port
-const char* serverAddress = "ws://autocam.local:80/ws";
-IPAddress serverIP, udpServerIP;
-
-// UDP Configuration
-WiFiUDP udpClient;
-const char* udpServerDomain = "autocam.local"; // Replace with the receiver's domain
-const unsigned int udpServerPort = 12345;
-
 float distance = 0;
 float heading = 0;
+
+// BLE Service and Characteristics
+BLEService UWBAnchorService("e2b221c6-7a26-49f4-80cc-0cd58a53041d");
+//BLEService UWBAnchorService("180F");
+BLEFloatCharacteristic UWBAnchorDistanceData ("A319", BLERead | BLENotify);
+BLEFloatCharacteristic UWBAnchorHeadingData ("A31A", BLERead | BLENotify);
+
+BLEDevice BLECentral;
+
 
 void setup() {
   // Start Serial for debugging
@@ -49,7 +45,7 @@ void setup() {
   }
 
   setupUWBAnchor();
-  setupWiFi();
+  setupBLEPeripheral();
 }
 
 void loop() {
@@ -73,38 +69,55 @@ void setupUWBAnchor() {
   DW1000Ranging.startAsAnchor(anchor_addr, DW1000.MODE_LONGDATA_RANGE_LOWPOWER, false);
 }
 
-void setupWiFi() {
-  // Connect to WiFi
-  Serial.printf("Connecting to WiFi: %s\n", ssid);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
+void setupBLEPeripheral() {
+   // begin initialization
+  if (!BLE.begin()) {
+    Serial.println("Failed to start BLE module!");
+    while (1);
+  }
+  BLE.setLocalName("UWB Anchor");
+  BLE.setDeviceName("uwb-anchor");
+  BLE.setAdvertisedService(UWBAnchorService);
+
+  // add the characteristic to the service
+  UWBAnchorService.addCharacteristic(UWBAnchorDistanceData);
+  UWBAnchorService.addCharacteristic(UWBAnchorHeadingData);
+
+  // add service
+  BLE.addService(UWBAnchorService);
+
+  // set the initial value for the characeristic:
+  UWBAnchorDistanceData.writeValue(0);
+  UWBAnchorHeadingData.writeValue(0);
+
+  // start advertising
+  BLE.advertise();
+  Serial.println("BLE Peripheral advertised!");
+
+  connectToCentral();
+}
+
+void connectToCentral() {
+  while (!BLECentral || !BLECentral.connected()) {
+    Serial.println("Connecting to BLE central...");
+    BLECentral = BLE.central();
     delay(1000);
-    Serial.print(".");
   }
-  Serial.println("\nWiFi connected!");
-  serverIP = WiFi.localIP();
-  Serial.printf("IP Address: %s\n", serverIP.toString().c_str());
+  Serial.print("Connected to BLE central: ");
+  // print the central's MAC address:
+  Serial.println(BLECentral.address());
+}
 
-  if (WiFi.hostByName(udpServerDomain, udpServerIP)) {
-    Serial.print("Resolved UDP IP: ");
-    Serial.println(udpServerIP);
+void sendSensorData(float distance, float heading) {
+  if (BLECentral && BLECentral.connected()) {
+    UWBAnchorDistanceData.writeValue(distance);
+    UWBAnchorHeadingData.writeValue(heading);
+    Serial.printf("Sent via BLE: distance=%f, heading=%f\n", distance, heading);
+    delay(10);
   } else {
-    Serial.println("Failed to resolve domain!");
+    Serial.println("Disconnected from central, reconnecting...");
+    connectToCentral();
   }
-}
-
-void sendSensorData() {
-  // Send `distance` data
-  String message = "distance=" + String(distance, 2) + "&heading=" + String(heading, 2);
-  sendUDP(message);
-  delay(10); // 100Hz.
-}
-
-void sendUDP(String data) {
-  udpClient.beginPacket(udpServerIP, udpServerPort);
-  udpClient.print(data);
-  udpClient.endPacket();
-  Serial.println("Sent via UDP: " + data);
 }
 
 void newRange() {
@@ -191,9 +204,8 @@ void sendSensorDataWayPoints(const float waypoints[][2], int waypointCount) {
     heading += 360;
   }
 
-  // Send `distance` and `heading` via UDP
-  String message = "distance=" + String(distance, 2) + "&heading=" + String(heading, 2);
-  sendUDP(message);
+  // Send `distance` and `heading` via BLE
+  sendSensorData(distance, heading);
 
   // Print debugging information
   Serial.println("Position: (" + String(posX, 2) + ", " + String(posY, 2) +
