@@ -38,6 +38,8 @@ const unsigned int udpServerPort = 12345;
 float distance = 0;
 float heading = 0;
 
+unsigned int lastPingTime = 0;
+
 void setup() {
   // Start Serial for debugging
   unsigned long startTime = millis();
@@ -97,14 +99,16 @@ void sendSensorData() {
   // Send `distance` data
   String message = "distance=" + String(distance, 2) + "&heading=" + String(heading, 2);
   sendUDP(message);
-  delay(10); // 100Hz.
 }
 
 void sendUDP(String data) {
   udpClient.beginPacket(udpServerIP, udpServerPort);
   udpClient.print(data);
   udpClient.endPacket();
-  Serial.println("Sent via UDP: " + data);
+  //Serial.println("Sent via UDP: " + data);
+  delay(10); // 100Hz.
+  Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  lastPingTime = millis();
 }
 
 void newRange() {
@@ -145,19 +149,10 @@ void sendSensorDataSquare() {
 
 void sendSensorDataWayPoints(const float waypoints[][2], int waypointCount) {
   static int currentWaypointIndex = 0;  // Index of the current waypoint
-  static unsigned long lastUpdateTime = 0;  // Time tracking for updates
-  const unsigned long updateInterval = 100;  // Update every 100 ms
 
   static float posX = 0;  // Current X position
   static float posY = 0;  // Current Y position
   const float stepSize = 0.1;  // Movement per step
-
-  // Check if it's time to update
-  unsigned long currentTime = millis();
-  if (currentTime - lastUpdateTime < updateInterval) {
-    return;  // Wait until the next update interval
-  }
-  lastUpdateTime = currentTime;
 
   // Get the target waypoint
   float targetX = waypoints[currentWaypointIndex][0];
@@ -196,9 +191,9 @@ void sendSensorDataWayPoints(const float waypoints[][2], int waypointCount) {
   sendUDP(message);
 
   // Print debugging information
-  Serial.println("Position: (" + String(posX, 2) + ", " + String(posY, 2) +
+  /*Serial.println("Position: (" + String(posX, 2) + ", " + String(posY, 2) +
                  ") | Distance: " + String(distance, 2) +
                  " | Heading: " + String(heading, 2) +
-                 " | Target: (" + String(targetX, 2) + ", " + String(targetY, 2) + ")");
+                 " | Target: (" + String(targetX, 2) + ", " + String(targetY, 2) + ")");*/
 }
 

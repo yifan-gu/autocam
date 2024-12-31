@@ -17,6 +17,7 @@
 const char* ssid = "RC-Controller";
 const char* password = "12345678"; // Minimum 8 characters
 const char* hostname = "autocam"; // mDNS hostname
+const uint8_t fixedMacAddress[] = {0x24, 0x6F, 0x28, 0xAB, 0xCD, 0xEF};
 
 WiFiUDP udpServer;
 unsigned int udpPort = 12345; // UDP port for receiving data
@@ -130,6 +131,14 @@ void setupESC() {
 
 // WiFi, WebServer, UDP, and WebSocket setup
 void setupServer() {
+  // Set the fixed MAC address
+  if (esp_base_mac_addr_set(fixedMacAddress) == ESP_OK) {
+    Serial.print("MAC Address set to: ");
+    printMacAddress(fixedMacAddress);
+  } else {
+    Serial.println("Failed to set MAC Address!");
+  }
+
   // Start Access Point
   WiFi.softAP(ssid, password);
   Serial.println("Access Point started!");
@@ -164,6 +173,16 @@ void setupServer() {
 
   // Start server
   server.begin();
+}
+
+void printMacAddress(const uint8_t *macAddress) {
+  for (int i = 0; i < 6; ++i) {
+    if (i > 0) {
+      Serial.print(":");
+    }
+    Serial.printf("%02X", macAddress[i]);
+  }
+  Serial.println();
 }
 
 // Handle WebSocket events
@@ -252,6 +271,8 @@ void receiveUDPData() {
       distance = distanceValue.toFloat();  // Assuming distance[0] for storage
       heading = headingValue.toFloat();    // Assuming heading[0] for storage
     }
+
+    Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
 
     // Update the last ping time
     lastPingTime = millis();
