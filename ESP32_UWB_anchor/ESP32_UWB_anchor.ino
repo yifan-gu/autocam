@@ -56,7 +56,7 @@ void setup() {
 void loop() {
   DW1000Ranging.loop();
   sendSensorDataSquare();
-  delay(1000 / DATA_RATE); // Controll the data rate.
+  delay(1000 / DATA_RATE); // Control the data rate.
 }
 
 void setupUWBAnchor() {
@@ -104,7 +104,7 @@ void setupBLEPeripheral() {
 }
 
 void connectToCentral() {
-  while (!BLECentral || !BLECentral.connected()) {
+  while (!(BLECentral && BLECentral.connected())) {
     Serial.println("Connecting to BLE central...");
     BLECentral = BLE.central();
     delay(1000);
@@ -115,17 +115,17 @@ void connectToCentral() {
 }
 
 void sendSensorData(float distance, float heading) {
-  if (BLECentral && BLECentral.connected()) {
-    SensorData data = {distance, heading};
-    UWBAnchorSensorData.writeValue((uint8_t*)&data, sizeof(data));
-
-    Serial.printf("Sent via BLE: distance=%f, heading=%f\n", distance, heading);
-    //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
-    lastPingTime = millis();
-  } else {
+  if (!(BLECentral && BLECentral.connected())) {
     Serial.println("Disconnected from central, reconnecting...");
     connectToCentral();
   }
+
+  SensorData data = {distance, heading};
+  UWBAnchorSensorData.writeValue((uint8_t*)&data, sizeof(data));
+
+  Serial.printf("Sent via BLE: distance=%f, heading=%f\n", distance, heading);
+  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  lastPingTime = millis();
 }
 
 void newRange() {

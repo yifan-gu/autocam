@@ -31,7 +31,7 @@ const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
 const int minSteering = 1000, maxSteering = 2000, midSteering = 1500;
 
 // Variable to toggle the free vs lock mode.
-boolean isLockMode = false;
+boolean isLockMode = true;
 
 // Variables to store values
 int throttleValue = midThrottle, steeringValue = midSteering;
@@ -91,15 +91,28 @@ struct SensorData {
   float heading;
 };
 
-SensorData receivedData;
+SensorData sensorData;
+
+struct ControllerData {
+  int throttleValue;
+  int steeringValue;
+  boolean isLockMode;
+};
+
+ControllerData controllerData;
 
 // BLE variables
-BLEDevice UWBAnchor;
-BLEService UWBAnchorService;
+BLEDevice UWBAnchor, AutocamController;
+BLEService UWBAnchorService, AutocamControllerService;
 
 const char UWBAnchorServiceUUID[] = "e2b221c6-7a26-49f4-80cc-0cd58a53041d";
-const char UWBAnchorCharacteristicSensorDataUUID[] = "A319";
+const char AutocamControllerServiceUUID[] = "f49f531a-9cba-4ada-905c-68699d400122";
+
+const char UWBAnchorSensorDataCharacteristicUUID[] = "A319";
+const char AutocamControllerControllerDataCharacteristicUUID[] = "B320";
+
 BLECharacteristic UWBAnchorSensorData;
+BLECharacteristic AutocamControllerData;
 
 void setup() {
   // Start Serial for debugging
@@ -117,11 +130,8 @@ void setup() {
 }
 
 void loop() {
-  if (UWBAnchor.connected()) {
-    receiveUWBAnchorData();
-  } else {
-    scanForUWBAnchor();
-  }
+  //getUWBAnchorData();
+  getAutocamControllerData();
   calculateCoordinates();
   calculateSteeringThrottle();
   runESCController();
@@ -137,56 +147,55 @@ void setupBLECentral() {
   BLE.setConnectionInterval(6, 6);
 }
 
-void scanForUWBAnchor() {
-  Serial.println("Scanning for UWB Anchor...");
-  BLE.scanForUuid(UWBAnchorServiceUUID);
+void scanForPeripheral(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID) {
+  Serial.printf("Scanning for BLE peripheral [%s]...\n", serviceUUID);
+  BLE.scanForUuid(serviceUUID);
 
-  UWBAnchor = BLE.available();
-  if (UWBAnchor) {
-    Serial.print("Found UWB Anchor: ");
-    Serial.println(UWBAnchor.deviceName());
+  device = BLE.available();
+  if (device) {
+    Serial.printf("Found BLE peripheral, local name: [%s]\n", device.localName());
     BLE.stopScan();
-    connectToUWBAnchor();
+    connectToBLEDevice(device, service, characteristic, serviceUUID, characteristicUUID);
     return;
   }
   delay(1000);
 }
 
-void connectToUWBAnchor() {
-  if (!UWBAnchor.connect()) {
-    Serial.println("Failed to connect to UWBAnchor.");
+void connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID) {
+  if (!device.connect()) {
+    Serial.printf("Failed to connect to [%s].\n", device.localName());
     return;
   }
 
-  Serial.println("Connected to UWBAnchor!");
-  if (!UWBAnchor.discoverAttributes()) {
-    Serial.println("Attribute discovery failed! Disconnecting...");
-    UWBAnchor.disconnect();
+  Serial.printf("Connected to [%s]!\n", device.localName());
+  if (!device.discoverAttributes()) {
+    Serial.printf("Attribute discovery failed for [%s]! Disconnecting...\n", device.localName());
+    device.disconnect();
     return;
   }
     
-  UWBAnchorService = UWBAnchor.service(UWBAnchorServiceUUID);
-  Serial.printf("UWB device name: %s, UWB advertised svc: %d, Real svc count: %d, characteristics count: %d\n", UWBAnchor.deviceName(), UWBAnchor.advertisedServiceUuidCount(), UWBAnchor.serviceCount(), UWBAnchorService.characteristicCount());
-  UWBAnchorSensorData = UWBAnchorService.characteristic(UWBAnchorCharacteristicSensorDataUUID);
+  service = device.service(serviceUUID);
+  Serial.printf("BLE device name: [%s], advertised svc count: [%d], Real svc count: [%d], characteristics count: [%d]\n", device.deviceName(), device.advertisedServiceUuidCount(), device.serviceCount(), device.characteristicCount());
+  characteristic = service.characteristic(characteristicUUID);
 
-  if (!UWBAnchorSensorData) {
-    Serial.println("Failed to find sensor data characteristic! Disconnecting...");
-    UWBAnchor.disconnect();
+  if (!characteristic) {
+    Serial.printf("Failed to find characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
+    device.disconnect();
     return;
   }
 
-  if (!UWBAnchorSensorData.canSubscribe()) {
-    Serial.println("Cannot subscribe sensor data characteristic! Disconnecting...");
-    UWBAnchor.disconnect();
+  if (!characteristic.canSubscribe()) {
+    Serial.printf("Cannot subscribe characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
+    device.disconnect();
     return;
   }
 
-  if (!UWBAnchorSensorData.subscribe()) {
-    Serial.println("Failed to subscribe sensor data characteristic! Disconnecting...");
-    UWBAnchor.disconnect();
+  if (!characteristic.subscribe()) {
+    Serial.printf("Failed to subscribe characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
+    device.disconnect();
     return;
   }
-  Serial.println("Found sensor data characteristic and successfully subscribed!");
+  Serial.printf("Found characteristic [%s] on device [%s] and successfully subscribed!\n", characteristicUUID, device.deviceName());
 }
 
 void setupESC() {
@@ -247,7 +256,7 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 
     case WS_EVT_DISCONNECT:
       Serial.println("WebSocket disconnected");
-      isLockMode = false;
+      setLockMode(false);
       throttleValue = midThrottle;
       steeringValue = midSteering;
       Serial.println("Throttle and Steering reset to middle positions");
@@ -274,9 +283,9 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
         //Serial.println("Sent data: " + response);
       } else if (message.startsWith("mode=")) {
         if (message == "mode=lock") {
-          isLockMode = true;
+          setLockMode(true);
         } else if (message == "mode=free") {
-          isLockMode = false;
+          setLockMode(false);
           throttleValue = midThrottle;
           steeringValue = midSteering;
         }
@@ -295,18 +304,6 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
     default:
       Serial.println("Unknown WebSocket event");
       break;
-  }
-}
-
-// Receive data from the UWB Anchor.
-void receiveUWBAnchorData() {
-  if (UWBAnchorSensorData.valueUpdated()) {
-    UWBAnchorSensorData.readValue((uint8_t*)&receivedData, sizeof(receivedData));
-    Serial.printf("Received distance: %f, heading: %f\n", receivedData.distance, receivedData.heading);
-    distance = receivedData.distance;
-    heading = receivedData.heading;
-    //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
-    lastPingTime = millis();
   }
 }
 
@@ -329,6 +326,66 @@ void runHealthCheck() {
     steeringValue = midSteering;
     lastPingTime = millis(); // Reset timer to avoid repeated timeouts
   }
+}
+
+// Get data from the UWB Anchor via BLE.
+void getUWBAnchorData() {
+  if (!UWBAnchor.connected()) {
+    scanForPeripheral(UWBAnchor, UWBAnchorService, UWBAnchorSensorData, UWBAnchorServiceUUID, UWBAnchorSensorDataCharacteristicUUID);
+    return;
+  }
+
+  if (!UWBAnchorSensorData.valueUpdated()) { // No available data.
+    return;
+  }
+
+  UWBAnchorSensorData.readValue((uint8_t*)&sensorData, sizeof(sensorData));
+  Serial.printf("Received distance=%f, heading=%f\n", sensorData.distance, sensorData.heading);
+  distance = sensorData.distance;
+  heading = sensorData.heading;
+  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  lastPingTime = millis();
+}
+
+void getAutocamControllerData() {
+  if (!AutocamController.connected()) {
+    scanForPeripheral(AutocamController, AutocamControllerService, AutocamControllerData, AutocamControllerServiceUUID, AutocamControllerControllerDataCharacteristicUUID);
+    updateAutocamControllerStatus(); // Update the status after the initial connection;
+    return;
+  }
+
+  if (!AutocamControllerData.valueUpdated()) { // No available data.
+    return;
+  }
+  
+  AutocamControllerData.readValue((uint8_t*)&controllerData, sizeof(controllerData));
+  Serial.printf("Received throttle=%d, steering=%d, isLockMode=%d\n", controllerData.throttleValue, controllerData.steeringValue, controllerData.isLockMode);
+  Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  lastPingTime = millis();
+
+  throttleValue = controllerData.throttleValue;
+  steeringValue = controllerData.steeringValue;
+  setLockMode(controllerData.isLockMode);
+}
+
+void setLockMode(boolean value) {
+  boolean prevValue = isLockMode;
+  isLockMode = value;
+  if (prevValue != value) {
+    updateAutocamControllerStatus(); // Update the status only if there's a change.
+  }
+}
+
+void updateAutocamControllerStatus() {
+  if (!AutocamController.connected()) {
+    Serial.println("Autocam controller is not connected, will not update status!");
+    return;
+  }
+
+  ControllerData data = {throttleValue, steeringValue, isLockMode};
+  AutocamControllerData.writeValue((uint8_t*)&data, sizeof(data));
+  Serial.printf("Sent status to [%s] via BLE: throttle=%d, steering=%d, isLockMode=%d\n", AutocamController.deviceName(), throttleValue, steeringValue, isLockMode);
+  return;
 }
 
 void calculateSteeringThrottle() {

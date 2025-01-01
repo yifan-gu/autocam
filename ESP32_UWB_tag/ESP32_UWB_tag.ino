@@ -38,8 +38,7 @@ void setup() {
   setupUWBTag();
 }
 
-void loop()
-{
+void loop() {
   DW1000Ranging.loop();
 }
 
