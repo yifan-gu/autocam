@@ -5,15 +5,18 @@
 // Available state.
 #define STATE_NOT_CONNECTED 0
 #define STATE_CONNECTING 1
-#define STATE_CONNECTED_FREE_MODE 2
-#define STATE_CONNECTED_LOCK_MODE 3
+#define STATE_CONNECTED_MANUAL_MODE 2
+#define STATE_CONNECTED_AUTO_FOLLOW_MODE 3
+
+#define DRIVE_MODE_MANUAL 0
+#define DRIVE_MODE_AUTO_FOLLOW 1
 
 const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
 const int minSteering = 1000, maxSteering = 2000, midSteering = 1500;
 
-// Variable to toggle the free vs lock mode.
-boolean isLockModeStateValue = false;
-boolean isLockModeTriggerValue = false;
+// Variable to store and toggle the drive mode.
+int driveModeStateValue = DRIVE_MODE_MANUAL;
+int driveModeTriggerValue = DRIVE_MODE_MANUAL;
 
 int state = STATE_NOT_CONNECTED;
 
@@ -23,7 +26,7 @@ int throttleValue = midThrottle, steeringValue = midSteering;
 struct ControllerData {
   int throttleValue;
   int steeringValue;
-  boolean isLockMode;
+  int driveMode;
 };
 
 ControllerData receivedData;
@@ -52,7 +55,7 @@ void setup() {
 void loop() {
   readStatusData();
   readControllerData();
-  sendControllerData();
+  sendControllerData(); // TODO(yifan): Send update only when there's a value change.
   delay(1000 / DATA_RATE); // Control the data rate.
 }
 
@@ -110,9 +113,9 @@ void sendControllerData() {
     connectToCentral();
   }
 
-  ControllerData data = {throttleValue, steeringValue, isLockModeTriggerValue};
+  ControllerData data = {throttleValue, steeringValue, driveModeTriggerValue};
   AutocamControllerData.writeValue((uint8_t*)&data, sizeof(data));
-  Serial.printf("Sent via BLE: throttle=%d, steering=%d, isLockMode=%d\n", data.throttleValue, data.steeringValue, data.isLockMode);
+  Serial.printf("Sent via BLE: throttle=%d, steering=%d, driveMode=%d\n", data.throttleValue, data.steeringValue, data.driveMode);
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 }
@@ -126,9 +129,13 @@ void readStatusData() {
 
   if (AutocamControllerData.written()) {
     AutocamControllerData.readValue((uint8_t*)&receivedData, sizeof(receivedData));
-    Serial.printf("Received throttle=%d, steering=%d, isLockMode=%d\n", receivedData.throttleValue, receivedData.steeringValue, receivedData.isLockMode);
-    isLockModeStateValue = receivedData.isLockMode;
-    updateState(isLockModeStateValue ? STATE_CONNECTED_LOCK_MODE : STATE_CONNECTED_FREE_MODE);
+    Serial.printf("Received throttle=%d, steering=%d, driveMode=%d\n", receivedData.throttleValue, receivedData.steeringValue, receivedData.driveMode);
+    driveModeStateValue = receivedData.driveMode;
+    if (driveModeStateValue == DRIVE_MODE_MANUAL) {
+      updateState(STATE_CONNECTED_MANUAL_MODE);
+    } else if (driveModeStateValue == DRIVE_MODE_AUTO_FOLLOW) {
+      updateState(STATE_CONNECTED_AUTO_FOLLOW_MODE);
+    }
     //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
     //lastPingTime = millis();
   }
@@ -158,7 +165,7 @@ void readControllerData() {
 
 
   if (millis() - lastUpdate >= 1000) {
-    isLockModeTriggerValue = !isLockModeTriggerValue;
+    driveModeTriggerValue = driveModeStateValue == DRIVE_MODE_MANUAL ? DRIVE_MODE_AUTO_FOLLOW : DRIVE_MODE_MANUAL;
     lastUpdate = millis();
   }
 }

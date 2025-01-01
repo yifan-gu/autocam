@@ -9,6 +9,9 @@
 
 #define PI 3.14159265359
 
+#define DRIVE_MODE_MANUAL 0
+#define DRIVE_MODE_AUTO_FOLLOW 1
+
 // Pin configuration
 #define STEERING_PIN 2  // GPIO2 for steering
 #define THROTTLE_PIN 3  // GPIO3 for throttle
@@ -30,8 +33,8 @@ Servo steeringServo;
 const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
 const int minSteering = 1000, maxSteering = 2000, midSteering = 1500;
 
-// Variable to toggle the free vs lock mode.
-boolean isLockMode = true;
+// Variable for the drive mode.
+int driveMode = DRIVE_MODE_MANUAL;
 
 // Variables to store values
 int throttleValue = midThrottle, steeringValue = midSteering;
@@ -96,7 +99,7 @@ SensorData sensorData;
 struct ControllerData {
   int throttleValue;
   int steeringValue;
-  boolean isLockMode;
+  int driveMode;
 };
 
 ControllerData controllerData;
@@ -256,7 +259,7 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 
     case WS_EVT_DISCONNECT:
       Serial.println("WebSocket disconnected");
-      setLockMode(false);
+      setDriveMode(DRIVE_MODE_MANUAL);
       throttleValue = midThrottle;
       steeringValue = midSteering;
       Serial.println("Throttle and Steering reset to middle positions");
@@ -282,10 +285,10 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
         client->text(response); // Send the JSON response to the client
         //Serial.println("Sent data: " + response);
       } else if (message.startsWith("mode=")) {
-        if (message == "mode=lock") {
-          setLockMode(true);
-        } else if (message == "mode=free") {
-          setLockMode(false);
+        if (message == "mode=manual") {
+          setDriveMode(DRIVE_MODE_MANUAL);
+        } else if (message == "mode=auto") {
+          setDriveMode(DRIVE_MODE_AUTO_FOLLOW);
           throttleValue = midThrottle;
           steeringValue = midSteering;
         }
@@ -359,18 +362,18 @@ void getAutocamControllerData() {
   }
   
   AutocamControllerData.readValue((uint8_t*)&controllerData, sizeof(controllerData));
-  Serial.printf("Received throttle=%d, steering=%d, isLockMode=%d\n", controllerData.throttleValue, controllerData.steeringValue, controllerData.isLockMode);
+  Serial.printf("Received throttle=%d, steering=%d, driveMode=%d\n", controllerData.throttleValue, controllerData.steeringValue, controllerData.driveMode);
   Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 
   throttleValue = controllerData.throttleValue;
   steeringValue = controllerData.steeringValue;
-  setLockMode(controllerData.isLockMode);
+  setDriveMode(controllerData.driveMode);
 }
 
-void setLockMode(boolean value) {
-  boolean prevValue = isLockMode;
-  isLockMode = value;
+void setDriveMode(int value) {
+  int prevValue = driveMode;
+  driveMode = value;
   if (prevValue != value) {
     updateAutocamControllerStatus(); // Update the status only if there's a change.
   }
@@ -382,14 +385,14 @@ void updateAutocamControllerStatus() {
     return;
   }
 
-  ControllerData data = {throttleValue, steeringValue, isLockMode};
+  ControllerData data = {throttleValue, steeringValue, driveMode};
   AutocamControllerData.writeValue((uint8_t*)&data, sizeof(data));
-  Serial.printf("Sent status to [%s] via BLE: throttle=%d, steering=%d, isLockMode=%d\n", AutocamController.deviceName(), throttleValue, steeringValue, isLockMode);
+  Serial.printf("Sent status to [%s] via BLE: throttle=%d, steering=%d, driveMode=%d\n", AutocamController.deviceName(), throttleValue, steeringValue, driveMode);
   return;
 }
 
 void calculateSteeringThrottle() {
-  if (!isLockMode) {
+  if (driveMode != DRIVE_MODE_AUTO_FOLLOW) {
     return;
   }
 
@@ -502,7 +505,7 @@ void calculateCoordinates() {
   //Serial.print(", ");
   //Serial.println(currentY)
 
-  if (!isLockMode) { // Update the target coordinates if not in lock mode
+  if (driveMode == DRIVE_MODE_MANUAL) { // Update the real time target coordinates if in manual mode.
     targetX = currentX;
     targetY = currentY;
     targetDistance = distance;
