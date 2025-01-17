@@ -72,6 +72,99 @@ unsigned int CRC32_Table[256] = {
     0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d,
 };
 
+
+// Function to calculate CRC16
+void calc_crc16(const uint8_t *data, size_t length, uint8_t result[2]) {
+    DEBUGF("crc16 length=%d\n", length);
+    unsigned short Init_CRC = 0x3AA3;
+
+    for (size_t i = 0; i < length; i++) {
+        Init_CRC = ((Init_CRC >> 8) & MASK_BIT_TYPE) ^ CRC16_Table[(Init_CRC ^ data[i]) % MAX_INT_8];
+    }
+
+    // Store CRC result in uint8_t array
+    result[0] = Init_CRC & 0xFF;         // Low byte
+    result[1] = (Init_CRC >> 8) & 0xFF;  // High byte
+}
+
+// Function to calculate CRC32
+void calc_crc32(const uint8_t *data, size_t length, uint8_t result[4]) {
+    unsigned int Init_CRC = 0x3AA3;
+
+    for (size_t i = 0; i < length; i++) {
+        unsigned char msg = 0x000000ff & data[i];
+        unsigned int tmp = Init_CRC ^ msg;
+        Init_CRC = (Init_CRC >> 8) ^ CRC32_Table[tmp & 0xff];
+    }
+
+    // Store CRC result in uint8_t array
+    result[0] = Init_CRC & 0xFF;         // Least significant byte
+    result[1] = (Init_CRC >> 8) & 0xFF;
+    result[2] = (Init_CRC >> 16) & 0xFF;
+    result[3] = (Init_CRC >> 24) & 0xFF; // Most significant byte
+}
+
+bool is_last_frame(CanFrame &frame) {
+    if (frame.data_length_code < FRAME_LEN) {
+        return true;
+    }
+    if (frame.data[0] == SOF_BYTE && size_t(frame.data[1]) + size_t(frame.data[2]) << 8 == FRAME_LEN) { // Single frame message.
+        return true;
+    }
+    return false;
+}
+
+bool validate_data(uint8_t *data) {
+    uint16_t expected_crc16, actual_crc16;
+    uint32_t expected_crc32, actual_crc32;
+
+    uint8_t crc16_result[2];
+    uint8_t crc32_result[4];
+
+    int crc16_index = 10;
+    calc_crc16(data, crc16_index, crc16_result);
+
+    expected_crc16 = uint16_t(crc16_result[0]);
+    expected_crc16 += uint16_t(crc16_result[1]) << 8;
+
+    actual_crc16 = uint16_t(data[crc16_index]);
+    actual_crc16 += uint16_t(data[crc16_index+1]) << 8;
+
+    if (expected_crc16 != actual_crc16) {
+        WARNF("Invalid CRC16 checksum, expecting 0x%04X, got 0x%04X\n", expected_crc16, actual_crc16);
+        return false;
+    }
+
+    size_t data_len = size_t(data[1]) + (size_t(data[2]) << 8);
+    int crc32_index = data_len - 4;
+    calc_crc32(data, crc32_index, crc32_result);
+
+    expected_crc32 = uint32_t(crc32_result[0]);
+    expected_crc32 += uint32_t(crc32_result[1]) << 8;
+    expected_crc32 += uint32_t(crc32_result[2]) << 16;
+    expected_crc32 += uint32_t(crc32_result[3]) << 24;
+
+    actual_crc32 = uint32_t(data[crc32_index]);
+    actual_crc32 += uint32_t(data[crc32_index+1]) << 8;
+    actual_crc32 += uint32_t(data[crc32_index+2]) << 16;
+    actual_crc32 += uint32_t(data[crc32_index+3]) << 24;
+
+    if (expected_crc32 != actual_crc32) {
+        WARNF("Invalid CRC32 checksum, expecting 0x%08X, got 0x%08X\n", expected_crc32, actual_crc32);
+        return false;
+    }
+
+    return true;
+}
+
+void parse_response_metadata(uint8_t *data, uint8_t *cmd_type, uint16_t *response_seq, uint8_t *cmd_set, uint8_t *cmd_id, uint8_t *return_code) {
+    *cmd_type = data[3];
+    *response_seq = uint16_t(data[8]) + (uint16_t(data[9]) << 8);
+    *cmd_set = data[12];
+    *cmd_id = data[13];
+    *return_code = data[14];
+}
+
 bool DJIRoninController::begin() {
     esp32Can.setPins(tx_pin, rx_pin);
     return esp32Can.begin(esp32Can.convertSpeed(rate_speed));
@@ -134,43 +227,10 @@ bool DJIRoninController::_send_data(uint8_t *data, size_t data_len) {
     return ret;
 }
 
-
-// Function to calculate CRC16
-void DJIRoninController::_calc_crc16(const uint8_t *hex_seq, size_t length, uint8_t result[2]) {
-    DEBUGF("crc16 length=%d\n", length);
-    unsigned short Init_CRC = 0x3AA3;
-
-    for (size_t i = 0; i < length; ++i) {
-        Init_CRC = ((Init_CRC >> 8) & MASK_BIT_TYPE) ^ CRC16_Table[(Init_CRC ^ hex_seq[i]) % MAX_INT_8];
-    }
-
-    // Store CRC result in uint8_t array
-    result[0] = Init_CRC & 0xFF;         // Low byte
-    result[1] = (Init_CRC >> 8) & 0xFF;  // High byte
-}
-
-// Function to calculate CRC32
-void DJIRoninController::_calc_crc32(const uint8_t *hex_seq, size_t length, uint8_t result[4]) {
-    unsigned int Init_CRC = 0x3AA3;
-
-    for (size_t i = 0; i < length; ++i) {
-        unsigned char msg = 0x000000ff & hex_seq[i];
-        unsigned int tmp = Init_CRC ^ msg;
-        Init_CRC = (Init_CRC >> 8) ^ CRC32_Table[tmp & 0xff];
-    }
-
-    // Store CRC result in uint8_t array
-    result[0] = Init_CRC & 0xFF;         // Least significant byte
-    result[1] = (Init_CRC >> 8) & 0xFF;
-    result[2] = (Init_CRC >> 16) & 0xFF;
-    result[3] = (Init_CRC >> 24) & 0xFF; // Most significant byte
-}
-
 size_t DJIRoninController::_assemble_can_msg(uint8_t cmd_type, uint8_t cmd_set, uint8_t cmd_id, const uint8_t* data, size_t data_len, uint8_t *can_msg) {
     size_t idx = 0; // Index for writing to can_msg array
 
     // Fixed values
-    uint8_t header = 0xAA;  // Header value set to 0xAA
     uint8_t enc = 0;        // Encoding set to 0
     uint8_t res1 = 0;       // Reserved 1 set to 0
     uint8_t res2 = 0;       // Reserved 2 set to 0
@@ -178,8 +238,8 @@ size_t DJIRoninController::_assemble_can_msg(uint8_t cmd_type, uint8_t cmd_set, 
     uint16_t seq = _seq_num();
 
     // Assemble the header
-    can_msg[idx++] = header; // SOF byte (set to 0xAA)
-    size_t cmd_length = data_len + 18;
+    can_msg[idx++] = SOF_BYTE; // SOF byte (set to 0xAA)
+    size_t cmd_length = data_len + 18; // data_len + cmd_set + cmd_id + other bits in the data packet.
     can_msg[idx++] = cmd_length & 0xFF;        // Low byte of length
     can_msg[idx++] = (cmd_length >> 8) & 0xFF; // High byte of length
     can_msg[idx++] = cmd_type; // Command Type
@@ -192,7 +252,7 @@ size_t DJIRoninController::_assemble_can_msg(uint8_t cmd_type, uint8_t cmd_set, 
 
     // Calculate CRC16 and append to the header
     uint8_t crc16_result[2];
-    _calc_crc16(can_msg, idx, crc16_result);
+    calc_crc16(can_msg, idx, crc16_result);
     can_msg[idx++] = crc16_result[0];
     can_msg[idx++] = crc16_result[1];
 
@@ -205,7 +265,7 @@ size_t DJIRoninController::_assemble_can_msg(uint8_t cmd_type, uint8_t cmd_set, 
 
     // Calculate CRC32 and append it
     uint8_t crc32_result[4];
-    _calc_crc32(can_msg, idx, crc32_result);
+    calc_crc32(can_msg, idx, crc32_result);
     for (size_t i = 0; i < 4; ++i) {
         can_msg[idx++] = crc32_result[i];
     }
@@ -213,12 +273,59 @@ size_t DJIRoninController::_assemble_can_msg(uint8_t cmd_type, uint8_t cmd_set, 
 }
 
 uint16_t DJIRoninController::_seq_num() {
-    seq_num++;
-    if (seq_num >= 0xFFFD) {
-        seq_num = 0x0002;
-    }
-    return seq_num;
+    return ++seq_num;
 }
+
+bool DJIRoninController::_recv_data(uint8_t *data) {
+    CanFrame frame;
+    uint8_t data_buffer[DATA_BUFFER_SIZE];
+    int data_offset = 0;
+    bool seen_sof = false;
+
+    while (true) {
+        if (!esp32Can.readFrame(frame)) {
+            Serial.printf("No frame received\n");
+            break;
+        }
+        DEBUGF("Received frame: %02X, length=%d\n", frame.identifier, frame.data_length_code);
+
+        if (frame.identifier != can_recv_id) {
+            DEBUGF("Not an expected frame, skipping...\n");
+            continue;
+        }
+        if (frame.data[0] == SOF_BYTE) {
+            seen_sof = true;
+        }
+        if (!seen_sof) {
+            DEBUGF("Unexpected SOF header %02X, skipping...\n", frame.data[0]);
+            continue;
+        }
+        if (data_offset + frame.data_length_code > DATA_BUFFER_SIZE) {
+            WARNF("Not enough data buffer for a frame, try to increase the data buffer\n");
+            return false;
+        }
+
+        //for(int i = 0; i < frame.data_length_code; i++) {
+        //    DEBUGF("%02X ", frame.data[i]);
+        //}
+        //DEBUGF("\n");
+
+        memcpy(data_buffer+data_offset, frame.data, frame.data_length_code);
+        data_offset += frame.data_length_code;
+
+        if (is_last_frame(frame)) {
+            break;
+        }
+    }
+
+    if (!validate_data(data_buffer)) {
+        return false;
+    }
+    
+    memcpy(data, data_buffer, DATA_BUFFER_SIZE);
+    return true;
+}
+
 
 bool DJIRoninController::set_position(float yaw, float roll, float pitch, bool absolute_position, uint16_t time_for_action_in_millis = 1000) {
     uint16_t yaw_int = uint16_t(yaw * 10);
@@ -238,7 +345,7 @@ bool DJIRoninController::set_position(float yaw, float roll, float pitch, bool a
     data[data_size++] = absolute_position ? 0x01 : 0x00;
     data[data_size++] = time_for_action_cnt;
 
-    uint8_t message[256];
+    uint8_t message[32];
 
     DEBUGF("data_size=%d\n", data_size);
     //for (int i = 0; i < data_size; i++) {
@@ -256,19 +363,55 @@ bool DJIRoninController::set_position(float yaw, float roll, float pitch, bool a
     return _send_data(message, message_len);
 }
 
-void DJIRoninController::read_frame() {
-    CanFrame rxFrame;
-    if(esp32Can.readFrame(rxFrame, 700)) { // 1000 is the timeout value
-        // Communicate that a packet was received
-        Serial.printf("Received frame: %03X, length:%d \r\n", rxFrame.identifier, rxFrame.data_length_code);
+bool DJIRoninController::get_position(float *yaw, float *roll, float *pitch) {
+    uint8_t send_data[1] = { 0x01 }; // 0x01 = attitude angle, 0x02 = joint angle
+    uint8_t recv_data[DATA_BUFFER_SIZE];
 
-        // Communicate packet information
-        for(int i = 0; i <= rxFrame.data_length_code - 1; i++) {
-            Serial.print("0x");  // Optional: Prefix with "0x"
-            Serial.print((rxFrame.data[i] & 0xFF), HEX);  // Print the hex value of each byte
-        }
-        Serial.println("");
-    } else {
-        Serial.println("No frame received");
+    uint8_t message[32];
+    size_t message_len = _assemble_can_msg(0x03, 0x0e, 0x02, send_data, 1, message);
+
+    if (!_send_data(message, message_len)) {
+        return false;
     }
+
+    if (!_recv_data(recv_data)) {
+        return false;
+    }
+
+    uint8_t cmd_type, cmd_set, cmd_id, return_code;
+    uint16_t response_seq;
+    int data_offset = 14;
+    parse_response_metadata(recv_data, &cmd_type, &response_seq, &cmd_set, &cmd_id, &return_code);
+    if (cmd_type & 0x20 == 0) {
+        WARNF("Invalid response type, not a reply frame, cmd_type=0x%02F\n", cmd_type);
+        return false;
+    }
+    if (seq_num != response_seq) {
+        WARNF("Invalid response SEQ, expect 0x%02X, got 0x%02X\n", seq_num, response_seq);
+        return false;
+    }
+    if (cmd_set != 0x0e || cmd_id != 0x02) {
+        WARNF("Invalid cmd_set or cmd_id, expect cmd_set=0x03(got 0x%02X), cmd_id=0x0E(got 0x%02X)\n", cmd_set, cmd_id);
+        return false;
+    }
+    if (return_code != 0) {
+        WARNF("Unexpected return_code, expect 0x00, got 0x%02X\n", return_code);
+        return false;
+    }
+    uint8_t data_type = recv_data[data_offset+1];
+    if (data_type != 0x01) {
+        WARNF("Unexpected data_type, expect 0x01, got 0x%02X\n", data_type);
+        return false;
+    }
+
+    // Parse the yaw, roll, pitch value.
+    int16_t yaw_res = int16_t(recv_data[data_offset+2]) + (int16_t(recv_data[data_offset+3]) << 8);
+    int16_t roll_res = int16_t(recv_data[data_offset+4]) + (int16_t(recv_data[data_offset+5]) << 8);
+    int16_t pitch_res = int16_t(recv_data[data_offset+6]) + (int16_t(recv_data[data_offset+7]) << 8);
+
+    *yaw = float(yaw_res) / 10.0;
+    *roll = float(roll_res) / 10.0;
+    *pitch = float(pitch_res) / 10.0;
+
+    return true;
 }
