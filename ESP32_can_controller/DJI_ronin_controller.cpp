@@ -104,16 +104,6 @@ void calc_crc32(const uint8_t *data, size_t length, uint8_t result[4]) {
     result[3] = (Init_CRC >> 24) & 0xFF; // Most significant byte
 }
 
-bool is_last_frame(CanFrame &frame) {
-    if (frame.data_length_code < FRAME_LEN) {
-        return true;
-    }
-    if (frame.data[0] == SOF_BYTE && size_t(frame.data[1]) + size_t(frame.data[2]) << 8 == FRAME_LEN) { // Single frame message.
-        return true;
-    }
-    return false;
-}
-
 bool validate_data(uint8_t *data) {
     uint16_t expected_crc16, actual_crc16;
     uint32_t expected_crc32, actual_crc32;
@@ -132,8 +122,18 @@ bool validate_data(uint8_t *data) {
 
     if (expected_crc16 != actual_crc16) {
         WARNF("Invalid CRC16 checksum, expecting 0x%04X, got 0x%04X\n", expected_crc16, actual_crc16);
+        WARNF("Data:\n");
+        for (int i = 0; i < size_t(data[1]) + (size_t(data[2]) << 8); i++) {
+            WARNF("%02X ", data[i]);
+            if ((i + 1) % 8 == 0)  {
+                WARNF("\n");
+            }
+        }
+        WARNF("\n");
         return false;
     }
+
+
 
     size_t data_len = size_t(data[1]) + (size_t(data[2]) << 8);
     int crc32_index = data_len - 4;
@@ -151,6 +151,14 @@ bool validate_data(uint8_t *data) {
 
     if (expected_crc32 != actual_crc32) {
         WARNF("Invalid CRC32 checksum, expecting 0x%08X, got 0x%08X\n", expected_crc32, actual_crc32);
+        WARNF("Data:\n");
+        for (int i = 0; i < size_t(data[1]) + (size_t(data[2]) << 8); i++) {
+            WARNF("%02X ", data[i]);
+            if ((i + 1) % 8 == 0)  {
+                WARNF("\n");
+            }
+        }
+        WARNF("\n");
         return false;
     }
 
@@ -279,8 +287,9 @@ uint16_t DJIRoninController::_seq_num() {
 bool DJIRoninController::_recv_data(uint8_t *data) {
     CanFrame frame;
     uint8_t data_buffer[DATA_BUFFER_SIZE];
-    int data_offset = 0;
+    size_t data_offset = 0;
     bool seen_sof = false;
+
 
     while (true) {
         if (!esp32Can.readFrame(frame)) {
@@ -297,7 +306,7 @@ bool DJIRoninController::_recv_data(uint8_t *data) {
             seen_sof = true;
         }
         if (!seen_sof) {
-            DEBUGF("Unexpected SOF header %02X, skipping...\n", frame.data[0]);
+            WARNF("Unexpected SOF header %02X, skipping...\n", frame.data[0]);
             continue;
         }
         if (data_offset + frame.data_length_code > DATA_BUFFER_SIZE) {
@@ -313,8 +322,11 @@ bool DJIRoninController::_recv_data(uint8_t *data) {
         memcpy(data_buffer+data_offset, frame.data, frame.data_length_code);
         data_offset += frame.data_length_code;
 
-        if (is_last_frame(frame)) {
-            break;
+        if (data_offset >= 3) {
+            size_t data_len = size_t(data_buffer[1]) + (size_t(data_buffer[2]) << 8);
+            if (data_len == data_offset) {
+                break; // Full message received.
+            }
         }
     }
 
@@ -326,6 +338,44 @@ bool DJIRoninController::_recv_data(uint8_t *data) {
     return true;
 }
 
+bool DJIRoninController::_execute_command(uint8_t cmd_type, uint8_t cmd_set, uint8_t cmd_id, uint8_t *data, size_t data_len, uint8_t *recv_data) {
+    uint8_t message[32];
+    uint8_t recv_message[DATA_BUFFER_SIZE];
+
+    size_t message_len = _assemble_can_msg(cmd_type, cmd_set, cmd_id, data, data_len, message);
+    if (!_send_data(message, message_len)) {
+        return false;
+    }
+
+    if (!_recv_data(recv_message)) {
+        return false;
+    }
+
+    uint8_t return_cmd_type, return_cmd_set, return_cmd_id, return_code;
+    uint16_t response_seq;
+    int data_offset = 14;
+    parse_response_metadata(recv_message, &return_cmd_type, &response_seq, &return_cmd_set, &return_cmd_id, &return_code);
+    if (cmd_type & 0x20 == 0) {
+        WARNF("Invalid response type, not a reply frame, cmd_type=0x%02F\n", return_cmd_type);
+        return false;
+    }
+    if (seq_num != response_seq) {
+        WARNF("Invalid response SEQ, expect 0x%02X, got 0x%02X\n", seq_num, response_seq);
+        return false;
+    }
+    if (return_cmd_set != cmd_set || return_cmd_id != cmd_id) {
+        WARNF("Invalid cmd_set or cmd_id, expect cmd_set=0x%02X(got 0x%02X), cmd_id=0x%02X(got 0x%02X)\n", return_cmd_set, cmd_set, return_cmd_id, cmd_id);
+        return false;
+    }
+    if (return_code != 0) {
+        WARNF("Unexpected return_code, expect 0x00, got 0x%02X\n", return_code);
+        return false;
+    }
+
+    memcpy(recv_data, recv_message+data_offset, DATA_BUFFER_SIZE-data_offset);
+    return true;
+}
+
 
 bool DJIRoninController::set_position(float yaw, float roll, float pitch, bool absolute_position, uint16_t time_for_action_in_millis = 1000) {
     uint16_t yaw_int = uint16_t(yaw * 10);
@@ -334,80 +384,45 @@ bool DJIRoninController::set_position(float yaw, float roll, float pitch, bool a
     uint8_t time_for_action_cnt = time_for_action_in_millis / 100;
 
     uint8_t data[8];
-    size_t data_size = 0;
+    size_t data_len = 0;
 
-    data[data_size++] = yaw_int & 0xFF;
-    data[data_size++] = (yaw_int >> 8) & 0xFF;
-    data[data_size++] = roll_int & 0xFF;
-    data[data_size++] = (roll_int >> 8) & 0xFF;
-    data[data_size++] = pitch_int & 0xFF;
-    data[data_size++] = (pitch_int >> 8) & 0xFF;
-    data[data_size++] = absolute_position ? 0x01 : 0x00;
-    data[data_size++] = time_for_action_cnt;
+    uint8_t recv_data[DATA_BUFFER_SIZE];
 
-    uint8_t message[32];
+    data[data_len++] = yaw_int & 0xFF;
+    data[data_len++] = (yaw_int >> 8) & 0xFF;
+    data[data_len++] = roll_int & 0xFF;
+    data[data_len++] = (roll_int >> 8) & 0xFF;
+    data[data_len++] = pitch_int & 0xFF;
+    data[data_len++] = (pitch_int >> 8) & 0xFF;
+    data[data_len++] = absolute_position ? 0x01 : 0x00;
+    data[data_len++] = time_for_action_cnt;
 
-    DEBUGF("data_size=%d\n", data_size);
-    //for (int i = 0; i < data_size; i++) {
-    //    DEBUGF("%02X ", data[i]);
-    //}
-    //DEBUGF("\n");
-
-    size_t message_len = _assemble_can_msg(0x03, 0x0e, 0x00, data, data_size, message);
-    DEBUGF("assembled_msg_len=%d\n", message_len);
-    //for (int i = 0; i < message_len; i++) {
-    //    DEBUGF("%02X ", message[i]);
-    //}
-    //DEBUGF("\n");
-
-    return _send_data(message, message_len);
+    if (!_execute_command(0x03, 0x0e, 0x00, data, data_len, recv_data)) {
+        WARNF("Failed to execute set_position()\n");
+        return false;
+    }
+    return true;
 }
 
 bool DJIRoninController::get_position(float *yaw, float *roll, float *pitch) {
     uint8_t send_data[1] = { 0x01 }; // 0x01 = attitude angle, 0x02 = joint angle
     uint8_t recv_data[DATA_BUFFER_SIZE];
 
-    uint8_t message[32];
-    size_t message_len = _assemble_can_msg(0x03, 0x0e, 0x02, send_data, 1, message);
-
-    if (!_send_data(message, message_len)) {
+    if (!_execute_command(0x03, 0x0e, 0x02, send_data, 1, recv_data)) {
+        WARNF("Failed to execute get_position()\n");
         return false;
     }
 
-    if (!_recv_data(recv_data)) {
-        return false;
-    }
-
-    uint8_t cmd_type, cmd_set, cmd_id, return_code;
-    uint16_t response_seq;
-    int data_offset = 14;
-    parse_response_metadata(recv_data, &cmd_type, &response_seq, &cmd_set, &cmd_id, &return_code);
-    if (cmd_type & 0x20 == 0) {
-        WARNF("Invalid response type, not a reply frame, cmd_type=0x%02F\n", cmd_type);
-        return false;
-    }
-    if (seq_num != response_seq) {
-        WARNF("Invalid response SEQ, expect 0x%02X, got 0x%02X\n", seq_num, response_seq);
-        return false;
-    }
-    if (cmd_set != 0x0e || cmd_id != 0x02) {
-        WARNF("Invalid cmd_set or cmd_id, expect cmd_set=0x03(got 0x%02X), cmd_id=0x0E(got 0x%02X)\n", cmd_set, cmd_id);
-        return false;
-    }
-    if (return_code != 0) {
-        WARNF("Unexpected return_code, expect 0x00, got 0x%02X\n", return_code);
-        return false;
-    }
-    uint8_t data_type = recv_data[data_offset+1];
+    uint8_t data_type = recv_data[1];
     if (data_type != 0x01) {
-        WARNF("Unexpected data_type, expect 0x01, got 0x%02X\n", data_type);
-        return false;
-    }
+             WARNF("Unexpected data_type, expect 0x01, got 0x%02X\n", data_type);
+         return false;
+     }
 
     // Parse the yaw, roll, pitch value.
-    int16_t yaw_res = int16_t(recv_data[data_offset+2]) + (int16_t(recv_data[data_offset+3]) << 8);
-    int16_t roll_res = int16_t(recv_data[data_offset+4]) + (int16_t(recv_data[data_offset+5]) << 8);
-    int16_t pitch_res = int16_t(recv_data[data_offset+6]) + (int16_t(recv_data[data_offset+7]) << 8);
+    int16_t yaw_res = int16_t(recv_data[2]) + (int16_t(recv_data[3]) << 8);
+    int16_t roll_res = int16_t(recv_data[4]) + (int16_t(recv_data[5]) << 8);
+    int16_t pitch_res = int16_t(recv_data[6]) + (int16_t(recv_data[7]) << 8);
 
     *yaw = float(yaw_res) / 10.0;
     *roll = float(roll_res) / 10.0;

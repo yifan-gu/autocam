@@ -32,6 +32,7 @@ class DJIRoninController {
         size_t _assemble_can_msg(uint8_t cmd_type, uint8_t cmd_set, uint8_t cmd_id, const uint8_t* data, size_t data_len, uint8_t *can_msg);
         uint16_t _seq_num();
         bool _recv_data(uint8_t *data);
+        bool _execute_command(uint8_t cmd_type, uint8_t cmd_set, uint8_t cmd_id, uint8_t *data, size_t data_size, uint8_t *recv_data);
     public:
         DJIRoninController(int txPin, int rxPin, int rateSpeed) { tx_pin = txPin; rx_pin = rxPin; rate_speed=rateSpeed; }
         bool begin();

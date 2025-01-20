@@ -1,7 +1,7 @@
 #include "DJI_ronin_controller.hpp"
 
-#define CAN_TX   12  // Connects to CTX
-#define CAN_RX   2  // Connects to CRX
+#define CAN_TX 12  // Connects to CTX
+#define CAN_RX 2  // Connects to CRX
 #define CAN_RATE 1000 // Speed rate in kbps
 
 float yaw = 0;
@@ -21,13 +21,13 @@ void setup() {
 }
 
 void loop() {
-  //if (!djiRoninController.set_position(1, 0, 0, 0, 100)) {
-  //  Serial.println("Failed to move incrementally");
-  //}
-
-  if (!djiRoninController.get_position(&yaw, &roll, &pitch)) {
-    Serial.println("Failed to get position");
+  if (!djiRoninController.set_position(2, 0, 0, 0, 1000)) {
+    Serial.println("Failed to move incrementally");
   }
-  Serial.printf("yaw=%.1f, roll=%.1f, pitch=%.1f\n", yaw, roll, pitch);
-  //delay(100);
+
+  //if (!djiRoninController.get_position(&yaw, &roll, &pitch)) {
+  //  Serial.println("Failed to get position");
+  //}
+  //Serial.printf("yaw=%.1f, roll=%.1f, pitch=%.1f\n", yaw, roll, pitch);
+  delay(100);
 }
