@@ -3,10 +3,9 @@
 #define DATA_RATE 100 // 100 Hz
 
 // Available state.
-#define STATE_NOT_CONNECTED 0
-#define STATE_CONNECTING 1
-#define STATE_CONNECTED_MANUAL_MODE 2
-#define STATE_CONNECTED_AUTO_FOLLOW_MODE 3
+#define STATE_NOT_READY 0
+#define STATE_SENSOR_READY 1
+#define STATE_REMOTE_CONTROLLER_READY 2
 
 #define DRIVE_MODE_MANUAL 0
 #define DRIVE_MODE_AUTO_FOLLOW 1
@@ -14,11 +13,12 @@
 const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
 const int minSteering = 1000, maxSteering = 2000, midSteering = 1500;
 
-// Variable to store and toggle the drive mode.
-int driveModeStateValue = DRIVE_MODE_MANUAL;
-int driveModeTriggerValue = DRIVE_MODE_MANUAL;
+// State indicators.
+int state = STATE_NOT_READY;
+int driveMode = DRIVE_MODE_MANUAL;
 
-int state = STATE_NOT_CONNECTED;
+// Variable toggle the drive mode.
+int driveModeTriggerValue = DRIVE_MODE_MANUAL;
 
 // Variables to store values
 int throttleValue = midThrottle, steeringValue = midSteering;
@@ -27,6 +27,7 @@ struct ControllerData {
   int throttleValue;
   int steeringValue;
   int driveMode;
+  int state;
 };
 
 ControllerData receivedData;
@@ -39,6 +40,9 @@ BLEDevice BLECentral;
 
 unsigned int lastPingTime = 0;
 
+unsigned long lastScanMillis = 0;
+unsigned long scanIntervalMillis = 1000;
+
 void setup() {
   // Start Serial for debugging
   unsigned long startTime = millis();
@@ -50,6 +54,7 @@ void setup() {
   }
 
   setupBLEPeripheral();
+  connectToCentral();
 }
 
 void loop() {
@@ -60,8 +65,6 @@ void loop() {
 }
 
 void setupBLEPeripheral() {
-  updateState(STATE_NOT_CONNECTED);
-
    // begin initialization
   if (!BLE.begin()) {
     Serial.println("Failed to start BLE module!");
@@ -79,75 +82,73 @@ void setupBLEPeripheral() {
   BLE.addService(AutocamControllerService);
 
   // set the initial value for the characeristic:
-  ControllerData data = {0, 0, false};
+  ControllerData data = {0, 0, 0, 0};
   AutocamControllerData.writeValue((uint8_t*)&data, sizeof(data));
 
   // start advertising
   BLE.advertise();
   Serial.println("BLE Peripheral advertised!");
-
-  connectToCentral();
 }
 
-void connectToCentral() {
-  updateState(STATE_CONNECTING);
-  while (!(BLECentral && BLECentral.connected())) {
-    Serial.println("Connecting to BLE central...");
-    BLECentral = BLE.central();
-    delay(1000);
+bool connectToCentral() {
+  unsigned long currentMillis = millis();
+  if (currentMillis - lastScanMillis < scanIntervalMillis) {
+    return false;
   }
-  Serial.print("Connected to BLE central: ");
-  // print the central's MAC address:
-  Serial.println(BLECentral.address());
-}
+  lastScanMillis = currentMillis;
 
-void sendControllerData() {
-  if (state <= STATE_CONNECTING) {
-    //Serial.println("Waiting for the initial state sync..."); No need to delay(), because apparently delay() will block BLE attributes discovery on the central device.
-    return;
-  }
+  Serial.println("Connecting to BLE central...");
 
+  BLECentral = BLE.central();
   if (!(BLECentral && BLECentral.connected())) {
-    Serial.println("Disconnected from central, reconnecting...");
-    updateState(STATE_NOT_CONNECTED);
-    connectToCentral();
+    return false;
   }
 
-  ControllerData data = {throttleValue, steeringValue, driveModeTriggerValue};
-  AutocamControllerData.writeValue((uint8_t*)&data, sizeof(data));
-  Serial.printf("Sent via BLE: throttle=%d, steering=%d, driveMode=%d\n", data.throttleValue, data.steeringValue, data.driveMode);
-  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
-  lastPingTime = millis();
-}
-
-void readStatusData() {
-  if (!(BLECentral && BLECentral.connected())) {
-    Serial.println("Disconnected from central, reconnecting...");
-    updateState(STATE_NOT_CONNECTED);
-    connectToCentral();
-  }
-
-  if (AutocamControllerData.written()) {
-    AutocamControllerData.readValue((uint8_t*)&receivedData, sizeof(receivedData));
-    Serial.printf("Received throttle=%d, steering=%d, driveMode=%d\n", receivedData.throttleValue, receivedData.steeringValue, receivedData.driveMode);
-    driveModeStateValue = receivedData.driveMode;
-    if (driveModeStateValue == DRIVE_MODE_MANUAL) {
-      updateState(STATE_CONNECTED_MANUAL_MODE);
-    } else if (driveModeStateValue == DRIVE_MODE_AUTO_FOLLOW) {
-      updateState(STATE_CONNECTED_AUTO_FOLLOW_MODE);
-    }
-    //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
-    //lastPingTime = millis();
-  }
+  Serial.printf("Connected to BLE central: %s\n", BLECentral.address());
+  return true;
 }
 
 void updateState(int newState) {
+  if (state == newState) {
+    return;
+  }
+
   state = newState;
   Serial.printf("Update state=%d\n", state);
   // TODO(yifan): Update LED.
 }
 
- // TOOD(yifan): Fill me in.
+void updateDriveMode(int newDriveMode) {
+  if (driveMode == newDriveMode) {
+    return;
+  }
+
+  driveMode = newDriveMode;
+  Serial.printf("Update drive mode=%d\n", driveMode);
+  // TODO(yifan): Update LED.
+}
+
+void readStatusData() {
+  if (!(BLECentral && BLECentral.connected())) {
+    updateState(state & ~STATE_REMOTE_CONTROLLER_READY);
+    if (!connectToCentral()) {
+      return;
+    }
+    updateState(state | STATE_REMOTE_CONTROLLER_READY);
+  }
+
+  if (AutocamControllerData.written()) {
+    AutocamControllerData.readValue((uint8_t*)&receivedData, sizeof(receivedData));
+    Serial.printf("Received throttle=%d, steering=%d, driveMode=%d, state=%d\n", receivedData.throttleValue, receivedData.steeringValue, receivedData.driveMode, receivedData.state);
+    updateState(receivedData.state);
+    updateDriveMode(receivedData.driveMode);
+
+    //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+    //lastPingTime = millis();
+  }
+}
+
+ // TODO(yifan): Fill me in.
 void readControllerData() {
   static int throttleStep = 1;
   static int steeringStep = 1;
@@ -165,7 +166,23 @@ void readControllerData() {
 
 
   if (millis() - lastUpdate >= 1000) {
-    driveModeTriggerValue = driveModeStateValue == DRIVE_MODE_MANUAL ? DRIVE_MODE_AUTO_FOLLOW : DRIVE_MODE_MANUAL;
+    driveModeTriggerValue = driveMode == DRIVE_MODE_MANUAL ? DRIVE_MODE_AUTO_FOLLOW : DRIVE_MODE_MANUAL;
     lastUpdate = millis();
   }
+}
+
+void sendControllerData() {
+  if (!(BLECentral && BLECentral.connected())) {
+    updateState(state & ~STATE_REMOTE_CONTROLLER_READY);
+    if (!connectToCentral()) {
+      return;
+    }
+    updateState(state | STATE_REMOTE_CONTROLLER_READY);
+  }
+
+  ControllerData data = {throttleValue, steeringValue, driveModeTriggerValue, state}; // state doesn't matter because it will not be used by the server.
+  AutocamControllerData.writeValue((uint8_t*)&data, sizeof(data));
+  Serial.printf("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state);
+  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  lastPingTime = millis();
 }

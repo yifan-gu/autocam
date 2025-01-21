@@ -38,6 +38,8 @@ class DJIRoninController {
         bool begin();
         bool set_position(float yaw, float roll, float pitch, bool absolute_position, uint16_t time_for_action_in_millis);
         bool get_position(float *yaw, float *roll, float *pitch);
+        bool get_version(uint8_t version[4]);
+        bool gimbal_active_track();
 };
 
 #endif

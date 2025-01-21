@@ -15,19 +15,23 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
 
-  if (djiRoninController.begin()) { //CAN_TX, CAN_RX, CAN_RATE)) {
+  if (djiRoninController.begin()) {
     Serial.println("CAN bus started!");
   }
 }
 
 void loop() {
-  if (!djiRoninController.set_position(2, 0, 0, 0, 1000)) {
-    Serial.println("Failed to move incrementally");
-  }
-
+  //if (!djiRoninController.set_position(2, 0, 0, 0, 1000)) {
+  //  Serial.println("Failed to move incrementally");
+  //}
+  //
   //if (!djiRoninController.get_position(&yaw, &roll, &pitch)) {
   //  Serial.println("Failed to get position");
   //}
   //Serial.printf("yaw=%.1f, roll=%.1f, pitch=%.1f\n", yaw, roll, pitch);
-  delay(100);
+
+  if (!djiRoninController.gimbal_active_track()) {
+    Serial.println("Failed to gimbal_active_track()");
+  }
+  delay(1000);
 }

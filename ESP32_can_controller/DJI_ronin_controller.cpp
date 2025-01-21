@@ -112,18 +112,17 @@ bool validate_data(uint8_t *data) {
     uint8_t crc32_result[4];
 
     int crc16_index = 10;
+    size_t data_len = size_t(*(uint16_t *)(data + 1));
+
     calc_crc16(data, crc16_index, crc16_result);
 
-    expected_crc16 = uint16_t(crc16_result[0]);
-    expected_crc16 += uint16_t(crc16_result[1]) << 8;
-
-    actual_crc16 = uint16_t(data[crc16_index]);
-    actual_crc16 += uint16_t(data[crc16_index+1]) << 8;
+    expected_crc16 = *(uint16_t *)(crc16_result);
+    actual_crc16 = *(uint16_t *)(data + crc16_index);
 
     if (expected_crc16 != actual_crc16) {
         WARNF("Invalid CRC16 checksum, expecting 0x%04X, got 0x%04X\n", expected_crc16, actual_crc16);
         WARNF("Data:\n");
-        for (int i = 0; i < size_t(data[1]) + (size_t(data[2]) << 8); i++) {
+        for (int i = 0; i < data_len; i++) {
             WARNF("%02X ", data[i]);
             if ((i + 1) % 8 == 0)  {
                 WARNF("\n");
@@ -133,26 +132,16 @@ bool validate_data(uint8_t *data) {
         return false;
     }
 
-
-
-    size_t data_len = size_t(data[1]) + (size_t(data[2]) << 8);
     int crc32_index = data_len - 4;
     calc_crc32(data, crc32_index, crc32_result);
 
-    expected_crc32 = uint32_t(crc32_result[0]);
-    expected_crc32 += uint32_t(crc32_result[1]) << 8;
-    expected_crc32 += uint32_t(crc32_result[2]) << 16;
-    expected_crc32 += uint32_t(crc32_result[3]) << 24;
-
-    actual_crc32 = uint32_t(data[crc32_index]);
-    actual_crc32 += uint32_t(data[crc32_index+1]) << 8;
-    actual_crc32 += uint32_t(data[crc32_index+2]) << 16;
-    actual_crc32 += uint32_t(data[crc32_index+3]) << 24;
+    expected_crc32 = *(uint32_t *)(crc32_result);
+    actual_crc32 = *(uint32_t *)(data + crc32_index);
 
     if (expected_crc32 != actual_crc32) {
         WARNF("Invalid CRC32 checksum, expecting 0x%08X, got 0x%08X\n", expected_crc32, actual_crc32);
         WARNF("Data:\n");
-        for (int i = 0; i < size_t(data[1]) + (size_t(data[2]) << 8); i++) {
+        for (int i = 0; i < data_len; i++) {
             WARNF("%02X ", data[i]);
             if ((i + 1) % 8 == 0)  {
                 WARNF("\n");
@@ -167,7 +156,7 @@ bool validate_data(uint8_t *data) {
 
 void parse_response_metadata(uint8_t *data, uint8_t *cmd_type, uint16_t *response_seq, uint8_t *cmd_set, uint8_t *cmd_id, uint8_t *return_code) {
     *cmd_type = data[3];
-    *response_seq = uint16_t(data[8]) + (uint16_t(data[9]) << 8);
+    *response_seq = *(uint16_t *)(data + 8);
     *cmd_set = data[12];
     *cmd_id = data[13];
     *return_code = data[14];
@@ -323,8 +312,8 @@ bool DJIRoninController::_recv_data(uint8_t *data) {
         data_offset += frame.data_length_code;
 
         if (data_offset >= 3) {
-            size_t data_len = size_t(data_buffer[1]) + (size_t(data_buffer[2]) << 8);
-            if (data_len == data_offset) {
+            size_t data_len = size_t(*(uint16_t *)(data_buffer + 1));
+            if (data_offset >= data_len) {
                 break; // Full message received.
             }
         }
@@ -398,7 +387,7 @@ bool DJIRoninController::set_position(float yaw, float roll, float pitch, bool a
     data[data_len++] = time_for_action_cnt;
 
     if (!_execute_command(0x03, 0x0e, 0x00, data, data_len, recv_data)) {
-        WARNF("Failed to execute set_position()\n");
+        WARNF("Failed to execute command\n");
         return false;
     }
     return true;
@@ -409,7 +398,7 @@ bool DJIRoninController::get_position(float *yaw, float *roll, float *pitch) {
     uint8_t recv_data[DATA_BUFFER_SIZE];
 
     if (!_execute_command(0x03, 0x0e, 0x02, send_data, 1, recv_data)) {
-        WARNF("Failed to execute get_position()\n");
+        WARNF("Failed to execute command\n");
         return false;
     }
 
@@ -420,13 +409,46 @@ bool DJIRoninController::get_position(float *yaw, float *roll, float *pitch) {
      }
 
     // Parse the yaw, roll, pitch value.
-    int16_t yaw_res = int16_t(recv_data[2]) + (int16_t(recv_data[3]) << 8);
-    int16_t roll_res = int16_t(recv_data[4]) + (int16_t(recv_data[5]) << 8);
-    int16_t pitch_res = int16_t(recv_data[6]) + (int16_t(recv_data[7]) << 8);
+    int16_t yaw_res = *(int16_t *)(recv_data + 2);
+    int16_t roll_res = *(int16_t *)(recv_data + 4);
+    int16_t pitch_res = *(int16_t *)(recv_data + 6);
 
     *yaw = float(yaw_res) / 10.0;
     *roll = float(roll_res) / 10.0;
     *pitch = float(pitch_res) / 10.0;
 
+    return true;
+}
+
+bool DJIRoninController::get_version(uint8_t version[4]) {
+    uint32_t device_id = 0x00000001; // Device ID for the DJI R SDK.
+    uint8_t recv_data[DATA_BUFFER_SIZE];
+
+    if (!_execute_command(0x03, 0x0e, 0x09, (uint8_t *)(&device_id), 4, recv_data)) {
+        WARNF("Failed to execute command\n");
+        return false;
+    }
+
+    uint32_t reply_device_id = uint32_t(recv_data[1]);
+
+    if (reply_device_id != device_id) {
+        WARNF("Mismatching device ID, expect: 0x%08X, got: %08X\n", device_id, reply_device_id);
+        return false;
+    }
+    version[0] = recv_data[8];
+    version[1] = recv_data[7];
+    version[2] = recv_data[6];
+    version[3] = recv_data[5];
+    return true;
+}
+
+bool DJIRoninController::gimbal_active_track() {
+    uint8_t send_data[1] = { 0x03 };
+    uint8_t recv_data[DATA_BUFFER_SIZE];
+
+    if (!_execute_command(0x03, 0x0e, 0x11, send_data, 1, recv_data)) {
+        WARNF("Failed to execute command\n");
+        return false;
+    }
     return true;
 }

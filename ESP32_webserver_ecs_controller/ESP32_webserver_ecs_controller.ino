@@ -9,8 +9,13 @@
 
 #define PI 3.14159265359
 
+#define STATE_NOT_READY 0
+#define STATE_SENSOR_READY 1
+#define STATE_REMOTE_CONTROLLER_READY 2
+
 #define DRIVE_MODE_MANUAL 0
 #define DRIVE_MODE_AUTO_FOLLOW 1
+
 
 // Pin configuration
 #define STEERING_PIN 2  // GPIO2 for steering
@@ -33,12 +38,18 @@ Servo steeringServo;
 const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
 const int minSteering = 1000, maxSteering = 2000, midSteering = 1500;
 
-// Variable for the drive mode.
-int driveMode = DRIVE_MODE_MANUAL;
+// Heartbeat tracking
+unsigned long lastPingTime = 0;           // Time of last received ping
+const unsigned long heartbeatTimeout = 1000; // 1 second timeout
 
 // Variables to store values
 int throttleValue = midThrottle, steeringValue = midSteering;
 
+// Variable for store the state.
+int state = STATE_NOT_READY;
+
+// Variable for the drive mode.
+int driveMode = DRIVE_MODE_MANUAL;
 // The reported distances and angle.
 
 // Distance of the tag to the front anchors.
@@ -49,22 +60,19 @@ float targetDistance = 0;
 float heading = 0; // [0, 360)  N = 0/360, W = 90, S = 180, E = 270
 float targetHeading = 0;
 
-const float delta = 0.5; // The "play" margin.
-
 // The calculated coordinates of the tag.
 float currentX = 0, currentY = 0;
 
 // The target coordinates to match.
 float targetX = 0, targetY = 0;
 
-// Heartbeat tracking
-unsigned long lastPingTime = 0;           // Time of last received ping
-const unsigned long heartbeatTimeout = 1000; // 1 second timeout
 
-const int steeringChangeValue = 500;
-const int steeringThrottleChangeValue = 200;
+//////////////////////////////////////////////////////////////////////////////////
+//
+// PID Controller variables for throttle. Tunable.
+//
+const float delta = 0.5; // The "play" margin.
 
-// PID Controller variables for throttle.
 float Kp_t = 100;  // Proportional gain. Diff = Kp_t * distance
 float Ki_t = 0.0;  // Integral gain. Diff = Ki_t * distance * 1000 * second.
 float Kd_t = 0.0;  // Derivative gain. Diff = Kd_t / (speed m/s * 1000 ms)
@@ -72,22 +80,25 @@ float Kd_t = 0.0;  // Derivative gain. Diff = Kd_t / (speed m/s * 1000 ms)
 float previousError_t = 0.0;  // Previous error for the derivative term
 float integral_t = 0.0;       // Accumulated integral term
 
-float minMoveThrottle = -300;    // Minimum throttle value in practice.
-float maxMoveThrottle = 300;  // Maximum throttle value in practice.
+float maxMoveThrottle = 300;                 // Maximum throttle value in practice.
+float minMoveThrottle = -maxMoveThrottle;    // Minimum throttle value in practice.
 
 // // PID Controller variables for steering.
-float Kp_s = 10;  // Proportional gain. Diff = Kp_s * angle diff.
+float Kp_s = 10;   // Proportional gain. Diff = Kp_s * angle diff.
 float Ki_s = 0.0;  // Integral gain. Diff = Ki_s * angle diff * 1000 * second.
-float Kd_s = 0 ;  // Derivative gain. Diff = Kd_s / (anglur speed * 1000 ms)
+float Kd_s = 0 ;   // Derivative gain. Diff = Kd_s / (anglur speed * 1000 ms)
 
 float previousError_s = 0.0;  // Previous error for the derivative term
 float integral_s = 0.0;       // Accumulated integral term
 
-float minMoveSteering = -500;    // Minimum steering value in practice.
-float maxMoveSteering = 500;  // Maximum steering value in practice.
+float maxMoveSteering = 500;              // Maximum steering value in practice.
+float minMoveSteering = -maxMoveSteering; // Minimum steering value in practice.
 
 float lastDeltaTimeMillis = 0; // Used to calculate ki, and Kd in the PID system.
 float minDeltaTimeMillis = 10; // Control the rate of PID update.
+//
+//
+//////////////////////////////////////////////////////////////////////////////////
 
 struct SensorData {
   float distance;
@@ -100,6 +111,7 @@ struct ControllerData {
   int throttleValue;
   int steeringValue;
   int driveMode;
+  int state;
 };
 
 ControllerData controllerData;
@@ -117,6 +129,9 @@ const char AutocamControllerControllerDataCharacteristicUUID[] = "B320";
 BLECharacteristic UWBAnchorSensorData;
 BLECharacteristic AutocamControllerData;
 
+unsigned long lastScanMillis = 0;
+unsigned long scanIntervalMillis = 1000;
+
 void setup() {
   // Start Serial for debugging
   unsigned long startTime = millis();
@@ -133,7 +148,7 @@ void setup() {
 }
 
 void loop() {
-  //getUWBAnchorData();
+  getUWBAnchorData();
   getAutocamControllerData();
   calculateCoordinates();
   calculateSteeringThrottle();
@@ -147,34 +162,40 @@ void setupBLECentral() {
     while (1);
   }
   Serial.println("BLE Central initialized.");
-  BLE.setConnectionInterval(6, 6);
+  BLE.setConnectionInterval(6, 6); // from 7.5ms to 7.5ms (6 * 1.5ms).
 }
 
-void scanForPeripheral(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID) {
+bool scanForPeripheral(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID) {
+  unsigned long currentMillis = millis();
+  if (currentMillis - lastScanMillis < scanIntervalMillis) {
+    return false;
+  }
+  lastScanMillis = currentMillis;
+
   Serial.printf("Scanning for BLE peripheral [%s]...\n", serviceUUID);
   BLE.scanForUuid(serviceUUID);
-
   device = BLE.available();
-  if (device) {
-    Serial.printf("Found BLE peripheral, local name: [%s]\n", device.localName());
-    BLE.stopScan();
-    connectToBLEDevice(device, service, characteristic, serviceUUID, characteristicUUID);
-    return;
+
+  if (!device) {
+    Serial.println("No BLE peripheral found.");
+    return false;
   }
-  delay(1000);
+  Serial.printf("Found BLE peripheral, local name: [%s]\n", device.localName());
+  BLE.stopScan();
+  return connectToBLEDevice(device, service, characteristic, serviceUUID, characteristicUUID);
 }
 
-void connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID) {
+bool connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID) {
   if (!device.connect()) {
     Serial.printf("Failed to connect to [%s].\n", device.localName());
-    return;
+    false;
   }
 
   Serial.printf("Connected to [%s]!\n", device.localName());
   if (!device.discoverAttributes()) {
     Serial.printf("Attribute discovery failed for [%s]! Disconnecting...\n", device.localName());
     device.disconnect();
-    return;
+    false;
   }
     
   service = device.service(serviceUUID);
@@ -184,21 +205,22 @@ void connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristi
   if (!characteristic) {
     Serial.printf("Failed to find characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
     device.disconnect();
-    return;
+    false;
   }
 
   if (!characteristic.canSubscribe()) {
     Serial.printf("Cannot subscribe characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
     device.disconnect();
-    return;
+    false;
   }
 
   if (!characteristic.subscribe()) {
     Serial.printf("Failed to subscribe characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
     device.disconnect();
-    return;
+    false;
   }
   Serial.printf("Found characteristic [%s] on device [%s] and successfully subscribed!\n", characteristicUUID, device.deviceName());
+  return true;
 }
 
 void setupESC() {
@@ -334,8 +356,11 @@ void runHealthCheck() {
 // Get data from the UWB Anchor via BLE.
 void getUWBAnchorData() {
   if (!UWBAnchor.connected()) {
-    scanForPeripheral(UWBAnchor, UWBAnchorService, UWBAnchorSensorData, UWBAnchorServiceUUID, UWBAnchorSensorDataCharacteristicUUID);
-    return;
+    updateState(state & ~STATE_SENSOR_READY); // Clear the sensor ready indicator bit.
+    if (!scanForPeripheral(UWBAnchor, UWBAnchorService, UWBAnchorSensorData, UWBAnchorServiceUUID, UWBAnchorSensorDataCharacteristicUUID)) {
+      return;
+    }
+    updateState(state | STATE_SENSOR_READY);
   }
 
   if (!UWBAnchorSensorData.valueUpdated()) { // No available data.
@@ -352,9 +377,11 @@ void getUWBAnchorData() {
 
 void getAutocamControllerData() {
   if (!AutocamController.connected()) {
-    scanForPeripheral(AutocamController, AutocamControllerService, AutocamControllerData, AutocamControllerServiceUUID, AutocamControllerControllerDataCharacteristicUUID);
-    updateAutocamControllerStatus(); // Update the status after the initial connection;
-    return;
+    updateState(state & ~STATE_REMOTE_CONTROLLER_READY); // Clear the remote controller ready indicator bit.
+    if (!scanForPeripheral(AutocamController, AutocamControllerService, AutocamControllerData, AutocamControllerServiceUUID, AutocamControllerControllerDataCharacteristicUUID)) {
+      return;
+    }
+    updateState(state | STATE_REMOTE_CONTROLLER_READY);
   }
 
   if (!AutocamControllerData.valueUpdated()) { // No available data.
@@ -371,12 +398,20 @@ void getAutocamControllerData() {
   setDriveMode(controllerData.driveMode);
 }
 
-void setDriveMode(int value) {
-  int prevValue = driveMode;
-  driveMode = value;
-  if (prevValue != value) {
-    updateAutocamControllerStatus(); // Update the status only if there's a change.
+void updateState(int newState) {
+  if (state == newState) {
+    return;
   }
+  state = newState;
+  updateAutocamControllerStatus();
+}
+
+void setDriveMode(int newDriveMode) {
+  if (driveMode == newDriveMode) {
+    return;
+  }
+  driveMode = newDriveMode;
+  updateAutocamControllerStatus();
 }
 
 void updateAutocamControllerStatus() {
@@ -385,9 +420,9 @@ void updateAutocamControllerStatus() {
     return;
   }
 
-  ControllerData data = {throttleValue, steeringValue, driveMode};
+  ControllerData data = {throttleValue, steeringValue, driveMode, state};
   AutocamControllerData.writeValue((uint8_t*)&data, sizeof(data));
-  Serial.printf("Sent status to [%s] via BLE: throttle=%d, steering=%d, driveMode=%d\n", AutocamController.deviceName(), throttleValue, steeringValue, driveMode);
+  Serial.printf("Sent status to [%s] via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d\n", AutocamController.deviceName(), throttleValue, steeringValue, driveMode, state);
   return;
 }
 
