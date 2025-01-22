@@ -100,9 +100,13 @@ float minDeltaTimeMillis = 10; // Control the rate of PID update.
 //
 //////////////////////////////////////////////////////////////////////////////////
 
+#define SENSOR_STATE_NOT_READY 0
+#define SENSOR_STATE_READY 1
+
 struct SensorData {
   float distance;
   float heading;
+  int state; // 1 = ready, 0 = not ready.
 };
 
 SensorData sensorData;
@@ -129,7 +133,6 @@ const char AutocamControllerControllerDataCharacteristicUUID[] = "B320";
 BLECharacteristic UWBAnchorSensorData;
 BLECharacteristic AutocamControllerData;
 
-unsigned long lastScanMillis = 0;
 unsigned long scanIntervalMillis = 1000;
 
 void setup() {
@@ -166,8 +169,10 @@ void setupBLECentral() {
 }
 
 bool scanForPeripheral(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID) {
+  static unsigned long lastScanMillis = 0;
+
   unsigned long currentMillis = millis();
-  if (currentMillis - lastScanMillis < scanIntervalMillis) {
+  if (currentMillis - lastScanMillis < scanIntervalMillis ) {
     return false;
   }
   lastScanMillis = currentMillis;
@@ -368,9 +373,15 @@ void getUWBAnchorData() {
   }
 
   UWBAnchorSensorData.readValue((uint8_t*)&sensorData, sizeof(sensorData));
-  Serial.printf("Received distance=%f, heading=%f\n", sensorData.distance, sensorData.heading);
+  Serial.printf("Received distance=%f, heading=%f, state=%d\n", sensorData.distance, sensorData.heading, sensorData.state);
   distance = sensorData.distance;
   heading = sensorData.heading;
+  if (sensorData.state == SENSOR_STATE_READY) {
+    updateState(state | STATE_SENSOR_READY);
+  } else {
+    updateState(state & ~STATE_SENSOR_READY);
+  }
+
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 }

@@ -30,18 +30,25 @@ char anchor_addr[] = "80:00:5B:D5:A9:9A:E2:9C";
 //calibrated Antenna Delay setting for this anchor
 uint16_t Adelay = 16630;
 
+#define SENSOR_STATE_NOT_READY 0
+#define SENSOR_STATE_READY 1
+
 float distance = 0;
 float heading = 0;
+int state = SENSOR_STATE_NOT_READY;
 
 struct SensorData {
   float distance;
   float heading;
+  int state;
 };
 
 // BLE Service and Characteristic
 BLEService UWBAnchorService("e2b221c6-7a26-49f4-80cc-0cd58a53041d");
 BLECharacteristic UWBAnchorSensorData("A319", BLERead | BLENotify, sizeof(SensorData), true);
 BLEDevice BLECentral;
+
+unsigned long scanIntervalMillis = 1000;
 
 DJIRoninController djiRoninController(CAN_TX, CAN_RX, CAN_RATE);
 
@@ -65,12 +72,13 @@ void setup() {
   setupUWBAnchor();
   setupDJIRoninController();
   setupBLEPeripheral();
+  connectToCentral();
 }
 
 void loop() {
   getDistance();
   getHeading();
-  sendSensorData(5, heading);
+  sendSensorData();
   delay(1000 / DATA_RATE); // Control the data rate.
 }
 
@@ -107,7 +115,7 @@ void setupBLEPeripheral() {
   BLE.addService(UWBAnchorService);
 
   // set the initial value for the characeristic:
-  SensorData data = {0, 0};
+  SensorData data = {0, 0, SENSOR_STATE_NOT_READY};
   UWBAnchorSensorData.writeValue((uint8_t*)&data, sizeof(data));
 
   // start advertising
@@ -125,7 +133,7 @@ void setupDJIRoninController() {
     delay(1000);
   }
 
-  while (djiRoninController.get_version(SDK_version)) {
+  while (!djiRoninController.get_version(SDK_version)) {
     Serial.println("Reading DJI Ronin SDK version...");
     delay(1000);
   }
@@ -133,15 +141,24 @@ void setupDJIRoninController() {
   Serial.printf("DJI R SDK Version=%d.%d.%d.%d\n", SDK_version[0], SDK_version[1], SDK_version[2], SDK_version[3]);
 }
 
-void connectToCentral() {
-  while (!(BLECentral && BLECentral.connected())) {
-    Serial.println("Connecting to BLE central...");
-    BLECentral = BLE.central();
-    delay(1000);
+bool connectToCentral() {
+  static unsigned long lastScanMillis = 0;
+
+  unsigned long currentMillis = millis();
+  if (currentMillis - lastScanMillis < scanIntervalMillis) {
+    return false;
   }
-  Serial.print("Connected to BLE central: ");
-  // print the central's MAC address:
-  Serial.println(BLECentral.address());
+  lastScanMillis = currentMillis;
+
+  Serial.println("Connecting to BLE central...");
+
+  BLECentral = BLE.central();
+  if (!(BLECentral && BLECentral.connected())) {
+    return false;
+  }
+
+  Serial.printf("Connected to BLE central: %s\n", BLECentral.address());
+  return true;
 }
 
 void getDistance() {
@@ -160,16 +177,17 @@ void getHeading() {
   }
 }
 
-void sendSensorData(float distance, float heading) {
+void sendSensorData() {
   if (!(BLECentral && BLECentral.connected())) {
-    Serial.println("Disconnected from central, reconnecting...");
-    connectToCentral();
+    if (!connectToCentral()) {
+      return;
+    }
   }
 
-  SensorData data = {distance, heading};
+  SensorData data = {distance, heading, state};
   UWBAnchorSensorData.writeValue((uint8_t*)&data, sizeof(data));
 
-  Serial.printf("Sent via BLE: distance=%f, heading=%f\n", distance, heading);
+  Serial.printf("Sent via BLE: distance=%f, heading=%f, state=%d\n", distance, heading, state);
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 }
@@ -179,13 +197,13 @@ void newRange() {
 }
 
 void newDevice(DW1000Device *device) {
-  Serial.print("Device added: ");
-  Serial.println(device->getShortAddress(), HEX);
+  Serial.printf("Tag connected, address=%X\n", device->getShortAddress());
+  state = SENSOR_STATE_READY;
 }
 
 void inactiveDevice(DW1000Device *device) {
-  Serial.print("Delete inactive device: ");
-  Serial.println(device->getShortAddress(), HEX);
+  Serial.printf("Anchor disconnected, address=%X\n", device->getShortAddress());
+  state = SENSOR_STATE_NOT_READY;
 }
 
 /*
@@ -244,14 +262,14 @@ void sendSensorDataWayPoints(const float waypoints[][2], int waypointCount) {
   }
 
   // Calculate distance and heading from (0, 0) to the current position
-  float distance = sqrt(posX * posX + posY * posY);  // Distance from origin
-  float heading = atan2(posY, posX) * (180.0 / PI) - 90;  // Heading in degrees. -90 since the heading is calculated from the N direction.
+  distance = sqrt(posX * posX + posY * posY);  // Distance from origin
+  heading = atan2(posY, posX) * (180.0 / PI) - 90;  // Heading in degrees. -90 since the heading is calculated from the N direction.
   if (heading < 0) {
     heading += 360;
   }
 
   // Send `distance` and `heading` via BLE
-  sendSensorData(distance, heading);
+  sendSensorData();
 
   // Print debugging information
   //Serial.println("Position: (" + String(posX, 2) + ", " + String(posY, 2) +

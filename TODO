@@ -1,5 +1,5 @@
 [] Add dji remote control and receiver
 [] Add PID encoder
 [] Add LED
-[] Combine tag and remote
+[x] Combine tag and remote
 [] Add BLE central for the anchor

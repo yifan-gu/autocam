@@ -39,14 +39,11 @@ ControllerData receivedData;
 // BLE Service and Characteristic
 BLEService AutocamControllerService("f49f531a-9cba-4ada-905c-68699d400122");
 BLECharacteristic AutocamControllerData("B320", BLERead | BLEWrite | BLENotify, sizeof(ControllerData), true);
-
 BLEDevice BLECentral;
 
-unsigned int lastPingTime = 0;
-
-unsigned long lastScanMillis = 0;
 unsigned long scanIntervalMillis = 1000;
 
+unsigned int lastPingTime = 0;
 
 // DW1000 constants.
 #define SPI_SCK 18
@@ -131,6 +128,8 @@ void setupBLEPeripheral() {
 }
 
 bool connectToCentral() {
+  static unsigned long lastScanMillis = 0;
+
   unsigned long currentMillis = millis();
   if (currentMillis - lastScanMillis < scanIntervalMillis) {
     return false;
