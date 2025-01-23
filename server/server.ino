@@ -1,4 +1,3 @@
-#include <ArduinoBLE.h>
 #include <ESP32Servo.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
@@ -6,6 +5,7 @@
 #include <WiFi.h>
 
 #include "index_html.h"
+#include "BLE_setup.hpp"
 
 #define PI 3.14159265359
 
@@ -116,24 +116,35 @@ struct ControllerData {
   int steeringValue;
   int driveMode;
   int state;
+  float yaw_torque;
+  float pitch_torque;
+  int active_track_toggled;
 };
 
 ControllerData controllerData;
 
-// BLE variables
+// BLE variables for acting as central.
 BLEDevice UWBAnchor, AutocamController;
 BLEService UWBAnchorService, AutocamControllerService;
 
 const char UWBAnchorServiceUUID[] = "e2b221c6-7a26-49f4-80cc-0cd58a53041d";
 const char AutocamControllerServiceUUID[] = "f49f531a-9cba-4ada-905c-68699d400122";
 
-const char UWBAnchorSensorDataCharacteristicUUID[] = "A319";
-const char AutocamControllerControllerDataCharacteristicUUID[] = "B320";
+const char UWBAnchorSensorDataCharacteristicUUID[] = "B328";
+const char AutocamControllerControllerDataCharacteristicUUID[] = "B330";
 
 BLECharacteristic UWBAnchorSensorData;
 BLECharacteristic AutocamControllerData;
 
-unsigned long scanIntervalMillis = 1000;
+// BLE variables for acting as peripheral.
+BLEService GimbalControllerService;
+BLECharacteristic GimbalControllerData;
+
+struct GimbalControllerDataData {
+  float yaw_torque;
+  float pitch_torque;
+  bool active_track_toggled;
+};
 
 void setup() {
   // Start Serial for debugging
@@ -148,84 +159,18 @@ void setup() {
   setupESC();
   setupServer();
   setupBLECentral();
+  GimbalControllerDataData data = {0.0, 0.0, false};
+  setupBLEPeripheral("Gimbal Controller", "gimbal-controller", GimbalControllerService, GimbalControllerData, (uint8_t *)&data, sizeof(data));
 }
 
 void loop() {
+  sendGimbalControllerData();
   getUWBAnchorData();
   getAutocamControllerData();
   calculateCoordinates();
   calculateSteeringThrottle();
   runESCController();
   runHealthCheck();
-}
-
-void setupBLECentral() {
-  if (!BLE.begin()) {
-    Serial.println("Starting BLE failed!");
-    while (1);
-  }
-  Serial.println("BLE Central initialized.");
-  BLE.setConnectionInterval(6, 6); // from 7.5ms to 7.5ms (6 * 1.5ms).
-}
-
-bool scanForPeripheral(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID) {
-  static unsigned long lastScanMillis = 0;
-
-  unsigned long currentMillis = millis();
-  if (currentMillis - lastScanMillis < scanIntervalMillis ) {
-    return false;
-  }
-  lastScanMillis = currentMillis;
-
-  Serial.printf("Scanning for BLE peripheral [%s]...\n", serviceUUID);
-  BLE.scanForUuid(serviceUUID);
-  device = BLE.available();
-
-  if (!device) {
-    Serial.println("No BLE peripheral found.");
-    return false;
-  }
-  Serial.printf("Found BLE peripheral, local name: [%s]\n", device.localName());
-  BLE.stopScan();
-  return connectToBLEDevice(device, service, characteristic, serviceUUID, characteristicUUID);
-}
-
-bool connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID) {
-  if (!device.connect()) {
-    Serial.printf("Failed to connect to [%s].\n", device.localName());
-    false;
-  }
-
-  Serial.printf("Connected to [%s]!\n", device.localName());
-  if (!device.discoverAttributes()) {
-    Serial.printf("Attribute discovery failed for [%s]! Disconnecting...\n", device.localName());
-    device.disconnect();
-    false;
-  }
-    
-  service = device.service(serviceUUID);
-  Serial.printf("BLE device name: [%s], advertised svc count: [%d], Real svc count: [%d], characteristics count: [%d]\n", device.deviceName(), device.advertisedServiceUuidCount(), device.serviceCount(), device.characteristicCount());
-  characteristic = service.characteristic(characteristicUUID);
-
-  if (!characteristic) {
-    Serial.printf("Failed to find characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
-    device.disconnect();
-    false;
-  }
-
-  if (!characteristic.canSubscribe()) {
-    Serial.printf("Cannot subscribe characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
-    device.disconnect();
-    false;
-  }
-
-  if (!characteristic.subscribe()) {
-    Serial.printf("Failed to subscribe characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
-    device.disconnect();
-    false;
-  }
-  Serial.printf("Found characteristic [%s] on device [%s] and successfully subscribed!\n", characteristicUUID, device.deviceName());
-  return true;
 }
 
 void setupESC() {
@@ -356,6 +301,24 @@ void runHealthCheck() {
     steeringValue = midSteering;
     lastPingTime = millis(); // Reset timer to avoid repeated timeouts
   }
+}
+
+void sendGimbalControllerData() {
+  if (driveMode != DRIVE_MODE_MANUAL) {
+    return;
+  }
+
+  if (!(BLECentral && BLECentral.connected())) {
+    if (!connectToCentral()) {
+      return;
+    }
+  }
+
+  GimbalControllerDataData data = {controllerData.yaw_torque, controllerData.pitch_torque, controllerData.active_track_toggled};
+  GimbalControllerData.writeValue((uint8_t*)&data, sizeof(data));
+
+  Serial.printf("Sent via BLE: yaw_torque=%f, pitch_torque=%f, active_track_toggled=%d\n", controllerData.yaw_torque, controllerData.pitch_torque, controllerData.active_track_toggled);
+  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
 }
 
 // Get data from the UWB Anchor via BLE.

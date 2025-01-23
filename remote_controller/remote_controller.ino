@@ -1,8 +1,8 @@
-#include <ArduinoBLE.h>
 #include <SPI.h>
 
 #include "DW1000Ranging.h"
 #include "DW1000.h"
+#include "BLE_setup.hpp"
 
 #define DATA_RATE 100 // 100 Hz
 
@@ -27,21 +27,26 @@ int driveModeTriggerValue = DRIVE_MODE_MANUAL;
 // Variables to store values
 int throttleValue = midThrottle, steeringValue = midSteering;
 
+// Variables to store the gimbal controller data.
+float yawTorqueValue = 0.0;
+float pitchTorqueValue = 0.0;
+int activeTrackToggledValue = 0;
+
 struct ControllerData {
   int throttleValue;
   int steeringValue;
   int driveMode;
   int state;
+  float yaw_torque;
+  float pitch_torque;
+  int active_track_toggled;
 };
 
 ControllerData receivedData;
 
 // BLE Service and Characteristic
 BLEService AutocamControllerService("f49f531a-9cba-4ada-905c-68699d400122");
-BLECharacteristic AutocamControllerData("B320", BLERead | BLEWrite | BLENotify, sizeof(ControllerData), true);
-BLEDevice BLECentral;
-
-unsigned long scanIntervalMillis = 1000;
+BLECharacteristic AutocamControllerData("B330", BLERead | BLEWrite | BLENotify, sizeof(ControllerData), true);
 
 unsigned int lastPingTime = 0;
 
@@ -73,8 +78,8 @@ void setup() {
   }
 
   setupUWBTag();
-  setupBLEPeripheral();
-  connectToCentral();
+  ControllerData data = {0, 0, 0, 0, 0, 0, 0};
+  setupBLEPeripheral("Autocam Remote", "autocam-remote", AutocamControllerService, AutocamControllerData, (uint8_t *)&data, sizeof(data));
 }
 
 void loop() {
@@ -99,52 +104,6 @@ void setupUWBTag() {
 
   //start the module as an anchor, do not assign random short address
   DW1000Ranging.startAsTag(tag_addr, DW1000.MODE_LONGDATA_RANGE_LOWPOWER, false);
-}
-
-void setupBLEPeripheral() {
-   // begin initialization
-  if (!BLE.begin()) {
-    Serial.println("Failed to start BLE module!");
-    while (1);
-  }
-  BLE.setConnectionInterval(6, 6);
-  BLE.setLocalName("Autocam Remote");
-  BLE.setDeviceName("autocam-remote");
-  BLE.setAdvertisedService(AutocamControllerService);
-
-  // add the characteristic to the service
-  AutocamControllerService.addCharacteristic(AutocamControllerData);
-
-  // add service
-  BLE.addService(AutocamControllerService);
-
-  // set the initial value for the characeristic:
-  ControllerData data = {0, 0, 0, 0};
-  AutocamControllerData.writeValue((uint8_t*)&data, sizeof(data));
-
-  // start advertising
-  BLE.advertise();
-  Serial.println("BLE Peripheral advertised!");
-}
-
-bool connectToCentral() {
-  static unsigned long lastScanMillis = 0;
-
-  unsigned long currentMillis = millis();
-  if (currentMillis - lastScanMillis < scanIntervalMillis) {
-    return false;
-  }
-  lastScanMillis = currentMillis;
-
-  Serial.println("Connecting to BLE central...");
-
-  BLECentral = BLE.central();
-  if (!(BLECentral && BLECentral.connected())) {
-    return false;
-  }
-
-  Serial.printf("Connected to BLE central: %s\n", BLECentral.address());
-  return true;
 }
 
 void updateState(int newState) {
@@ -178,7 +137,7 @@ void readStatusData() {
 
   if (AutocamControllerData.written()) {
     AutocamControllerData.readValue((uint8_t*)&receivedData, sizeof(receivedData));
-    Serial.printf("Received throttle=%d, steering=%d, driveMode=%d, state=%d\n", receivedData.throttleValue, receivedData.steeringValue, receivedData.driveMode, receivedData.state);
+    Serial.printf("Received throttle=%d, steering=%d, driveMode=%d, state=%d, yaw_torque=%f, pitch_torque=%f, active_track_toggled=%d\n", receivedData.throttleValue, receivedData.steeringValue, receivedData.driveMode, receivedData.state, receivedData.yaw_torque, receivedData.pitch_torque, receivedData.active_track_toggled);
     updateState(receivedData.state);
     updateDriveMode(receivedData.driveMode);
 
@@ -231,9 +190,9 @@ void sendControllerData() {
     updateState(state | STATE_REMOTE_CONTROLLER_READY);
   }
 
-  ControllerData data = {throttleValue, steeringValue, driveModeTriggerValue, state}; // state doesn't matter because it will not be used by the server.
+  ControllerData data = {throttleValue, steeringValue, driveModeTriggerValue, state, yawTorqueValue, pitchTorqueValue, activeTrackToggledValue}; // state doesn't matter because it will not be used by the server.
   AutocamControllerData.writeValue((uint8_t*)&data, sizeof(data));
-  Serial.printf("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state);
+  Serial.printf("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d, yaw_torque=%f, pitch_torque=%f, active_track_toggled=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state, data.yaw_torque, data.pitch_torque, data.active_track_toggled);
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 }

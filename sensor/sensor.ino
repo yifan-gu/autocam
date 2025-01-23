@@ -1,9 +1,9 @@
-#include <ArduinoBLE.h>
 #include <SPI.h>
 
 #include "DW1000Ranging.h"
 #include "DW1000.h"
 #include "DJI_ronin_controller.hpp"
+#include "BLE_setup.hpp"
 
 #define PI 3.14159265359
 #define DATA_RATE 100 // 100 Hz
@@ -45,19 +45,26 @@ struct SensorData {
 
 // BLE Service and Characteristic
 BLEService UWBAnchorService("e2b221c6-7a26-49f4-80cc-0cd58a53041d");
-BLECharacteristic UWBAnchorSensorData("A319", BLERead | BLENotify, sizeof(SensorData), true);
-BLEDevice BLECentral;
+BLECharacteristic UWBAnchorSensorData("B328", BLERead | BLENotify, sizeof(SensorData), true);
 
-unsigned long scanIntervalMillis = 1000;
+struct GimbalControllerDataData {
+  float yaw_torque;
+  float pitch_torque;
+  bool active_track_toggled;
+};
+
+GimbalControllerDataData gimbalControllerDataData;
+
+// BLE values for acting as a central.
+BLEDevice GimbalController;
+BLEService GimbalControllerService;
+const char GimbalControllerServiceUUID[] = "53f884f3-b189-4e84-8a16-f4c24d9add7c";
+const char GimbalControllerDataCharacteristicUUID[] = "B335";
+BLECharacteristic GimbalControllerData;
 
 DJIRoninController djiRoninController(CAN_TX, CAN_RX, CAN_RATE);
 
 unsigned int lastPingTime = 0;
-
-void panic(const char *message) {
-  Serial.println(message);
-  while (1) {};
-}
 
 void setup() {
   // Start Serial for debugging
@@ -71,14 +78,17 @@ void setup() {
 
   setupUWBAnchor();
   setupDJIRoninController();
-  setupBLEPeripheral();
-  connectToCentral();
+  setupBLECentral();
+  SensorData data = {0, 0, SENSOR_STATE_NOT_READY};
+  setupBLEPeripheral("UWB Anchor", "uwb-anchor", UWBAnchorService, UWBAnchorSensorData, (uint8_t *)&data, sizeof(data));
 }
 
 void loop() {
   getDistance();
   getHeading();
   sendSensorData();
+  getGimbalControllerData();
+  setGimbalPosition();
   delay(1000 / DATA_RATE); // Control the data rate.
 }
 
@@ -98,32 +108,37 @@ void setupUWBAnchor() {
   DW1000Ranging.startAsAnchor(anchor_addr, DW1000.MODE_LONGDATA_RANGE_LOWPOWER, false);
 }
 
-void setupBLEPeripheral() {
-   // begin initialization
-  if (!BLE.begin()) {
-    panic("Failed to start BLE module!");
+void getGimbalControllerData() {
+  if (!GimbalController.connected()) {
+    if (!scanForPeripheral(GimbalController, GimbalControllerService, GimbalControllerData, GimbalControllerServiceUUID, GimbalControllerDataCharacteristicUUID)) {
+      return;
+    }
   }
-  BLE.setConnectionInterval(6, 6);
-  BLE.setLocalName("UWB Anchor");
-  BLE.setDeviceName("uwb-anchor");
-  BLE.setAdvertisedService(UWBAnchorService);
 
-  // add the characteristic to the service
-  UWBAnchorService.addCharacteristic(UWBAnchorSensorData);
+  if (!GimbalControllerData.valueUpdated()) { // No available data.
+    return;
+  }
 
-  // add service
-  BLE.addService(UWBAnchorService);
+  GimbalControllerData.readValue((uint8_t*)&gimbalControllerDataData, sizeof(GimbalControllerDataData));
+  Serial.printf("Received yaw_torque=%f, pitch_torque=%f, active_track_toggled=%d\n", gimbalControllerDataData.yaw_torque, gimbalControllerDataData.pitch_torque, gimbalControllerDataData.active_track_toggled);
 
-  // set the initial value for the characeristic:
-  SensorData data = {0, 0, SENSOR_STATE_NOT_READY};
-  UWBAnchorSensorData.writeValue((uint8_t*)&data, sizeof(data));
-
-  // start advertising
-  BLE.advertise();
-  Serial.println("BLE Peripheral advertised!");
-
-  connectToCentral();
+  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  lastPingTime = millis();
 }
+
+void setGimbalPosition() {
+  float yaw = convert_gimbal_torque(gimbalControllerDataData.yaw_torque);
+  float pitch = convert_gimbal_torque(gimbalControllerDataData.pitch_torque);
+  if (!djiRoninController.set_position(yaw, 0, pitch, 0, 100)) {
+    Serial.println("Failed to set DJI Ronin position");
+  }
+}
+
+float convert_gimbal_torque(float torque) {
+  // TODO(yifan): Conver yaw_torque and pitch_torque;
+  return torque;
+}
+
 
 void setupDJIRoninController() {
   uint8_t SDK_version[4];
@@ -141,26 +156,6 @@ void setupDJIRoninController() {
   Serial.printf("DJI R SDK Version=%d.%d.%d.%d\n", SDK_version[0], SDK_version[1], SDK_version[2], SDK_version[3]);
 }
 
-bool connectToCentral() {
-  static unsigned long lastScanMillis = 0;
-
-  unsigned long currentMillis = millis();
-  if (currentMillis - lastScanMillis < scanIntervalMillis) {
-    return false;
-  }
-  lastScanMillis = currentMillis;
-
-  Serial.println("Connecting to BLE central...");
-
-  BLECentral = BLE.central();
-  if (!(BLECentral && BLECentral.connected())) {
-    return false;
-  }
-
-  Serial.printf("Connected to BLE central: %s\n", BLECentral.address());
-  return true;
-}
-
 void getDistance() {
   DW1000Ranging.loop();
 }
@@ -168,7 +163,7 @@ void getDistance() {
 void getHeading() {
   float yaw, roll, pitch;
   if (!djiRoninController.get_position(&yaw, &roll, &pitch)) {
-    Serial.println("Failed to get DJI position");
+    Serial.println("Failed to get DJI Ronin position");
     return;
   }
   heading = -yaw;
