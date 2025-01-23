@@ -36,31 +36,9 @@ uint16_t Adelay = 16630;
 float distance = 0;
 float heading = 0;
 int state = SENSOR_STATE_NOT_READY;
-
-struct SensorData {
-  float distance;
-  float heading;
-  int state;
-};
-
-// BLE Service and Characteristic
-BLEService UWBAnchorService("e2b221c6-7a26-49f4-80cc-0cd58a53041d");
-BLECharacteristic UWBAnchorSensorData("B328", BLERead | BLENotify, sizeof(SensorData), true);
-
-struct GimbalControllerDataData {
-  float yaw_torque;
-  float pitch_torque;
-  bool active_track_toggled;
-};
-
-GimbalControllerDataData gimbalControllerDataData;
-
-// BLE values for acting as a central.
-BLEDevice GimbalController;
-BLEService GimbalControllerService;
-const char GimbalControllerServiceUUID[] = "53f884f3-b189-4e84-8a16-f4c24d9add7c";
-const char GimbalControllerDataCharacteristicUUID[] = "B335";
-BLECharacteristic GimbalControllerData;
+float yaw_speed = 0;
+float pitch_speed = 0;
+int active_track_toggled = 0;
 
 DJIRoninController djiRoninController(CAN_TX, CAN_RX, CAN_RATE);
 
@@ -80,7 +58,7 @@ void setup() {
   setupDJIRoninController();
   setupBLECentral();
   SensorData data = {0, 0, SENSOR_STATE_NOT_READY};
-  setupBLEPeripheral("UWB Anchor", "uwb-anchor", UWBAnchorService, UWBAnchorSensorData, (uint8_t *)&data, sizeof(data));
+  setupBLEPeripheral("UWB Anchor", "uwb-anchor", UWBAnchorService, UWBAnchorSensorData, (uint8_t *)&data, sizeof(SensorData));
 }
 
 void loop() {
@@ -109,7 +87,10 @@ void setupUWBAnchor() {
 }
 
 void getGimbalControllerData() {
-  if (!GimbalController.connected()) {
+  if (!GimbalController.connected()) { // Reset.
+    yaw_speed = 0;
+    pitch_speed = 0;
+    active_track_toggled = 0;
     if (!scanForPeripheral(GimbalController, GimbalControllerService, GimbalControllerData, GimbalControllerServiceUUID, GimbalControllerDataCharacteristicUUID)) {
       return;
     }
@@ -119,24 +100,28 @@ void getGimbalControllerData() {
     return;
   }
 
-  GimbalControllerData.readValue((uint8_t*)&gimbalControllerDataData, sizeof(GimbalControllerDataData));
-  Serial.printf("Received yaw_torque=%f, pitch_torque=%f, active_track_toggled=%d\n", gimbalControllerDataData.yaw_torque, gimbalControllerDataData.pitch_torque, gimbalControllerDataData.active_track_toggled);
+  GimbalControllerDataData data;
+  GimbalControllerData.readValue((uint8_t*)&data, sizeof(GimbalControllerDataData));
+  Serial.printf("Received yaw_speed=%f, pitch_speed=%f, active_track_toggled=%d\n", data.yaw_speed, data.pitch_speed, data.active_track_toggled);
+  yaw_speed = data.yaw_speed;
+  pitch_speed = data.pitch_speed;
+  active_track_toggled = data.active_track_toggled;
 
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 }
 
 void setGimbalPosition() {
-  float yaw = convert_gimbal_torque(gimbalControllerDataData.yaw_torque);
-  float pitch = convert_gimbal_torque(gimbalControllerDataData.pitch_torque);
+  float yaw = convert_gimbal_speed(yaw_speed);
+  float pitch = convert_gimbal_speed(pitch_speed);
   if (!djiRoninController.set_position(yaw, 0, pitch, 0, 100)) {
     Serial.println("Failed to set DJI Ronin position");
   }
 }
 
-float convert_gimbal_torque(float torque) {
-  // TODO(yifan): Conver yaw_torque and pitch_torque;
-  return torque;
+float convert_gimbal_speed(float speed) {
+  // TODO(yifan): Conver yaw_speed and pitch_speed;
+  return speed;
 }
 
 
@@ -180,7 +165,7 @@ void sendSensorData() {
   }
 
   SensorData data = {distance, heading, state};
-  UWBAnchorSensorData.writeValue((uint8_t*)&data, sizeof(data));
+  UWBAnchorSensorData.writeValue((uint8_t*)&data, sizeof(SensorData));
 
   Serial.printf("Sent via BLE: distance=%f, heading=%f, state=%d\n", distance, heading, state);
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);

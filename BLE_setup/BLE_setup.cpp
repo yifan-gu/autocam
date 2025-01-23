@@ -3,16 +3,22 @@
 BLEDevice BLECentral;
 
 BLEDevice UWBAnchor, AutocamController, GimbalController;
-BLEService UWBAnchorService, AutocamControllerService, GimbalControllerService;
-BLECharacteristic UWBAnchorSensorData, AutocamControllerData, GimbalControllerData;
 
-const char UWBAnchorServiceUUID[] = "e2b221c6-7a26-49f4-80cc-0cd58a53041d";
-const char AutocamControllerServiceUUID[] = "f49f531a-9cba-4ada-905c-68699d400122";
-const char GimbalControllerServiceUUID[] = "53f884f3-b189-4e84-8a16-f4c24d9add7c";
+const char *UWBAnchorServiceUUID = "e2b221c6-7a26-49f4-80cc-0cd58a53041d";
+const char *AutocamControllerServiceUUID = "f49f531a-9cba-4ada-905c-68699d400122";
+const char *GimbalControllerServiceUUID = "53f884f3-b189-4e84-8a16-f4c24d9add7c";
 
-const char UWBAnchorSensorDataCharacteristicUUID[] = "B328";
-const char AutocamControllerControllerDataCharacteristicUUID[] = "B330";
-const char GimbalControllerDataCharacteristicUUID[] = "B335";
+const char *UWBAnchorSensorDataCharacteristicUUID = "B328";
+const char *AutocamControllerControllerDataCharacteristicUUID = "B330";
+const char *GimbalControllerDataCharacteristicUUID = "B335";
+
+BLEService UWBAnchorService(UWBAnchorServiceUUID);
+BLEService AutocamControllerService(AutocamControllerServiceUUID);
+BLEService GimbalControllerService(GimbalControllerServiceUUID);
+
+BLECharacteristic UWBAnchorSensorData(UWBAnchorSensorDataCharacteristicUUID, BLERead | BLENotify, sizeof(ControllerData), true);
+BLECharacteristic AutocamControllerData(AutocamControllerControllerDataCharacteristicUUID, BLERead | BLEWrite | BLENotify, sizeof(ControllerData), true);
+BLECharacteristic GimbalControllerData(GimbalControllerDataCharacteristicUUID, BLERead | BLENotify, sizeof(ControllerData), true);
 
 unsigned long scanIntervalMillis = 1000;
 
