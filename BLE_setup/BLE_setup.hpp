@@ -4,38 +4,36 @@
 #include <ArduinoBLE.h>
 
 extern BLEDevice BLECentral;
-extern BLEDevice UWBAnchor, AutocamController, GimbalController;
-extern BLEService UWBAnchorService, AutocamControllerService, GimbalControllerService;
-extern BLECharacteristic UWBAnchorSensorData, AutocamControllerData, GimbalControllerData;
+extern BLEDevice UWBAnchor, AutocamController;
+extern BLEService UWBAnchorService, AutocamControllerService;
+extern BLECharacteristic UWBAnchorSensorData, AutocamControllerData;
 
 extern const char *UWBAnchorServiceUUID;
 extern const char *AutocamControllerServiceUUID;
-extern const char *GimbalControllerServiceUUID;
 
 extern const char *UWBAnchorSensorDataCharacteristicUUID;
 extern const char *AutocamControllerControllerDataCharacteristicUUID;
-extern const char *GimbalControllerDataCharacteristicUUID;
 
 struct SensorData {
   float distance;
   float heading;
   int state; // 1 = ready, 0 = not ready.
+
+  // Values below are written by the central (server).
+  float yaw_speed;
+  float pitch_speed;
+  int active_track_toggled;
 };
 
 struct ControllerData {
   int throttleValue;
   int steeringValue;
   int driveMode;
-  int state;
   float yaw_speed;
   float pitch_speed;
   int active_track_toggled;
-};
 
-struct GimbalControllerDataData {
-  float yaw_speed;
-  float pitch_speed;
-  bool active_track_toggled;
+  int state; // This value is written by the central (server).
 };
 
 void setupBLECentral();

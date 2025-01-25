@@ -56,8 +56,7 @@ void setup() {
 
   setupUWBAnchor();
   setupDJIRoninController();
-  setupBLECentral();
-  SensorData data = {0, 0, SENSOR_STATE_NOT_READY};
+  SensorData data = {.distance = 0, .heading = 0, .state = SENSOR_STATE_NOT_READY};
   setupBLEPeripheral("UWB Anchor", "uwb-anchor", UWBAnchorService, UWBAnchorSensorData, (uint8_t *)&data, sizeof(SensorData));
 }
 
@@ -87,28 +86,22 @@ void setupUWBAnchor() {
 }
 
 void getGimbalControllerData() {
-  if (!GimbalController.connected()) { // Reset.
-    yaw_speed = 0;
-    pitch_speed = 0;
-    active_track_toggled = 0;
-    if (!scanForPeripheral(GimbalController, GimbalControllerService, GimbalControllerData, GimbalControllerServiceUUID, GimbalControllerDataCharacteristicUUID)) {
+  if (!(BLECentral && BLECentral.connected())) {
+    if (!connectToCentral()) {
       return;
     }
   }
 
-  if (!GimbalControllerData.valueUpdated()) { // No available data.
+  if (!UWBAnchorSensorData.written()) {
     return;
   }
 
-  GimbalControllerDataData data;
-  GimbalControllerData.readValue((uint8_t*)&data, sizeof(GimbalControllerDataData));
+  SensorData data;
+  UWBAnchorSensorData.readValue((uint8_t *)&data, sizeof(SensorData));
   Serial.printf("Received yaw_speed=%f, pitch_speed=%f, active_track_toggled=%d\n", data.yaw_speed, data.pitch_speed, data.active_track_toggled);
   yaw_speed = data.yaw_speed;
   pitch_speed = data.pitch_speed;
   active_track_toggled = data.active_track_toggled;
-
-  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
-  lastPingTime = millis();
 }
 
 void setGimbalPosition() {
@@ -120,7 +113,7 @@ void setGimbalPosition() {
 }
 
 float convert_gimbal_speed(float speed) {
-  // TODO(yifan): Conver yaw_speed and pitch_speed;
+  // TODO(yifan): Convert yaw_speed and pitch_speed;
   return speed;
 }
 
@@ -164,8 +157,8 @@ void sendSensorData() {
     }
   }
 
-  SensorData data = {distance, heading, state};
-  UWBAnchorSensorData.writeValue((uint8_t*)&data, sizeof(SensorData));
+  SensorData data = {.distance = distance, .heading = heading, .state = state};
+  UWBAnchorSensorData.writeValue((uint8_t *)&data, sizeof(SensorData));
 
   Serial.printf("Sent via BLE: distance=%f, heading=%f, state=%d\n", distance, heading, state);
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);

@@ -2,23 +2,19 @@
 
 BLEDevice BLECentral;
 
-BLEDevice UWBAnchor, AutocamController, GimbalController;
+BLEDevice UWBAnchor, AutocamController;
 
 const char *UWBAnchorServiceUUID = "e2b221c6-7a26-49f4-80cc-0cd58a53041d";
 const char *AutocamControllerServiceUUID = "f49f531a-9cba-4ada-905c-68699d400122";
-const char *GimbalControllerServiceUUID = "53f884f3-b189-4e84-8a16-f4c24d9add7c";
 
 const char *UWBAnchorSensorDataCharacteristicUUID = "B328";
 const char *AutocamControllerControllerDataCharacteristicUUID = "B330";
-const char *GimbalControllerDataCharacteristicUUID = "B335";
 
 BLEService UWBAnchorService(UWBAnchorServiceUUID);
 BLEService AutocamControllerService(AutocamControllerServiceUUID);
-BLEService GimbalControllerService(GimbalControllerServiceUUID);
 
-BLECharacteristic UWBAnchorSensorData(UWBAnchorSensorDataCharacteristicUUID, BLERead | BLENotify, sizeof(ControllerData), true);
-BLECharacteristic AutocamControllerData(AutocamControllerControllerDataCharacteristicUUID, BLERead | BLEWrite | BLENotify, sizeof(ControllerData), true);
-BLECharacteristic GimbalControllerData(GimbalControllerDataCharacteristicUUID, BLERead | BLENotify, sizeof(ControllerData), true);
+BLECharacteristic UWBAnchorSensorData(UWBAnchorSensorDataCharacteristicUUID, BLERead | BLEWrite | BLENotify, sizeof(SensorData));
+BLECharacteristic AutocamControllerData(AutocamControllerControllerDataCharacteristicUUID, BLERead | BLEWrite | BLENotify, sizeof(ControllerData));
 
 unsigned long scanIntervalMillis = 1000;
 
@@ -117,8 +113,6 @@ void setupBLEPeripheral(const char *localName, const char *deviceName, BLEServic
   // start advertising
   BLE.advertise();
   Serial.println("BLE Peripheral advertised!");
-
-  connectToCentral();
 }
 
 bool connectToCentral() {
@@ -130,13 +124,13 @@ bool connectToCentral() {
   }
   lastScanMillis = currentMillis;
 
-  Serial.println("Connecting to BLE central...");
+  Serial.println("Waiting for BLE central to connect...");
 
   BLECentral = BLE.central();
   if (!(BLECentral && BLECentral.connected())) {
     return false;
   }
 
-  Serial.printf("Connected to BLE central: %s\n", BLECentral.address());
+  Serial.printf("BLE central[%s] connected!\n", BLECentral.address());
   return true;
 }

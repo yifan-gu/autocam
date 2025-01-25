@@ -46,7 +46,7 @@ void setup() {
     // Wait for Serial or timeout
   }
 
-  ControllerData data = {0, 0, 0, 0, 0, 0, 0};
+  ControllerData data = {.throttleValue = 0, .steeringValue = 0, .driveMode = 0, .yaw_speed = 0, .pitch_speed = 0, .active_track_toggled = 0};
   setupBLEPeripheral("Autocam Remote", "autocam-remote", AutocamControllerService, AutocamControllerData, (uint8_t *)&data, sizeof(ControllerData));
 }
 
@@ -87,8 +87,8 @@ void readStatusData() {
   }
 
   if (AutocamControllerData.written()) {
-    AutocamControllerData.readValue((uint8_t*)&receivedData, sizeof(ControllerData));
-    Serial.printf("Received throttle=%d, steering=%d, driveMode=%d, state=%d, yaw_speed=%f, pitch_speed=%f, active_track_toggled=%d\n", receivedData.throttleValue, receivedData.steeringValue, receivedData.driveMode, receivedData.state, receivedData.yaw_speed, receivedData.pitch_speed, receivedData.active_track_toggled);
+    AutocamControllerData.readValue((uint8_t *)&receivedData, sizeof(ControllerData));
+    Serial.printf("Received state=%d, driveMode=%d, activeTrackToggled=%d\n", receivedData.state, receivedData.driveMode, receivedData.active_track_toggled);
     updateState(receivedData.state);
     updateDriveMode(receivedData.driveMode);
 
@@ -132,8 +132,8 @@ void sendControllerData() {
     updateState(state | STATE_REMOTE_CONTROLLER_READY);
   }
 
-  ControllerData data = {throttleValue, steeringValue, driveModeTriggerValue, state, yawSpeedValue, pitchSpeedValue, activeTrackToggledValue}; // state doesn't matter because it will not be used by the server.
-  AutocamControllerData.writeValue((uint8_t*)&data, sizeof(ControllerData));
+  ControllerData data = {.throttleValue = throttleValue, .steeringValue = steeringValue, .driveMode = driveModeTriggerValue, .yaw_speed = yawSpeedValue, .pitch_speed = pitchSpeedValue, .active_track_toggled = activeTrackToggledValue};
+  AutocamControllerData.writeValue((uint8_t *)&data, sizeof(ControllerData));
   //Serial.printf("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d, yaw_speed=%f, pitch_speed=%f, active_track_toggled=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state, data.yaw_speed, data.pitch_speed, data.active_track_toggled);
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
