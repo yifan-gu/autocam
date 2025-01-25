@@ -55,18 +55,23 @@ void setup() {
   }
 
   setupUWBAnchor();
-  setupDJIRoninController();
-  SensorData data = {.distance = 0, .heading = 0, .state = SENSOR_STATE_NOT_READY};
-  setupBLEPeripheral("UWB Anchor", "uwb-anchor", UWBAnchorService, UWBAnchorSensorData, (uint8_t *)&data, sizeof(SensorData));
+  //setupDJIRoninController();
+  setupBLE();
 }
 
 void loop() {
-  getDistance();
-  getHeading();
+  //getDistance();
+  //getHeading();
   sendSensorData();
   getGimbalControllerData();
-  setGimbalPosition();
+  //setGimbalPosition();
   delay(1000 / DATA_RATE); // Control the data rate.
+}
+
+void setupBLE() {
+  UWBAnchorService.addCharacteristic(UWBAnchorSensorDataSend);
+  UWBAnchorService.addCharacteristic(UWBAnchorSensorDataRecv);
+  setupBLEPeripheral("UWB Anchor", "uwb-anchor", UWBAnchorService);
 }
 
 void setupUWBAnchor() {
@@ -88,20 +93,24 @@ void setupUWBAnchor() {
 void getGimbalControllerData() {
   if (!(BLECentral && BLECentral.connected())) {
     if (!connectToCentral()) {
+      resetGimbalControl();
       return;
     }
   }
 
-  if (!UWBAnchorSensorData.written()) {
+  if (!UWBAnchorSensorDataRecv.written()) {
     return;
   }
 
-  SensorData data;
-  UWBAnchorSensorData.readValue((uint8_t *)&data, sizeof(SensorData));
+  SensorDataRecv data;
+  UWBAnchorSensorDataRecv.readValue((uint8_t *)&data, sizeof(SensorDataRecv));
   Serial.printf("Received yaw_speed=%f, pitch_speed=%f, active_track_toggled=%d\n", data.yaw_speed, data.pitch_speed, data.active_track_toggled);
   yaw_speed = data.yaw_speed;
   pitch_speed = data.pitch_speed;
   active_track_toggled = data.active_track_toggled;
+
+  Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  lastPingTime = millis();
 }
 
 void setGimbalPosition() {
@@ -110,6 +119,12 @@ void setGimbalPosition() {
   if (!djiRoninController.set_position(yaw, 0, pitch, 0, 100)) {
     Serial.println("Failed to set DJI Ronin position");
   }
+}
+
+void resetGimbalControl() {
+  yaw_speed = 0;
+  pitch_speed = 0;
+  active_track_toggled = false;
 }
 
 float convert_gimbal_speed(float speed) {
@@ -153,16 +168,17 @@ void getHeading() {
 void sendSensorData() {
   if (!(BLECentral && BLECentral.connected())) {
     if (!connectToCentral()) {
+      resetGimbalControl();
       return;
     }
   }
 
-  SensorData data = {.distance = distance, .heading = heading, .state = state};
-  UWBAnchorSensorData.writeValue((uint8_t *)&data, sizeof(SensorData));
+  SensorDataSend data = {.distance = distance, .heading = heading, .state = state};
+  UWBAnchorSensorDataSend.writeValue((uint8_t *)&data, sizeof(SensorDataSend));
 
-  Serial.printf("Sent via BLE: distance=%f, heading=%f, state=%d\n", distance, heading, state);
+  //Serial.printf("Sent via BLE: distance=%f, heading=%f, state=%d\n", distance, heading, state);
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
-  lastPingTime = millis();
+  //lastPingTime = millis();
 }
 
 void newRange() {

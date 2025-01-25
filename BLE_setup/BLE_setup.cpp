@@ -7,13 +7,15 @@ BLEDevice UWBAnchor, AutocamController;
 const char *UWBAnchorServiceUUID = "e2b221c6-7a26-49f4-80cc-0cd58a53041d";
 const char *AutocamControllerServiceUUID = "f49f531a-9cba-4ada-905c-68699d400122";
 
-const char *UWBAnchorSensorDataCharacteristicUUID = "B328";
+const char *UWBAnchorSensorDataSendCharacteristicUUID = "B328";
+const char *UWBAnchorSensorDataRecvCharacteristicUUID = "B329";
 const char *AutocamControllerControllerDataCharacteristicUUID = "B330";
 
 BLEService UWBAnchorService(UWBAnchorServiceUUID);
 BLEService AutocamControllerService(AutocamControllerServiceUUID);
 
-BLECharacteristic UWBAnchorSensorData(UWBAnchorSensorDataCharacteristicUUID, BLERead | BLEWrite | BLENotify, sizeof(SensorData));
+BLECharacteristic UWBAnchorSensorDataSend(UWBAnchorSensorDataSendCharacteristicUUID, BLERead | BLENotify, sizeof(SensorDataSend));
+BLECharacteristic UWBAnchorSensorDataRecv(UWBAnchorSensorDataRecvCharacteristicUUID, BLEWrite, sizeof(SensorDataRecv));
 BLECharacteristic AutocamControllerData(AutocamControllerControllerDataCharacteristicUUID, BLERead | BLEWrite | BLENotify, sizeof(ControllerData));
 
 unsigned long scanIntervalMillis = 1000;
@@ -40,13 +42,14 @@ bool scanForPeripheral(BLEDevice &device, BLEService &service, BLECharacteristic
   }
   lastScanMillis = currentMillis;
 
-  Serial.printf("Scanning for BLE peripheral [%s]...\n", serviceUUID);
-  BLE.scanForUuid(serviceUUID);
-  device = BLE.available();
-
   if (!device) {
-    Serial.println("No BLE peripheral found.");
-    return false;
+    Serial.printf("Scanning for BLE peripheral [%s]...\n", serviceUUID);
+    BLE.scanForUuid(serviceUUID);
+    device = BLE.available();
+    if (!device) {
+      Serial.println("No BLE peripheral found.");
+      return false;
+    }
   }
   Serial.printf("Found BLE peripheral, local name: [%s]\n", device.localName());
   BLE.stopScan();
@@ -54,16 +57,18 @@ bool scanForPeripheral(BLEDevice &device, BLEService &service, BLECharacteristic
 }
 
 bool connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID) {
-  if (!device.connect()) {
-    Serial.printf("Failed to connect to [%s].\n", device.localName());
-    false;
+  if (!device.connected()) {
+    if (!device.connect()) {
+      Serial.printf("Failed to connect to [%s].\n", device.localName());
+      return false;
+    }
   }
 
   Serial.printf("Connected to [%s]!\n", device.localName());
   if (!device.discoverAttributes()) {
     Serial.printf("Attribute discovery failed for [%s]! Disconnecting...\n", device.localName());
     device.disconnect();
-    false;
+    return false;
   }
 
   service = device.service(serviceUUID);
@@ -73,25 +78,21 @@ bool connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristi
   if (!characteristic) {
     Serial.printf("Failed to find characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
     device.disconnect();
-    false;
+    return false;
   }
 
-  if (!characteristic.canSubscribe()) {
-    Serial.printf("Cannot subscribe characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
-    device.disconnect();
-    false;
-  }
-
-  if (!characteristic.subscribe()) {
-    Serial.printf("Failed to subscribe characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
-    device.disconnect();
-    false;
+  if (characteristic.canSubscribe()) {
+    if (!characteristic.subscribe()) {
+      Serial.printf("Failed to subscribe characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
+      device.disconnect();
+      return false;
+    }
   }
   Serial.printf("Found characteristic [%s] on device [%s] and successfully subscribed!\n", characteristicUUID, device.deviceName());
   return true;
 }
 
-void setupBLEPeripheral(const char *localName, const char *deviceName, BLEService& service, BLECharacteristic& characteristic, uint8_t *data, int data_length) {
+void setupBLEPeripheral(const char *localName, const char *deviceName, BLEService& service) {
    // begin initialization
   if (!BLE.begin()) {
     panic("Failed to start BLE as peripheral!");
@@ -101,14 +102,8 @@ void setupBLEPeripheral(const char *localName, const char *deviceName, BLEServic
   BLE.setDeviceName(deviceName);
   BLE.setAdvertisedService(service);
 
-  // add the characteristic to the service
-  service.addCharacteristic(characteristic);
-
   // add service
   BLE.addService(service);
-
-  // set the initial value for the characeristic:
-  characteristic.writeValue(data, data_length);
 
   // start advertising
   BLE.advertise();

@@ -45,9 +45,7 @@ void setup() {
   while (!Serial && (millis() - startTime < timeout)) {
     // Wait for Serial or timeout
   }
-
-  ControllerData data = {.throttleValue = 0, .steeringValue = 0, .driveMode = 0, .yaw_speed = 0, .pitch_speed = 0, .active_track_toggled = 0};
-  setupBLEPeripheral("Autocam Remote", "autocam-remote", AutocamControllerService, AutocamControllerData, (uint8_t *)&data, sizeof(ControllerData));
+  setupBLE();
 }
 
 void loop() {
@@ -55,6 +53,11 @@ void loop() {
   readControllerData();
   sendControllerData(); // TODO(yifan): Send update only when there's a value change.
   delay(1000 / DATA_RATE); // Control the data rate.
+}
+
+void setupBLE() {
+  AutocamControllerService.addCharacteristic(AutocamControllerData);
+  setupBLEPeripheral("Autocam Remote", "autocam-remote", AutocamControllerService);
 }
 
 void updateState(int newState) {
@@ -134,6 +137,7 @@ void sendControllerData() {
 
   ControllerData data = {.throttleValue = throttleValue, .steeringValue = steeringValue, .driveMode = driveModeTriggerValue, .yaw_speed = yawSpeedValue, .pitch_speed = pitchSpeedValue, .active_track_toggled = activeTrackToggledValue};
   AutocamControllerData.writeValue((uint8_t *)&data, sizeof(ControllerData));
+  activeTrackToggledValue = 0;
   //Serial.printf("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d, yaw_speed=%f, pitch_speed=%f, active_track_toggled=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state, data.yaw_speed, data.pitch_speed, data.active_track_toggled);
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
