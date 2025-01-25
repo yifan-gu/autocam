@@ -123,7 +123,10 @@ void setup() {
   while (!scanForPeripheral(AutocamController, AutocamControllerService, AutocamControllerData, AutocamControllerServiceUUID, AutocamControllerControllerDataCharacteristicUUID)) {
     delay(1000);
   }
-  while (!scanForPeripheral(UWBAnchor, UWBAnchorService, UWBAnchorSensorData, UWBAnchorServiceUUID, UWBAnchorSensorDataCharacteristicUUID)) {
+  while (!scanForPeripheral(UWBAnchor, UWBAnchorService, UWBAnchorSensorDataSend, UWBAnchorServiceUUID, UWBAnchorSensorDataSendCharacteristicUUID)) {
+    delay(1000);
+  };
+  while (!scanForPeripheral(UWBAnchor, UWBAnchorService, UWBAnchorSensorDataRecv, UWBAnchorServiceUUID, UWBAnchorSensorDataRecvCharacteristicUUID)) {
     delay(1000);
   };
 }
@@ -268,16 +271,25 @@ void runHealthCheck() {
 }
 
 void sendGimbalControllerData() {
+  if (!hasNewGimbalControllerValue()) {
+    return;
+  }
+
   if (!UWBAnchor.connected()) {
     Serial.println("UWB Anchor is not connected, will not update gimbal");
     return;
   }
 
-  SensorData data = {.yaw_speed = yawSpeed, .pitch_speed = pitchSpeed, .active_track_toggled = activeTrackToggled};
-  UWBAnchorSensorData.writeValue((uint8_t *)&data, sizeof(SensorData));
+  SensorDataRecv data = {.yaw_speed = yawSpeed, .pitch_speed = pitchSpeed, .active_track_toggled = activeTrackToggled};
+  UWBAnchorSensorDataRecv.writeValue((uint8_t *)&data, sizeof(SensorDataRecv));
+  activeTrackToggled = 0;
 
-  //Serial.printf("Sent via BLE: yaw_speed=%f, pitch_speed=%f, active_track_toggled=%d\n", controllerData.yaw_speed, controllerData.pitch_speed, controllerData.active_track_toggled);
+  Serial.printf("Sent via BLE: yaw_speed=%f, pitch_speed=%f, active_track_toggled=%d\n", data.yaw_speed, data.pitch_speed, data.active_track_toggled);
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+}
+
+bool hasNewGimbalControllerValue() {
+  return yawSpeed != 0 || pitchSpeed != 0 || activeTrackToggled != 0;
 }
 
 // Get data from the UWB Anchor via BLE.
@@ -288,18 +300,18 @@ void getUWBAnchorData() {
     }
 
     updateState(state & ~STATE_SENSOR_READY); // Clear the sensor ready indicator bit.
-    if (!scanForPeripheral(UWBAnchor, UWBAnchorService, UWBAnchorSensorData, UWBAnchorServiceUUID, UWBAnchorSensorDataCharacteristicUUID)) {
+    if (!scanForPeripheral(UWBAnchor, UWBAnchorService, UWBAnchorSensorDataSend, UWBAnchorServiceUUID, UWBAnchorSensorDataSendCharacteristicUUID)) {
       return;
     }
   }
 
-  if (!UWBAnchorSensorData.valueUpdated()) { // No available data.
+  if (!UWBAnchorSensorDataSend.valueUpdated()) { // No available data.
     return;
   }
 
-  SensorData data;
+  SensorDataSend data;
 
-  UWBAnchorSensorData.readValue((uint8_t *)&data, sizeof(SensorData));
+  UWBAnchorSensorDataSend.readValue((uint8_t *)&data, sizeof(SensorDataSend));
   Serial.printf("Received distance=%f, heading=%f, state=%d\n", data.distance, data.heading, data.state);
   distance = data.distance;
   heading = data.heading;
