@@ -1,0 +1,8 @@
+- [x] Add dji remote control and receiver
+- [ ] Add PID encoder
+- [ ] Add LED
+- [x] <s>Combine tag and remote (disgarded)</s>
+- [x] Add BLE central for the anchor
+- [ ] Nice to have, detect active track failure.
+- [ ] (optimize) Refactor the server code with a state machine.
+- [ ] (optimize) Reorganize shared code into libraries, add external dependencies. 
