@@ -6,14 +6,16 @@
 extern BLEDevice BLECentral;
 extern BLEDevice UWBAnchor, AutocamController;
 extern BLEService UWBAnchorService, AutocamControllerService;
-extern BLECharacteristic UWBAnchorSensorDataSend, UWBAnchorSensorDataRecv, AutocamControllerData;
+extern BLECharacteristic UWBAnchorSensorDataSend, UWBAnchorSensorDataRecv, AutocamControllerVehicleDataSend, AutocamControllerGimbalDataSend, AutocamControllerDataRecv;
 
 extern const char *UWBAnchorServiceUUID;
 extern const char *AutocamControllerServiceUUID;
 
 extern const char *UWBAnchorSensorDataSendCharacteristicUUID;
 extern const char *UWBAnchorSensorDataRecvCharacteristicUUID;
-extern const char *AutocamControllerControllerDataCharacteristicUUID;
+extern const char *AutocamControllerVehicleDataSendCharacteristicUUID;
+extern const char *AutocamControllerGimbalDataSendCharacteristicUUID;
+extern const char *AutocamControllerDataRecvCharacteristicUUID;
 
 struct SensorDataSend {
   float distance;
@@ -28,14 +30,20 @@ struct SensorDataRecv {
   int active_track_toggled;
 };
 
-struct ControllerData {
+struct ControllerVehicleDataSend {
   int throttleValue;
   int steeringValue;
   int driveMode;
+};
+
+struct ControllerGimbalDataSend {
   float yaw_speed;
   float pitch_speed;
   int active_track_toggled;
+};
 
+struct ControllerDataRecv {
+  int driveMode;
   int state; // This value is written by the central (server).
 };
 

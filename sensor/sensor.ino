@@ -54,7 +54,7 @@ void setup() {
     // Wait for Serial or timeout
   }
 
-  setupUWBAnchor();
+  //setupUWBAnchor();
   //setupDJIRoninController();
   setupBLE();
 }
@@ -93,6 +93,7 @@ void setupUWBAnchor() {
 void getGimbalControllerData() {
   if (!(BLECentral && BLECentral.connected())) {
     if (!connectToCentral()) {
+      resetGimbalControl();
       return;
     }
   }
@@ -110,6 +111,12 @@ void getGimbalControllerData() {
 
   Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
+}
+
+void resetGimbalControl() {
+  yaw_speed = 0;
+  pitch_speed = 0;
+  active_track_toggled = false;
 }
 
 void setGimbalPosition() {

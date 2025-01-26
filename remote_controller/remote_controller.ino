@@ -32,7 +32,7 @@ float yawSpeedValue = 0.0;
 float pitchSpeedValue = 0.0;
 int activeTrackToggledValue = 0;
 
-ControllerData receivedData;
+ControllerDataRecv receivedData;
 
 unsigned int lastPingTime = 0;
 
@@ -56,7 +56,9 @@ void loop() {
 }
 
 void setupBLE() {
-  AutocamControllerService.addCharacteristic(AutocamControllerData);
+  AutocamControllerService.addCharacteristic(AutocamControllerVehicleDataSend);
+  AutocamControllerService.addCharacteristic(AutocamControllerGimbalDataSend);
+  AutocamControllerService.addCharacteristic(AutocamControllerDataRecv);
   setupBLEPeripheral("Autocam Remote", "autocam-remote", AutocamControllerService);
 }
 
@@ -89,9 +91,9 @@ void readStatusData() {
     updateState(state | STATE_REMOTE_CONTROLLER_READY);
   }
 
-  if (AutocamControllerData.written()) {
-    AutocamControllerData.readValue((uint8_t *)&receivedData, sizeof(ControllerData));
-    Serial.printf("Received state=%d, driveMode=%d, activeTrackToggled=%d\n", receivedData.state, receivedData.driveMode, receivedData.active_track_toggled);
+  if (AutocamControllerDataRecv.written()) {
+    AutocamControllerDataRecv.readValue((uint8_t *)&receivedData, sizeof(ControllerDataRecv));
+    Serial.printf("Received state=%d, driveMode=%d\n", receivedData.state, receivedData.driveMode);
     updateState(receivedData.state);
     updateDriveMode(receivedData.driveMode);
 
@@ -135,10 +137,13 @@ void sendControllerData() {
     updateState(state | STATE_REMOTE_CONTROLLER_READY);
   }
 
-  ControllerData data = {.throttleValue = throttleValue, .steeringValue = steeringValue, .driveMode = driveModeTriggerValue, .yaw_speed = yawSpeedValue, .pitch_speed = pitchSpeedValue, .active_track_toggled = activeTrackToggledValue};
-  AutocamControllerData.writeValue((uint8_t *)&data, sizeof(ControllerData));
+  ControllerVehicleDataSend Vdata = {.throttleValue = throttleValue, .steeringValue = steeringValue, .driveMode = driveModeTriggerValue};
+  ControllerGimbalDataSend Gdata = {.yaw_speed = yawSpeedValue, .pitch_speed = pitchSpeedValue, .active_track_toggled = activeTrackToggledValue};
+  AutocamControllerVehicleDataSend.writeValue((uint8_t *)&Vdata, sizeof(ControllerVehicleDataSend));
+  AutocamControllerGimbalDataSend.writeValue((uint8_t *)&Gdata, sizeof(ControllerGimbalDataSend));
   activeTrackToggledValue = 0;
-  //Serial.printf("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d, yaw_speed=%f, pitch_speed=%f, active_track_toggled=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state, data.yaw_speed, data.pitch_speed, data.active_track_toggled);
+  Serial.printf("Sent via BLE: throttle=%d, steering=%d, driveMode=%d\n", Vdata.throttleValue, Vdata.steeringValue, Vdata.driveMode);
+  Serial.printf("Sent via BLE: yaw_speed=%f, pitch_speed=%f, active_track_toggled=%d\n", Gdata.yaw_speed, Gdata.pitch_speed, Gdata.active_track_toggled);
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 }

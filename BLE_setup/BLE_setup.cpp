@@ -9,14 +9,18 @@ const char *AutocamControllerServiceUUID = "f49f531a-9cba-4ada-905c-68699d400122
 
 const char *UWBAnchorSensorDataSendCharacteristicUUID = "B328";
 const char *UWBAnchorSensorDataRecvCharacteristicUUID = "B329";
-const char *AutocamControllerControllerDataCharacteristicUUID = "B330";
+const char *AutocamControllerVehicleDataSendCharacteristicUUID = "B330";
+const char *AutocamControllerGimbalDataSendCharacteristicUUID = "B331";
+const char *AutocamControllerDataRecvCharacteristicUUID = "B332";
 
 BLEService UWBAnchorService(UWBAnchorServiceUUID);
 BLEService AutocamControllerService(AutocamControllerServiceUUID);
 
-BLECharacteristic UWBAnchorSensorDataSend(UWBAnchorSensorDataSendCharacteristicUUID, BLERead | BLEWrite | BLENotify, sizeof(SensorDataSend));
-BLECharacteristic UWBAnchorSensorDataRecv(UWBAnchorSensorDataRecvCharacteristicUUID, BLERead | BLEWrite | BLENotify, sizeof(SensorDataRecv));
-BLECharacteristic AutocamControllerData(AutocamControllerControllerDataCharacteristicUUID, BLERead | BLEWrite | BLENotify, sizeof(ControllerData));
+BLECharacteristic UWBAnchorSensorDataSend(UWBAnchorSensorDataSendCharacteristicUUID, BLERead | BLENotify, sizeof(SensorDataSend));
+BLECharacteristic UWBAnchorSensorDataRecv(UWBAnchorSensorDataRecvCharacteristicUUID, BLEWrite | BLENotify, sizeof(SensorDataRecv));
+BLECharacteristic AutocamControllerVehicleDataSend(AutocamControllerVehicleDataSendCharacteristicUUID, BLERead | BLENotify, sizeof(ControllerVehicleDataSend));
+BLECharacteristic AutocamControllerGimbalDataSend(AutocamControllerGimbalDataSendCharacteristicUUID, BLERead | BLENotify, sizeof(ControllerGimbalDataSend));
+BLECharacteristic AutocamControllerDataRecv(AutocamControllerDataRecvCharacteristicUUID, BLEWrite | BLENotify, sizeof(ControllerDataRecv));
 
 unsigned long scanIntervalMillis = 1000;
 
@@ -50,9 +54,9 @@ bool scanForPeripheral(BLEDevice &device, BLEService &service, BLECharacteristic
       Serial.println("No BLE peripheral found.");
       return false;
     }
+    BLE.stopScan();
   }
   Serial.printf("Found BLE peripheral, local name: [%s]\n", device.localName());
-  BLE.stopScan();
   return connectToBLEDevice(device, service, characteristic, serviceUUID, characteristicUUID);
 }
 
