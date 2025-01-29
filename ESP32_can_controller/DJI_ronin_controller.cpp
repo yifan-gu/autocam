@@ -291,6 +291,13 @@ bool DJIRoninController::_recv_data(uint8_t *data) {
             DEBUGF("Not an expected frame, skipping...\n");
             continue;
         }
+
+        DEBUGF("Frame data:\n");
+        for(int i = 0; i < frame.data_length_code; i++) {
+            DEBUGF("%02X ", frame.data[i]);
+        }
+        DEBUGF("\n");
+
         if (frame.data[0] == SOF_BYTE) {
             seen_sof = true;
         }
@@ -302,11 +309,6 @@ bool DJIRoninController::_recv_data(uint8_t *data) {
             WARNF("Not enough data buffer for a frame, try to increase the data buffer\n");
             return false;
         }
-
-        //for(int i = 0; i < frame.data_length_code; i++) {
-        //    DEBUGF("%02X ", frame.data[i]);
-        //}
-        //DEBUGF("\n");
 
         memcpy(data_buffer+data_offset, frame.data, frame.data_length_code);
         data_offset += frame.data_length_code;
@@ -334,6 +336,10 @@ bool DJIRoninController::_execute_command(uint8_t cmd_type, uint8_t cmd_set, uin
     size_t message_len = _assemble_can_msg(cmd_type, cmd_set, cmd_id, data, data_len, message);
     if (!_send_data(message, message_len)) {
         return false;
+    }
+
+    if (recv_data == NULL) {
+        return true;
     }
 
     if (!_recv_data(recv_message)) {
@@ -446,9 +452,27 @@ bool DJIRoninController::gimbal_active_track() {
     uint8_t send_data[1] = { 0x03 };
     uint8_t recv_data[DATA_BUFFER_SIZE];
 
-    if (!_execute_command(0x03, 0x0e, 0x11, send_data, 1, recv_data)) {
+    if (!_execute_command(0x03, 0x0e, 0x11, send_data, 1, NULL)) {
         WARNF("Failed to execute command\n");
         return false;
     }
     return true;
+}
+
+void DJIRoninController::dump_frame() {
+    CanFrame frame;
+    while (true) {
+        if (!esp32Can.readFrame(frame)) {
+            break;
+        }
+        Serial.printf("Received frame: %02X, length=%d\n", frame.identifier, frame.data_length_code);
+
+        for(int i = 0; i < frame.data_length_code; i++) {
+            Serial.printf("%02X ", frame.data[i]);
+            if (i + 1 % 8 == 0) {
+                Serial.println("");
+            }
+        }
+        Serial.println("");
+    }
 }

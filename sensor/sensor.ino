@@ -55,16 +55,16 @@ void setup() {
   }
 
   setupUWBAnchor();
-  //setupDJIRoninController();
+  setupDJIRoninController();
   setupBLE();
 }
 
 void loop() {
-  //getDistance();
-  //getHeading();
+  getDistance();
+  getHeading();
   sendSensorData();
   getGimbalControllerData();
-  //setGimbalPosition();
+  setGimbalPosition();
   delay(1000 / DATA_RATE); // Control the data rate.
 }
 

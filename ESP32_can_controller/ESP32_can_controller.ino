@@ -7,6 +7,7 @@
 float yaw = 0;
 float roll = 0;
 float pitch = 0;
+int value = 1;
 
 DJIRoninController djiRoninController(CAN_TX, CAN_RX, CAN_RATE);
 
@@ -30,8 +31,17 @@ void loop() {
   //}
   //Serial.printf("yaw=%.1f, roll=%.1f, pitch=%.1f\n", yaw, roll, pitch);
 
+  Serial.printf("Run_active_track!!!!: %d\n", value);
+  if (value == 1) {
+    value = 0;
+  } else {
+    value = 1;
+  }
+
   if (!djiRoninController.gimbal_active_track()) {
     Serial.println("Failed to gimbal_active_track()");
+  } else {
+    Serial.println("Success");
   }
   delay(1000);
 }

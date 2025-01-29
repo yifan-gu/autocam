@@ -40,6 +40,7 @@ class DJIRoninController {
         bool get_position(float *yaw, float *roll, float *pitch);
         bool get_version(uint8_t version[4]);
         bool gimbal_active_track();
+        void dump_frame();
 };
 
 #endif
