@@ -836,21 +836,19 @@ char const* parameters_page_html = R"rawliteral(
       </div>
       <div class="slider-container">
         <label>Max Throttle: <span id="maxMoveThrottle-value">300</span></label>
-        <input class="slider" type="range" name="maxMoveThrottle" min="0" max="500" value="300" oninput="updateValue('maxMoveThrottle', this.value)" />
+        <input class="slider" type="range" name="maxMoveThrottle" min="0" max="500" step="1" value="300" oninput="updateValue('maxMoveThrottle', this.value)" />
       </div>
-      <!-- For minMoveThrottle, display the negative value -->
       <div class="slider-container">
         <label>Min Throttle: <span id="minMoveThrottle-value">-300</span></label>
-        <input class="slider" type="range" name="minMoveThrottle" min="0" max="500" value="300" oninput="updateValue('minMoveThrottle', this.value)" />
+        <input class="slider" type="range" name="minMoveThrottle" min="0" max="500" step="1" value="300" oninput="updateValue('minMoveThrottle', this.value)" />
       </div>
       <div class="slider-container">
         <label>Max Steering: <span id="maxMoveSteering-value">500</span></label>
-        <input class="slider" type="range" name="maxMoveSteering" min="0" max="500" value="500" oninput="updateValue('maxMoveSteering', this.value)" />
+        <input class="slider" type="range" name="maxMoveSteering" min="0" max="500" step="1" value="500" oninput="updateValue('maxMoveSteering', this.value)" />
       </div>
-      <!-- For minMoveSteering, display the negative value -->
       <div class="slider-container">
         <label>Min Steering: <span id="minMoveSteering-value">-500</span></label>
-        <input class="slider" type="range" name="minMoveSteering" min="0" max="500" value="500" oninput="updateValue('minMoveSteering', this.value)" />
+        <input class="slider" type="range" name="minMoveSteering" min="0" max="500" step="1" value="500" oninput="updateValue('minMoveSteering', this.value)" />
       </div>
       <input type="submit" value="Update" />
     </form>
@@ -866,20 +864,67 @@ char const* parameters_page_html = R"rawliteral(
         // Clear any successful message when a slider is changed.
         document.getElementById("status").textContent = "";
       }
-      // Reset all sliders to their default values and update the displayed values.
+      // Reset all sliders to their current values as in the form.
       function resetSliders() {
         // Reset the form to its initial state.
         document.getElementById("parameters-form").reset();
         // Update all slider displays.
-        document.querySelectorAll('input[type="range"]').forEach((slider) => {
+        document.querySelectorAll("input[type='range']").forEach((slider) => {
           updateValue(slider.name, slider.value);
         });
       }
-      // Intercept the form submission to send negative values for the min sliders.
+      // Function to fetch current parameters from the server and update the form inputs.
+      function fetchParameters() {
+        fetch("/get_parameters")
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("delta-value").textContent = data.delta;
+            document.querySelector("input[name='delta']").value = data.delta;
+
+            document.getElementById("Kp_t-value").textContent = data.Kp_t;
+            document.querySelector("input[name='Kp_t']").value = data.Kp_t;
+
+            document.getElementById("Ki_t-value").textContent = data.Ki_t;
+            document.querySelector("input[name='Ki_t']").value = data.Ki_t;
+
+            document.getElementById("Kd_t-value").textContent = data.Kd_t;
+            document.querySelector("input[name='Kd_t']").value = data.Kd_t;
+
+            document.getElementById("Kp_s-value").textContent = data.Kp_s;
+            document.querySelector("input[name='Kp_s']").value = data.Kp_s;
+
+            document.getElementById("Ki_s-value").textContent = data.Ki_s;
+            document.querySelector("input[name='Ki_s']").value = data.Ki_s;
+
+            document.getElementById("Kd_s-value").textContent = data.Kd_s;
+            document.querySelector("input[name='Kd_s']").value = data.Kd_s;
+
+            document.getElementById("maxMoveThrottle-value").textContent = data.maxMoveThrottle;
+            document.querySelector("input[name='maxMoveThrottle']").value = data.maxMoveThrottle;
+
+            // For the min sliders, display the negative value but set the slider to the absolute value.
+            document.getElementById("minMoveThrottle-value").textContent = data.minMoveThrottle;
+            document.querySelector("input[name='minMoveThrottle']").value = Math.abs(data.minMoveThrottle);
+
+            document.getElementById("maxMoveSteering-value").textContent = data.maxMoveSteering;
+            document.querySelector("input[name='maxMoveSteering']").value = data.maxMoveSteering;
+
+            document.getElementById("minMoveSteering-value").textContent = data.minMoveSteering;
+            document.querySelector("input[name='minMoveSteering']").value = Math.abs(data.minMoveSteering);
+          })
+          .catch((err) => {
+            console.error("Error fetching parameters:", err);
+          });
+      }
+      // When the page loads, fetch the current parameter values.
+      window.onload = function () {
+        fetchParameters();
+      };
+      // Form submission to update parameters on the ESP32.
       document.getElementById("parameters-form").onsubmit = async (e) => {
         e.preventDefault();
         let formData = new FormData(e.target);
-        // For the two reversed sliders, change the value from positive to negative.
+        // For the min sliders, convert the positive value to negative before sending.
         if (formData.has("minMoveThrottle")) {
           let val = Number(formData.get("minMoveThrottle"));
           formData.set("minMoveThrottle", -val);
@@ -892,13 +937,12 @@ char const* parameters_page_html = R"rawliteral(
           .then((response) => response.text())
           .then((data) => {
             document.getElementById("status").textContent = "Parameters updated successfully";
+            // Optionally, re-fetch parameters to update the UI.
+            fetchParameters();
+          })
+          .catch((err) => {
+            console.error("Error updating parameters:", err);
           });
-      };
-      // Initialize displayed values on page load.
-      window.onload = function () {
-        document.querySelectorAll('input[type="range"]').forEach((slider) => {
-          updateValue(slider.name, slider.value);
-        });
       };
     </script>
   </body>

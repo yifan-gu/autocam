@@ -185,6 +185,23 @@ void setupServer() {
     request->send(200, "text/html", parameters_page_html);
   });
 
+  server.on("/get_parameters", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String json = "{";
+    json += "\"delta\":" + String(delta, 2) + ",";
+    json += "\"Kp_t\":" + String(Kp_t, 1) + ",";
+    json += "\"Ki_t\":" + String(Ki_t, 1) + ",";
+    json += "\"Kd_t\":" + String(Kd_t, 1) + ",";
+    json += "\"Kp_s\":" + String(Kp_s, 1) + ",";
+    json += "\"Ki_s\":" + String(Ki_s, 1) + ",";
+    json += "\"Kd_s\":" + String(Kd_s, 1) + ",";
+    json += "\"maxMoveThrottle\":" + String(maxMoveThrottle, 0) + ",";
+    json += "\"minMoveThrottle\":" + String(minMoveThrottle, 0) + ",";
+    json += "\"maxMoveSteering\":" + String(maxMoveSteering, 0) + ",";
+    json += "\"minMoveSteering\":" + String(minMoveSteering, 0);
+    json += "}";
+    request->send(200, "application/json", json);
+  });
+
   // Add a handler to process the parameters update
   server.on("/update_parameters", HTTP_POST, [](AsyncWebServerRequest *request) {
     if (request->hasParam("delta", true)) {
