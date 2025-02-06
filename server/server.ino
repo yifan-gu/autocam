@@ -4,7 +4,7 @@
 #include <math.h>
 #include <WiFi.h>
 
-#include "index_html.h"
+#include "html_pages.h"
 #include "BLE_setup.hpp"
 
 #define PI 3.14159265359
@@ -77,9 +77,9 @@ float targetX = 0, targetY = 0;
 //
 // PID Controller variables for throttle. Tunable.
 //
-const float delta = 0.5; // The "play" margin.
+float delta = 0.5; // The "play" margin.
 
-float Kp_t = 100;  // Proportional gain. Diff = Kp_t * distance
+float Kp_t = 100.0;  // Proportional gain. Diff = Kp_t * distance
 float Ki_t = 0.0;  // Integral gain. Diff = Ki_t * distance * 1000 * second.
 float Kd_t = 0.0;  // Derivative gain. Diff = Kd_t / (speed m/s * 1000 ms)
 
@@ -90,9 +90,9 @@ float maxMoveThrottle = 300;                 // Maximum throttle value in practi
 float minMoveThrottle = -maxMoveThrottle;    // Minimum throttle value in practice.
 
 // // PID Controller variables for steering.
-float Kp_s = 10;   // Proportional gain. Diff = Kp_s * angle diff.
+float Kp_s = 10.0;   // Proportional gain. Diff = Kp_s * angle diff.
 float Ki_s = 0.0;  // Integral gain. Diff = Ki_s * angle diff * 1000 * second.
-float Kd_s = 0 ;   // Derivative gain. Diff = Kd_s / (anglur speed * 1000 ms)
+float Kd_s = 0.0;   // Derivative gain. Diff = Kd_s / (anglur speed * 1000 ms)
 
 float previousError_s = 0.0;  // Previous error for the derivative term
 float integral_s = 0.0;       // Accumulated integral term
@@ -178,6 +178,61 @@ void setupServer() {
   // Serve static files
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(200, "text/html", index_html);
+  });
+
+  // Add a new handler for serving the parameters page
+  server.on("/parameters", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "text/html", parameters_page_html);
+  });
+
+  // Add a handler to process the parameters update
+  server.on("/update_parameters", HTTP_POST, [](AsyncWebServerRequest *request) {
+    if (request->hasParam("delta", true)) {
+      delta = request->getParam("delta", true)->value().toFloat();
+      Serial.printf("delta: %f\n", delta);
+    }
+    if (request->hasParam("Kp_t", true)) {
+      Kp_t = request->getParam("Kp_t", true)->value().toFloat();
+      Serial.printf("Kp_t: %f\n", Kp_t);
+    }
+    if (request->hasParam("Ki_t", true)) {
+      Ki_t = request->getParam("Ki_t", true)->value().toFloat();
+      Serial.printf("Ki_t: %f\n", Ki_t);
+    }
+    if (request->hasParam("Kd_t", true)) {
+      Kd_t = request->getParam("Kd_t", true)->value().toFloat();
+      Serial.printf("Kd_t: %f\n", Kd_t);
+    }
+    if (request->hasParam("Kp_s", true)) {
+      Kp_s = request->getParam("Kp_s", true)->value().toFloat();
+      Serial.printf("Kp_s: %f\n", Kp_s);
+    }
+    if (request->hasParam("Ki_s", true)) {
+      Ki_s = request->getParam("Ki_s", true)->value().toFloat();
+      Serial.printf("Ki_s: %f\n", Ki_s);
+    }
+    if (request->hasParam("Kd_s", true)) {
+      Kd_s = request->getParam("Kd_s", true)->value().toFloat();
+      Serial.printf("Kd_s: %f\n", Kd_s);
+    }
+    if (request->hasParam("maxMoveThrottle", true)) {
+      maxMoveThrottle = request->getParam("maxMoveThrottle", true)->value().toFloat();
+      Serial.printf("maxMoveThrottle: %f\n", maxMoveThrottle);
+    }
+    if (request->hasParam("minMoveThrottle", true)) {
+      minMoveThrottle = request->getParam("minMoveThrottle", true)->value().toFloat();
+      Serial.printf("minMoveThrottle: %f\n", minMoveThrottle);
+    }
+    if (request->hasParam("maxMoveSteering", true)) {
+      maxMoveSteering = request->getParam("maxMoveSteering", true)->value().toFloat();
+      Serial.printf("maxMoveSteering: %f\n", maxMoveSteering);
+    }
+    if (request->hasParam("minMoveSteering", true)) {
+      minMoveSteering = request->getParam("minMoveSteering", true)->value().toFloat();
+      Serial.printf("minMoveSteering: %f\n", minMoveSteering);
+    }
+
+    request->send(200, "text/plain", "Parameters updated");
   });
 
   // Start server
@@ -541,15 +596,15 @@ void calculateCoordinates() {
 }
 
 void setSteering(float steeringDiff) {
-  steeringValue = midSteering + steeringDiff;
+  steeringValue = midSteering + (int)steeringDiff;
 }
 
 void setMoveForward(float throttleDiff) {
-  throttleValue = midThrottle + throttleDiff;
+  throttleValue = midThrottle + (int)throttleDiff;
 }
 
 void setMoveBackward(float throttleDiff) {
-  throttleValue = midThrottle - throttleDiff;
+  throttleValue = midThrottle - (int)throttleDiff;
 }
 
 void emergencyStop() { //TODO(yifan): Refactor out this with a state machine.
