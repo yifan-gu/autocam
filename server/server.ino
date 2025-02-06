@@ -447,14 +447,6 @@ void updateState(int newState) {
   updateAutocamControllerStatus();
 }
 
-void setDriveMode(int newDriveMode) {
-  if (driveMode == newDriveMode) {
-    return;
-  }
-  driveMode = newDriveMode;
-  updateAutocamControllerStatus();
-}
-
 void updateAutocamControllerStatus() {
   if (!AutocamController.connected()) {
     Serial.println("Autocam controller is not connected, will not update status!");
@@ -465,6 +457,14 @@ void updateAutocamControllerStatus() {
   AutocamControllerData.writeValue((uint8_t *)&data, sizeof(ControllerData));
   Serial.printf("Sent status to remote via BLE: driveMode = %d, state=%d\n", driveMode, state);
   return;
+}
+
+void setDriveMode(int newDriveMode) {
+  if (driveMode == newDriveMode) {
+    return;
+  }
+  driveMode = newDriveMode;
+  updateAutocamControllerStatus();
 }
 
 void calculateSteeringThrottle() {
