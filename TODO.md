@@ -1,8 +1,9 @@
 - [x] Add dji remote control and receiver
-- [ ] Add PID encoder
-- [ ] Add LED
+- [x] <s>Add PID encoder</s> Add a web page for parameters
+- [ ] Add LED state indicators
 - [x] <s>Combine tag and remote (disgarded)</s>
 - [x] Add BLE central for the anchor
-- [ ] Nice to have, detect active track failure.
-- [ ] (optimize) Refactor the server code with a state machine.
-- [ ] (optimize) Reorganize shared code into libraries, add external dependencies. 
+- [ ] Read joystick values for the remote controller
+- [ ] <s>Nice to have, detect active track failure</s> Turns out there's no API support for that
+- [ ] (optimize) Refactor the server code with a state machine
+- [ ] (optimize) Reorganize shared code into libraries, add external dependencies 
