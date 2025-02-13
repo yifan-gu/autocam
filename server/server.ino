@@ -286,7 +286,8 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
         response += "\"currentX\":" + String(currentX, 2) + ",";
         response += "\"currentY\":" + String(currentY, 2 ) + ",";
         response += "\"targetX\":" + String(targetX, 2) + ",";
-        response += "\"targetY\":" + String(targetY, 2);
+        response += "\"targetY\":" + String(targetY, 2) + ",";
+        response += "\"state\":" + String(state);
         response += "}";
 
         client->text(response); // Send the JSON response to the client

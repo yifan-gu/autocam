@@ -89,17 +89,15 @@ char const* index_html = R"rawliteral(
       .current-location {
         color: #3498db;
       }
-
       .toggle-container {
-        margin-top: 10px;
-        width: 80px;
-        height: 40px;
+        margin: 5px auto;
+        width: 60px;
+        height: 30px;
         background-color: #7f8c8d;
-        border-radius: 20px;
+        border-radius: 15px;
         cursor: pointer;
         transition: background-color 0.3s ease;
         position: relative;
-        left: 3px;
       }
 
       .toggle-container.active {
@@ -110,17 +108,16 @@ char const* index_html = R"rawliteral(
         position: absolute;
         top: 2px;
         left: 2px;
-        width: 36px;
-        height: 36px;
+        width: 26px;
+        height: 26px;
         background-color: white;
         border-radius: 50%;
         transition: transform 0.3s ease, left 0.3s ease;
       }
 
       .toggle-container.active .toggle-knob {
-        left: calc(100% - 38px);
+        left: calc(100% - 28px);
       }
-
       .mode-label {
         margin-top: 5px;
         color: white;
@@ -197,9 +194,36 @@ char const* index_html = R"rawliteral(
       .info-panel span {
         margin-bottom: 0px;
       }
+      /* New styles for LED indicators */
+      .led-indicators {
+        display: flex;
+        justify-content: flex-start; /* Align LEDs to the left */
+        margin: 5px 0; /* Adjust spacing as needed */
+      }
+
+      .led-container {
+        display: flex;
+        flex-direction: row; /* Arrange LED and label side by side */
+        align-items: center;
+        margin-right: 10px;
+      }
+
+      .led {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: red;
+      }
+
+      .led-label {
+        font-size: 10px;
+        color: #ecf0f1;
+        margin-left: 5px; /* Space between LED and label */
+      }
+
       #parameters-button {
         font-size: 10px; /* Smaller text */
-        margin-top: 5px; /* Space above the button */
+        border-radius: 5px;
       }
 
       #reset-zoom {
@@ -341,6 +365,16 @@ char const* index_html = R"rawliteral(
       <div class="steering-throttle">
         <span id="steering-value">Steering: 1500</span>
         <span id="throttle-value">Throttle: 1500</span>
+        <div class="led-indicators">
+          <div class="led-container">
+            <div class="led" id="sensor-led"></div>
+            <span class="led-label">Sensor</span>
+          </div>
+          <div class="led-container">
+            <div class="led" id="remote-led"></div>
+            <span class="led-label">Remote</span>
+          </div>
+        </div>
         <button id="parameters-button" onclick="window.location.href='/parameters'">Parameters</button>
       </div>
     </div>
@@ -378,6 +412,7 @@ char const* index_html = R"rawliteral(
         heading: 0,
         steering: 0,
         throttle: 0,
+        state: 0,
       };
 
       let driveMode = 0;
@@ -614,6 +649,7 @@ char const* index_html = R"rawliteral(
             updateInfoPanel();
             updateLocationPanel();
             updateSteeringThrottlePanel();
+            updateLEDs();
             drawCoordinateSystem();
           } catch (err) {
             console.error("Error parsing message:", err);
@@ -695,6 +731,18 @@ char const* index_html = R"rawliteral(
       throttleSlider.addEventListener("touchend", () => {
         resetSlider(throttleSlider, "throttle");
       });
+
+      const STATE_NOT_READY = 0;
+      const STATE_SENSOR_READY = 1;
+      const STATE_REMOTE_CONTROLLER_READY = 2;
+
+      function updateLEDs() {
+        const sensorLed = document.getElementById("sensor-led");
+        const remoteLed = document.getElementById("remote-led");
+
+        sensorLed.style.backgroundColor = data.state & STATE_SENSOR_READY ? "green" : "red";
+        remoteLed.style.backgroundColor = data.state & STATE_REMOTE_CONTROLLER_READY ? "green" : "red";
+      }
     </script>
   </body>
 </html>
@@ -743,6 +791,9 @@ char const* parameters_page_html = R"rawliteral(
         border: none;
         cursor: pointer;
       }
+      .back-button:hover {
+        background-color: #e0e0e0; /* Slightly darker on hover */
+      }
       /* Reset button styled similarly to the back button, positioned at the right */
       .reset-button {
         position: absolute;
@@ -752,10 +803,13 @@ char const* parameters_page_html = R"rawliteral(
         font-size: 12px; /* Small text */
         padding: 4px 8px; /* Small padding */
         border-radius: 5px;
-        background-color: #007bff;
-        color: white;
+        background-color: #eeeeee;
+        color: #007bff;
         border: none;
         cursor: pointer;
+      }
+      .reset-button:hover {
+        background-color: #e0e0e0; /* Slightly darker on hover */
       }
       h2 {
         font-size: 16px; /* Smaller heading text */
@@ -783,7 +837,7 @@ char const* parameters_page_html = R"rawliteral(
         width: 100%;
         padding: 8px; /* Reduced padding */
         font-size: 14px; /* Smaller button text */
-        background-color: #28a745;
+        background-color: #007bff;
         color: white;
         border: none;
         cursor: pointer;
@@ -791,7 +845,7 @@ char const* parameters_page_html = R"rawliteral(
         margin-top: 10px; /* Smaller top margin */
       }
       input[type="submit"]:hover {
-        background-color: #218838;
+        background-color: #0056b3;
       }
       #status {
         font-size: 12px; /* Smaller status text */
