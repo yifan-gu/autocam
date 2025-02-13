@@ -743,6 +743,43 @@ char const* index_html = R"rawliteral(
         sensorLed.style.backgroundColor = data.state & STATE_SENSOR_READY ? "green" : "red";
         remoteLed.style.backgroundColor = data.state & STATE_REMOTE_CONTROLLER_READY ? "green" : "red";
       }
+
+      // Variables for double tap continuous zoom gesture
+      let lastTapTime = 0;
+      let isDoubleTapZooming = false;
+      let startDoubleTapZoomY = 0;
+
+      // When a touch starts, check for a double tap
+      canvas.addEventListener("touchstart", (event) => {
+        if (event.touches.length === 1) {
+          const currentTime = new Date().getTime();
+          if (currentTime - lastTapTime < 300) {
+            // Double tap detected—enter continuous zoom mode.
+            isDoubleTapZooming = true;
+            startDoubleTapZoomY = event.touches[0].pageY;
+          }
+          lastTapTime = currentTime;
+        }
+      });
+
+      // When a touch moves, if in continuous zoom mode, adjust the scale based on vertical movement.
+      canvas.addEventListener("touchmove", (event) => {
+        // If in double tap zoom mode and only one finger is active, perform continuous zoom.
+        if (isDoubleTapZooming && event.touches.length === 1) {
+          const currentY = event.touches[0].pageY;
+          const scaleChange = (currentY - startDoubleTapZoomY) / 100;
+          scale = Math.min(maxScale, Math.max(minScale, scale + scaleChange));
+          startDoubleTapZoomY = currentY; // update for incremental zoom changes
+          drawCoordinateSystem();
+        }
+      });
+
+      // When a touch ends, disable continuous zoom mode.
+      canvas.addEventListener("touchend", (event) => {
+        if (event.touches.length === 0) {
+          isDoubleTapZooming = false;
+        }
+      });
     </script>
   </body>
 </html>
