@@ -18,8 +18,16 @@
 
 
 // Pin configuration
-#define STEERING_PIN 2  // GPIO2 for steering
-#define THROTTLE_PIN 3  // GPIO3 for throttle
+#define SENSOR_LED_RED_PIN 17 // A0
+#define SENSOR_LED_GREEN_PIN 18 // A1
+#define SENSOR_LED_BLUE_PIN 19 // A2
+
+#define REMOTE_CONTROLLER_LED_RED_PIN 20 // A3
+#define REMOTE_CONTROLLER_LED_GREEN_PIN 21 // A4
+#define REMOTE_CONTROLLER_LED_BLUE_PIN 22 // A5
+
+#define STEERING_PIN 2  //  D2 for steering
+#define THROTTLE_PIN 3  //  D3 for throttle
 
 // Access Point credentials
 const char* ssid = "RC-Controller";
@@ -119,6 +127,7 @@ void setup() {
     // Wait for Serial or timeout
   }
 
+  setupLED();
   setupESC();
   setupServer();
   setupBLECentral();
@@ -134,6 +143,24 @@ void loop() {
   calculateSteeringThrottle();
   runESCController();
   runHealthCheck();
+}
+
+void setupLED() {
+  pinMode(SENSOR_LED_RED_PIN, OUTPUT);
+  pinMode(SENSOR_LED_GREEN_PIN, OUTPUT);
+  pinMode(SENSOR_LED_BLUE_PIN, OUTPUT);
+  pinMode(REMOTE_CONTROLLER_LED_RED_PIN, OUTPUT);
+  pinMode(REMOTE_CONTROLLER_LED_GREEN_PIN, OUTPUT);
+  pinMode(REMOTE_CONTROLLER_LED_BLUE_PIN, OUTPUT);
+
+  digitalWrite(SENSOR_LED_RED_PIN, HIGH);
+  digitalWrite(SENSOR_LED_GREEN_PIN, HIGH);
+  digitalWrite(SENSOR_LED_BLUE_PIN, HIGH);
+  digitalWrite(REMOTE_CONTROLLER_LED_RED_PIN, HIGH);
+  digitalWrite(REMOTE_CONTROLLER_LED_GREEN_PIN, HIGH);
+  digitalWrite(REMOTE_CONTROLLER_LED_BLUE_PIN, HIGH);
+
+  updateLED(state);
 }
 
 void setupESC() {
@@ -462,7 +489,40 @@ void updateState(int newState) {
     return;
   }
   state = newState;
+  updateLED(state);
   updateAutocamControllerStatus();
+}
+
+void setColor(int red_pin, int green_pin, int blue_pin, int r, int g, int b, int brightness = 100) {
+  analogWrite(red_pin, 255 - r * brightness / 100);   // Invert value for common anode
+  analogWrite(green_pin, 255 - g * brightness / 100);
+  analogWrite(blue_pin, 255 - b * brightness / 100);
+}
+
+void setSensorLEDColor(int r, int g, int b, int brightness = 100) {
+  setColor(SENSOR_LED_RED_PIN,  SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN, r, g, b, brightness);
+}
+
+void setRemoteControllerLEDColor(int r, int g, int b, int brightness = 100) {
+  setColor(REMOTE_CONTROLLER_LED_RED_PIN,  REMOTE_CONTROLLER_LED_GREEN_PIN, REMOTE_CONTROLLER_LED_BLUE_PIN, r, g, b, brightness);
+}
+
+void updateLED(int state) {
+  if (state & STATE_SENSOR_READY) {
+    Serial.println("sensor, green");
+    setSensorLEDColor(128, 255, 0, 5);
+  } else {
+    Serial.println("sensor, red");
+    setSensorLEDColor(255, 0, 0, 5);
+  }
+
+  if (state & STATE_REMOTE_CONTROLLER_READY) {
+    Serial.println("remote, green");
+    setRemoteControllerLEDColor(128, 255, 0, 5);
+  } else {
+    Serial.println("remote, red");
+    setRemoteControllerLEDColor(255, 0, 0, 5);
+  }
 }
 
 void updateAutocamControllerStatus() {

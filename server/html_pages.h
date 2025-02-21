@@ -740,8 +740,8 @@ char const* index_html = R"rawliteral(
         const sensorLed = document.getElementById("sensor-led");
         const remoteLed = document.getElementById("remote-led");
 
-        sensorLed.style.backgroundColor = data.state & STATE_SENSOR_READY ? "green" : "red";
-        remoteLed.style.backgroundColor = data.state & STATE_REMOTE_CONTROLLER_READY ? "green" : "red";
+        sensorLed.style.backgroundColor = data.state & STATE_SENSOR_READY ? "#80ff00" : "#ff0000";
+        remoteLed.style.backgroundColor = data.state & STATE_REMOTE_CONTROLLER_READY ? "#80ff00" : "#ff0000";
       }
 
       // Variables for double tap continuous zoom gesture
