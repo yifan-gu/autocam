@@ -14,6 +14,23 @@
 #define DRIVE_MODE_MANUAL 0
 #define DRIVE_MODE_AUTO_FOLLOW 1
 
+#define STEERING_STICK_X 2
+#define THROTTLE_STICK_Y 12
+#define GIMBAL_STICK_X 13
+#define GIMBAL_STICK_Y 14
+
+#define STICK_DEAD_ZONE 200
+#define ADC_MAX 4095   // ESP32 ADC range
+#define ADC_MID (ADC_MAX / 2) // Midpoint for dead zone calculation
+
+#define SMOOTHING_FACTOR 0.2  // Smoothing factor (0.0 - 1.0, higher = more smoothing)
+
+// Smoothed joystick values
+float smoothedX = ADC_MID;
+float smoothedY = ADC_MID;
+float smoothedGX = ADC_MID;
+float smoothedGY = ADC_MID;
+
 const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
 const int minSteering = 1000, maxSteering = 2000, midSteering = 1500;
 
@@ -100,30 +117,42 @@ void readStatusData() {
   }
 }
 
- // TODO(yifan): Fill me in.
 void readControllerData() {
-  static int throttleStep = 1;
-  static int steeringStep = 1;
-  static int lastUpdate = 0;
+  // Read raw joystick values
+  int rawX = analogRead(STEERING_STICK_X);
+  int rawY = analogRead(THROTTLE_STICK_Y);
+  int rawGX = analogRead(GIMBAL_STICK_X);
+  int rawGY = analogRead(GIMBAL_STICK_Y);
 
-  if (throttleValue >= maxThrottle || throttleValue <= minThrottle) {
-    throttleStep = -throttleStep;
-  }
-  if (steeringValue >= maxSteering || steeringValue <= minSteering) {
-    steeringStep = -steeringStep;
-  }
+  // Apply dead zone filtering
+  if (abs(rawX - ADC_MID) < STICK_DEAD_ZONE) rawX = ADC_MID;
+  if (abs(rawY - ADC_MID) < STICK_DEAD_ZONE) rawY = ADC_MID;
+  if (abs(rawGX - ADC_MID) < STICK_DEAD_ZONE) rawGX = ADC_MID;
+  if (abs(rawGY - ADC_MID) < STICK_DEAD_ZONE) rawGY = ADC_MID;
 
-  throttleValue += throttleStep;
-  steeringValue += steeringStep;
+  // Apply exponential moving average (smoothing)
+  smoothedX = (SMOOTHING_FACTOR * rawX) + ((1 - SMOOTHING_FACTOR) * smoothedX);
+  smoothedY = (SMOOTHING_FACTOR * rawY) + ((1 - SMOOTHING_FACTOR) * smoothedY);
+  smoothedGX = (SMOOTHING_FACTOR * rawGX) + ((1 - SMOOTHING_FACTOR) * smoothedGX);
+  smoothedGY = (SMOOTHING_FACTOR * rawGY) + ((1 - SMOOTHING_FACTOR) * smoothedGY);
 
-  yawSpeedValue = 0.5;
-  pitchSpeedValue = 0;
+  // Map throttle and steering using floating-point math:
+  throttleValue = minThrottle + (int)round((maxThrottle - minThrottle) * ((float)smoothedY / (float)ADC_MAX));
+  steeringValue = minSteering + (int)round((maxSteering - minSteering) * ((float)smoothedX / (float)ADC_MAX));
 
-  driveModeTriggerValue = DRIVE_MODE_MANUAL;
-  //if (millis() - lastUpdate >= 1000) {
-  //  driveModeTriggerValue = driveMode == DRIVE_MODE_MANUAL ? DRIVE_MODE_AUTO_FOLLOW : DRIVE_MODE_MANUAL;
-  //  lastUpdate = millis();
-  //}
+  // For yaw: linear mapping from [0, ADC_MAX] to [-1, 1]
+  yawSpeedValue = ((float)smoothedGX / ADC_MAX) * 2.0 - 1.0;
+  pitchSpeedValue = ((float)smoothedGY / ADC_MAX) * 2.0 - 1.0;
+
+  // Ensure the midpoint results in exactly 1500 and 0.
+  if (rawY == ADC_MID) throttleValue = midThrottle;
+  if (rawX == ADC_MID) steeringValue = midSteering;
+  if (rawGX == ADC_MID) yawSpeedValue = 0.0;
+  if (rawGY == ADC_MID) pitchSpeedValue = 0.0;
+
+  // Print all values, including gimbal joystick positions
+  Serial.printf("Joystick X=%.1f, Y=%.1f | Throttle=%d, Steering=%d | Gimbal X=%.1f, Y=%.1f | Yaw=%.2f, Pitch=%.2f\n",
+                smoothedX, smoothedY, throttleValue, steeringValue, smoothedGX, smoothedGY, yawSpeedValue, pitchSpeedValue);
 }
 
 void sendControllerData() {
