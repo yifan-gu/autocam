@@ -7,7 +7,8 @@ Arduino files for my auto-following camera car!
 - [ ] Add LED state indicators
 - [ ] <s> Combine tag and remote (discarded)</s>
 - [x] Add BLE central for the anchor
-- [ ] Read joystick values for the remote controller
+- [x] Read joystick values for the remote controller
+- [ ] Read mode switch button for remote controller
 - [x] Add state indicator in the web UI.
 - [ ] Calibrate the UWB tag and anchor.
 - [ ] <s> Nice to have, detect active track failure</s> Turns out there's no API support for that
