@@ -8,7 +8,7 @@ Arduino files for my auto-following camera car!
 - [x] Read joystick values for the remote controller
 - [x] Read mode switch button for remote controller
 - [x] Add state indicator in the web UI
-- [ ] Add LED state indicators
+- [x] Add LED state indicators
 - [ ] Add external lithium batteries
 - [ ] Assemble together
 - [ ] Calibrate the UWB tag and anchor
