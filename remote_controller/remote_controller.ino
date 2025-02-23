@@ -3,7 +3,7 @@
 #include "DW1000Ranging.h"
 #include "DW1000.h"
 #include "BLE_setup.hpp"
-#include "LED_setup.hpp"
+#include "LED_controller.hpp"
 
 #define DATA_RATE 100 // 100 Hz
 
@@ -20,10 +20,13 @@
 
 #define REMOTE_CONTROLLER_LED_RED_PIN 12
 #define REMOTE_CONTROLLER_LED_GREEN_PIN 13
+#define REMOTE_CONTROLLER_LED_BLUE_PIN -1
 #define SENSOR_LED_RED_PIN 14
 #define SENSOR_LED_GREEN_PIN 15
+#define SENSOR_LED_BLUE_PIN -1
 #define DRIVE_MODE_LED_RED_PIN 18
 #define DRIVE_MODE_LED_GREEN_PIN 19
+#define DRIVE_MODE_LED_BLUE_PIN -1
 
 #define STEERING_STICK_X_PIN 25
 #define THROTTLE_STICK_Y_PIN 26
@@ -82,6 +85,11 @@ struct ButtonDebounce {
 ButtonDebounce modeSwitchDebounce = { MODE_SWITCH_PIN, HIGH, HIGH, DRIVE_MODE_MANUAL };
 ButtonDebounce activeTrackDebounce = { ACTIVE_TRACK_TOGGLE_PIN, HIGH, HIGH, false };
 
+LEDController ledController(
+  SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN,
+  REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN, REMOTE_CONTROLLER_LED_BLUE_PIN,
+  DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN, DRIVE_MODE_LED_BLUE_PIN
+);
 
 void setup() {
   // Start Serial for debugging
@@ -92,7 +100,7 @@ void setup() {
   while (!Serial && (millis() - startTime < timeout)) {
     // Wait for Serial or timeout
   }
-  setupLED();
+  ledController.setupLED(state, driveMode);
   setupInput();
   setupBLE();
 }
@@ -102,17 +110,6 @@ void loop() {
   readControllerData();
   sendControllerData();
   delay(1000 / DATA_RATE); // Control the data rate.
-}
-
-void setupLED() {
-  setupLEDPIN(SENSOR_LED_RED_PIN);
-  setupLEDPIN(SENSOR_LED_GREEN_PIN);
-  setupLEDPIN(REMOTE_CONTROLLER_LED_RED_PIN);
-  setupLEDPIN(REMOTE_CONTROLLER_LED_GREEN_PIN);
-  setupLEDPIN(DRIVE_MODE_LED_RED_PIN);
-  setupLEDPIN(DRIVE_MODE_LED_GREEN_PIN);
-
-  updateLED(state, driveMode);
 }
 
 void setupInput() {
@@ -126,39 +123,13 @@ void setupBLE() {
   setupBLEPeripheral("Autocam Remote", "autocam-remote", AutocamControllerService);
 }
 
-void updateLED(int state, int driveMode) {
-  if (state & STATE_SENSOR_READY) {
-    Serial.println("sensor, green");
-    setLEDGreen(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN);
-  } else {
-    Serial.println("sensor, red");
-    setLEDRed(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN);
-  }
-
-  if (state & STATE_REMOTE_CONTROLLER_READY) {
-    Serial.println("remote, green");
-    setLEDGreen(REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN);
-  } else {
-    Serial.println("remote, red");
-    setLEDRed(REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN);
-  }
-
-  if (driveMode == DRIVE_MODE_MANUAL) {
-    Serial.println("drive mode, red");
-    setLEDRed(DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN);
-  } else {
-    Serial.println("drive mode, green");
-    setLEDGreen(DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN);
-  }
-}
-
 void updateState(int newState) {
   if (state == newState) {
     return;
   }
 
   state = newState;
-  updateLED(state, driveMode);
+  ledController.updateStateLED(state);
   Serial.printf("Update state=%d\n", state);
 }
 
@@ -167,13 +138,14 @@ void updateDriveMode(int newDriveMode) {
     return;
   }
   driveMode = newDriveMode;
-  updateLED(state, driveMode);
+  ledController.updateDriveModeLED(driveMode);
   Serial.printf("Update drive mode=%d\n", driveMode);
 }
 
 void readStatusData() {
   if (!(BLECentral && BLECentral.connected())) {
     updateState(state & ~STATE_REMOTE_CONTROLLER_READY);
+    driveModeTriggerValue = DRIVE_MODE_MANUAL;
     if (!connectToCentral()) {
       return;
     }

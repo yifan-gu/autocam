@@ -24,18 +24,24 @@
 #define CAN_RX 2  // Connects to CRX
 #define CAN_RATE 1000 // Speed rate in kbps
 
+#define SERVER_LED_RED_PIN 12
+#define SERVER_LED_GREEN_PIN 13
+#define TAG_LED_RED_PIN 14
+#define TAG_LED_GREEN_PIN 15
+
 // leftmost two bytes below will become the "short address"
 char anchor_addr[] = "80:00:5B:D5:A9:9A:E2:9C";
 
 //calibrated Antenna Delay setting for this anchor
 uint16_t Adelay = 16630;
 
-#define SENSOR_STATE_NOT_READY 0
-#define SENSOR_STATE_READY 1
+#define STATE_NOT_READY 0
+#define STATE_TAG_CONNECTED 1
+#define STATE_SERVER_CONNECTED 2
 
 float distance = 0;
 float heading = 0;
-int state = SENSOR_STATE_NOT_READY;
+int state = STATE_TAG_CONNECTED;
 float yawSpeed = 0;
 float pitchSpeed = 0;
 bool activeTrackToggled = false;
@@ -54,6 +60,7 @@ void setup() {
     // Wait for Serial or timeout
   }
 
+  setupLED();
   setupUWBAnchor();
   setupDJIRoninController();
   setupBLE();
@@ -66,6 +73,19 @@ void loop() {
   getGimbalControllerData();
   setGimbalPosition();
   delay(1000 / DATA_RATE); // Control the data rate.
+}
+
+void setupLED() {
+  pinMode(TAG_LED_RED_PIN, OUTPUT);
+  pinMode(TAG_LED_GREEN_PIN, OUTPUT);
+  pinMode(SERVER_LED_RED_PIN, OUTPUT);
+  pinMode(SERVER_LED_GREEN_PIN, OUTPUT);
+  digitalWrite(TAG_LED_RED_PIN, HIGH);
+  digitalWrite(TAG_LED_GREEN_PIN, HIGH);
+  digitalWrite(SERVER_LED_RED_PIN, HIGH);
+  digitalWrite(SERVER_LED_GREEN_PIN, HIGH);
+
+  updateLED(state);
 }
 
 void setupBLE() {
@@ -97,6 +117,7 @@ void getGimbalControllerData() {
       return;
     }
   }
+  updateState(state | STATE_SERVER_CONNECTED);
 
   if (!UWBAnchorSensorDataRecv.written()) {
     return;
@@ -122,6 +143,7 @@ void setGimbalPosition() {
 }
 
 void resetGimbalControl() {
+  updateState(state & ~STATE_SERVER_CONNECTED);
   yawSpeed = 0;
   pitchSpeed = 0;
   activeTrackToggled = false;
@@ -172,6 +194,7 @@ void sendSensorData() {
       return;
     }
   }
+  updateState(state | STATE_SERVER_CONNECTED);
 
   SensorDataSend data = {.distance = distance, .heading = heading, .state = state};
   UWBAnchorSensorDataSend.writeValue((uint8_t *)&data, sizeof(SensorDataSend));
@@ -187,12 +210,42 @@ void newRange() {
 
 void newDevice(DW1000Device *device) {
   Serial.printf("Tag connected, address=%X\n", device->getShortAddress());
-  state = SENSOR_STATE_READY;
+  updateState(state | STATE_TAG_CONNECTED);
 }
 
 void inactiveDevice(DW1000Device *device) {
   Serial.printf("Anchor disconnected, address=%X\n", device->getShortAddress());
-  state = SENSOR_STATE_NOT_READY;
+  updateState(state & ~STATE_TAG_CONNECTED);
+}
+
+void updateLED(int state) {
+  if (state & STATE_TAG_CONNECTED) {
+    Serial.println("tag, green");
+    digitalWrite(TAG_LED_RED_PIN, HIGH);
+    digitalWrite(TAG_LED_GREEN_PIN, LOW);
+  } else {
+    Serial.println("tag, red");
+    digitalWrite(TAG_LED_RED_PIN, LOW);
+    digitalWrite(TAG_LED_GREEN_PIN, HIGH);
+  }
+
+  if (state & STATE_SERVER_CONNECTED) {
+    Serial.println("server, green");
+    digitalWrite(SERVER_LED_RED_PIN, HIGH);
+    digitalWrite(SERVER_LED_GREEN_PIN, LOW);
+  } else {
+    Serial.println("server, red");
+    digitalWrite(SERVER_LED_RED_PIN, LOW);
+    digitalWrite(SERVER_LED_GREEN_PIN, HIGH);
+  }
+}
+
+void updateState(int newState) {
+  if (state == newState) {
+    return;
+  }
+  state = newState;
+  updateLED(state);
 }
 
 /*

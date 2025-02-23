@@ -6,7 +6,7 @@
 
 #include "html_pages.h"
 #include "BLE_setup.hpp"
-#include "LED_setup.hpp"
+#include "LED_controller.hpp"
 
 #define PI 3.14159265359
 
@@ -18,14 +18,26 @@
 #define DRIVE_MODE_AUTO_FOLLOW 1
 
 // Pin configuration
+#define STEERING_PIN 2  //  D2 for steering
+#define THROTTLE_PIN 3  //  D3 for throttle
+
 #define SENSOR_LED_RED_PIN 17 // A0
 #define SENSOR_LED_GREEN_PIN 18 // A1
+#define SENSOR_LED_BLUE_PIN -1
 
 #define REMOTE_CONTROLLER_LED_RED_PIN 19 // A2
 #define REMOTE_CONTROLLER_LED_GREEN_PIN 20 // A3
+#define REMOTE_CONTROLLER_LED_BLUE_PIN -1
 
-#define STEERING_PIN 2  //  D2 for steering
-#define THROTTLE_PIN 3  //  D3 for throttle
+#define DRIVE_MODE_LED_RED_PIN 21 // A4
+#define DRIVE_MODE_LED_GREEN_PIN 22 // A5
+#define DRIVE_MODE_LED_BLUE_PIN -1
+
+LEDController ledController(
+  SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN,
+  REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN, REMOTE_CONTROLLER_LED_BLUE_PIN,
+  DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN, DRIVE_MODE_LED_BLUE_PIN
+);
 
 // Access Point credentials
 const char* ssid = "RC-Controller";
@@ -113,7 +125,7 @@ float minDeltaTimeMillis = 10; // Control the rate of PID update.
 //////////////////////////////////////////////////////////////////////////////////
 
 #define SENSOR_STATE_NOT_READY 0
-#define SENSOR_STATE_READY 1
+#define SENSOR_STATE_READY 3 // SENSOR_STATE_READY means tag and server connected to the sensor.
 
 void setup() {
   // Start Serial for debugging
@@ -125,7 +137,7 @@ void setup() {
     // Wait for Serial or timeout
   }
 
-  setupLED();
+  ledController.setupLED(state, driveMode);
   setupESC();
   setupServer();
   setupBLECentral();
@@ -141,15 +153,6 @@ void loop() {
   calculateSteeringThrottle();
   runESCController();
   runHealthCheck();
-}
-
-void setupLED() {
-  setupLEDPIN(SENSOR_LED_RED_PIN);
-  setupLEDPIN(SENSOR_LED_GREEN_PIN);
-  setupLEDPIN(REMOTE_CONTROLLER_LED_RED_PIN);
-  setupLEDPIN(REMOTE_CONTROLLER_LED_GREEN_PIN);
-
-  updateLED(state);
 }
 
 void setupESC() {
@@ -478,28 +481,9 @@ void updateState(int newState) {
     return;
   }
   state = newState;
-  updateLED(state);
+  ledController.updateStateLED(state);
   updateAutocamControllerStatus();
 }
-
-void updateLED(int state) {
-  if (state & STATE_SENSOR_READY) {
-    Serial.println("sensor, green");
-    setLEDGreen(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN);
-  } else {
-    Serial.println("sensor, red");
-    setLEDRed(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN);
-  }
-
-  if (state & STATE_REMOTE_CONTROLLER_READY) {
-    Serial.println("remote, green");
-    setLEDGreen(REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN);
-  } else {
-    Serial.println("remote, red");
-    setLEDRed(REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN);
-  }
-}
-
 void updateAutocamControllerStatus() {
   if (!AutocamController.connected()) {
     Serial.println("Autocam controller is not connected, will not update status!");
@@ -517,7 +501,7 @@ void setDriveMode(int newDriveMode) {
     return;
   }
   driveMode = newDriveMode;
-  updateAutocamControllerStatus();
+  ledController.updateDriveModeLED(driveMode);
 }
 
 void calculateSteeringThrottle() {
@@ -661,7 +645,7 @@ void setMoveBackward(float throttleDiff) {
 }
 
 void emergencyStop() { //TODO(yifan): Refactor out this with a state machine.
-  driveMode = DRIVE_MODE_MANUAL;
+  setDriveMode(DRIVE_MODE_MANUAL);
   distance = 0;
   heading = 0;
   yawSpeed = 0;
