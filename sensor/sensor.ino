@@ -36,9 +36,9 @@ uint16_t Adelay = 16630;
 float distance = 0;
 float heading = 0;
 int state = SENSOR_STATE_NOT_READY;
-float yaw_speed = 0;
-float pitch_speed = 0;
-int active_track_toggled = 0;
+float yawSpeed = 0;
+float pitchSpeed = 0;
+bool activeTrackToggled = false;
 
 DJIRoninController djiRoninController(CAN_TX, CAN_RX, CAN_RATE);
 
@@ -104,31 +104,31 @@ void getGimbalControllerData() {
 
   SensorDataRecv data;
   UWBAnchorSensorDataRecv.readValue((uint8_t *)&data, sizeof(SensorDataRecv));
-  Serial.printf("Received yaw_speed=%f, pitch_speed=%f, active_track_toggled=%d\n", data.yaw_speed, data.pitch_speed, data.active_track_toggled);
-  yaw_speed = data.yaw_speed;
-  pitch_speed = data.pitch_speed;
-  active_track_toggled = data.active_track_toggled;
+  Serial.printf("Received yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d\n", data.yawSpeed, data.pitchSpeed, data.activeTrackToggled);
+  yawSpeed = data.yawSpeed;
+  pitchSpeed = data.pitchSpeed;
+  activeTrackToggled = data.activeTrackToggled;
 
   Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 }
 
 void setGimbalPosition() {
-  float yaw = convert_gimbal_speed(yaw_speed);
-  float pitch = convert_gimbal_speed(pitch_speed);
+  float yaw = convert_gimbal_speed(yawSpeed);
+  float pitch = convert_gimbal_speed(pitchSpeed);
   if (!djiRoninController.set_position(yaw, 0, pitch, 0, 100)) {
     Serial.println("Failed to set DJI Ronin position");
   }
 }
 
 void resetGimbalControl() {
-  yaw_speed = 0;
-  pitch_speed = 0;
-  active_track_toggled = false;
+  yawSpeed = 0;
+  pitchSpeed = 0;
+  activeTrackToggled = false;
 }
 
 float convert_gimbal_speed(float speed) {
-  // TODO(yifan): Convert yaw_speed and pitch_speed;
+  // TODO(yifan): Convert yawSpeed and pitchSpeed;
   return speed;
 }
 

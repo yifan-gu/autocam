@@ -23,18 +23,18 @@ struct SensorDataSend {
 
 struct SensorDataRecv {
   // Values below are written by the central (server).
-  float yaw_speed;
-  float pitch_speed;
-  int active_track_toggled;
+  float yawSpeed;
+  float pitchSpeed;
+  bool activeTrackToggled;
 };
 
 struct ControllerData {
   int throttleValue;
   int steeringValue;
   int driveMode;
-  float yaw_speed;
-  float pitch_speed;
-  int active_track_toggled;
+  float yawSpeed;
+  float pitchSpeed;
+  bool activeTrackToggled;
 
   int state; // This value is written by the central (server).
 };
