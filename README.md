@@ -9,10 +9,10 @@ Arduino files for my auto-following camera car!
 - [x] Read mode switch button for remote controller
 - [x] Add state indicator in the web UI
 - [x] Add LED state indicators
-- [ ] Add external lithium batteries
+- [ ] Add battery state LED
 - [ ] Add PCB boards
-  - [ ] Sensor
-  - [ ] Verify LED resistor
+  - [x] Sensor
+  - [ ] Verify LED resistor values
   - [ ] Tag
   - [ ] Server
   - [ ] Remote
