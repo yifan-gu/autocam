@@ -26,10 +26,10 @@
 
 #define SERVER_LED_RED_PIN 25
 #define SERVER_LED_GREEN_PIN 27
-#define SERVER_LED_BLUE_PIN 32
+#define SERVER_LED_BLUE_PIN -1
 #define TAG_LED_RED_PIN 34
 #define TAG_LED_GREEN_PIN 36
-#define TAG_LED_GREEN_PIN 39
+#define TAG_LED_BLUE_PIN -1
 
 // leftmost two bytes below will become the "short address"
 char anchor_addr[] = "80:00:5B:D5:A9:9A:E2:9C";
