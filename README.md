@@ -10,12 +10,17 @@ Arduino files for my auto-following camera car!
 - [x] Add state indicator in the web UI
 - [x] Add LED state indicators
 - [ ] Add external lithium batteries
+- [ ] Add PCB boards
+  - [ ] Sensor
+  - [ ] Verify LED resistor
+  - [ ] Tag
+  - [ ] Server
+  - [ ] Remote
 - [ ] Assemble together
 - [ ] Calibrate the UWB tag and anchor
-API support for that
 - [ ] (optimize) Store settings in external storage (SD card)
 - [ ] (optimize) Refactor the server code with a state machine
 - [ ] (optimize) Reorganize shared code into libraries, add external dependencies 
 
-- [ ] <s> Nice to have, detect active track failure</s> Turns out there's no 
+- [ ] <s> Nice to have, detect active track failure</s> Turns out there's no API support for that
 - [ ] <s> Combine tag and remote (discarded)</s>
