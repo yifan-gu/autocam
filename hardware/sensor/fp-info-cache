@@ -1,4 +1,4 @@
-24746165832256366
+24747907075617987
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -13,6 +13,55 @@ audio belton reverb
 0
 7
 7
+Autocam
+2-PIN Connector
+
+
+0
+2
+2
+Autocam
+Anode RGB LED (Round)
+
+
+0
+4
+4
+Autocam
+Arduino ESP32 Nano
+
+
+0
+30
+30
+Autocam
+MP1584EN 5V Regulator
+
+
+0
+4
+4
+Autocam
+Makersfab ESP32 UWB
+
+
+0
+32
+32
+Autocam
+Simple Resistor
+
+
+0
+2
+2
+Autocam
+Waveshare CAN Transreceiver
+
+
+0
+8
+8
 Battery
 BatteryClip_Keystone_54_D16-19mm
 Battery clip for batteries with a diameter between 16-19 mm: https://www.keyelco.com/product.cfm/product_id/826
@@ -99508,48 +99557,6 @@ Varistor
 Varistor_Panasonic_VF
 Panasonic VF series varistor, 6x8mm body, 3.2mm height, https://mediap.industry.panasonic.eu/assets/imported/industrial.panasonic.com/cdbs/www-data/pdf/AWA0000/AWA0000C4.pdf
 Varistor VF
-0
-2
-2
-autocam
-2-pin connector
-
-
-0
-2
-2
-autocam
-Anode REB LED (round)
-
-
-0
-4
-4
-autocam
-MP1584EN 5V regulator
-
-
-0
-4
-4
-autocam
-Waveshare CAN transreceiver
-
-
-0
-8
-8
-autocam
-esp32_uwb1000
-
-
-0
-32
-32
-autocam
-resistor
-
-
 0
 2
 2

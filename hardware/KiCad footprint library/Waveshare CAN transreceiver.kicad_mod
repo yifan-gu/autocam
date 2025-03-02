@@ -1,4 +1,4 @@
-(footprint "Waveshare CAN transreceiver"
+(footprint "Waveshare CAN Transreceiver"
 	(version 20241229)
 	(generator "pcbnew")
 	(generator_version "9.0")
@@ -15,7 +15,7 @@
 			)
 		)
 	)
-	(property "Value" "Waveshare CAN transreceiver"
+	(property "Value" "Waveshare CAN Transreceiver"
 		(at -11.76 -5.08 0)
 		(unlocked yes)
 		(layer "F.Fab")

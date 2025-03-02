@@ -1,4 +1,4 @@
-(footprint "resistor"
+(footprint "Simple Resistor"
 	(version 20241229)
 	(generator "pcbnew")
 	(generator_version "9.0")

@@ -1,4 +1,4 @@
-(footprint "esp32_uwb1000"
+(footprint "Makersfab ESP32 UWB"
 	(version 20241229)
 	(generator "pcbnew")
 	(generator_version "9.0")
@@ -15,7 +15,7 @@
 			)
 		)
 	)
-	(property "Value" "esp32_uwb1000"
+	(property "Value" "Makersfab ESP32 UWB"
 		(at 35.56 18.78 0)
 		(unlocked yes)
 		(layer "F.Fab")
@@ -111,7 +111,7 @@
 			)
 		)
 	)
-	(fp_text user "Makerfabs ESP-UWB-1000"
+	(fp_text user "Makerfabs ESP32 UWB v1.0"
 		(at 35.56 12.7 0)
 		(unlocked yes)
 		(layer "F.Fab")
@@ -558,7 +558,7 @@
 		(drill 0.8)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "b728fa68-499c-4589-bd96-23c295aa1994")
+		(uuid "db195324-84f0-4c3a-bbd8-e7a61bf20ffa")
 	)
 	(pad "2" thru_hole circle
 		(at 7.62 30.48)

@@ -1,4 +1,4 @@
-(footprint "MP1584EN 5V regulator"
+(footprint "MP1584EN 5V Regulator"
 	(version 20241229)
 	(generator "pcbnew")
 	(generator_version "9.0")
@@ -15,7 +15,7 @@
 			)
 		)
 	)
-	(property "Value" "MP1584EN 5V regulator"
+	(property "Value" "MP1584EN 5V Regulator"
 		(at 8.75 5.06 0)
 		(unlocked yes)
 		(layer "F.Fab")

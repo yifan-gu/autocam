@@ -1,4 +1,4 @@
-(footprint "Anode REB LED (round)"
+(footprint "Anode RGB LED (Round)"
 	(version 20241229)
 	(generator "pcbnew")
 	(generator_version "9.0")
@@ -15,7 +15,7 @@
 			)
 		)
 	)
-	(property "Value" "Anode RGB LED (round)"
+	(property "Value" "Anode RGB LED (Round)"
 		(at 0 -2.292096 0)
 		(unlocked yes)
 		(layer "F.Fab")
@@ -132,7 +132,7 @@
 		(remove_unused_layers no)
 		(uuid "839b2500-791a-425d-84f6-0dec194cfd37")
 	)
-	(pad "2" thru_hole circle
+	(pad "2" thru_hole rect
 		(at -1.27 0)
 		(size 1.8 1.8)
 		(drill 0.8)

@@ -4,6 +4,11 @@
 	(generator_version "9.0")
 	(uuid "c67b54ef-a957-493c-ad24-f307495fd83c")
 	(paper "A4")
+	(title_block
+		(title "Autocam Sensor")
+		(date "2025-03-02")
+		(rev "v0.2")
+	)
 	(lib_symbols
 		(symbol "Device:R"
 			(pin_numbers
@@ -1409,16 +1414,6 @@
 	)
 	(wire
 		(pts
-			(xy 29.21 153.67) (xy 29.21 114.3)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "14be3697-3d08-4d38-b2de-09de4309c89f")
-	)
-	(wire
-		(pts
 			(xy 171.45 66.04) (xy 101.6 66.04)
 		)
 		(stroke
@@ -1449,16 +1444,6 @@
 	)
 	(wire
 		(pts
-			(xy 170.18 120.65) (xy 170.18 153.67)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "20b9dc32-88c0-4870-ad2e-840c94964886")
-	)
-	(wire
-		(pts
 			(xy 139.7 78.74) (xy 127 78.74)
 		)
 		(stroke
@@ -1486,26 +1471,6 @@
 			(type default)
 		)
 		(uuid "3465e480-ac11-4e5c-b7ea-cd65185db0c3")
-	)
-	(wire
-		(pts
-			(xy 170.18 93.98) (xy 170.18 113.03)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "34ccdc0d-6f0f-48de-a488-d5c2c8b73ad0")
-	)
-	(wire
-		(pts
-			(xy 29.21 153.67) (xy 170.18 153.67)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3530a41e-4844-486f-b36a-c34e738f581d")
 	)
 	(wire
 		(pts
@@ -1596,26 +1561,6 @@
 			(type default)
 		)
 		(uuid "6261d03e-d2bb-4964-b445-7b0b7e7f33f8")
-	)
-	(wire
-		(pts
-			(xy 132.08 97.79) (xy 132.08 113.03)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6558875b-193a-4ab4-b98e-ece6ec5d7f63")
-	)
-	(wire
-		(pts
-			(xy 132.08 120.65) (xy 132.08 139.7)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6658fc99-b334-432e-8d58-c4481a19876d")
 	)
 	(wire
 		(pts
@@ -1769,16 +1714,6 @@
 	)
 	(wire
 		(pts
-			(xy 29.21 114.3) (xy 76.2 114.3)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9cbfd342-23d8-4ba7-a7ab-a405c0149ba1")
-	)
-	(wire
-		(pts
 			(xy 63.5 99.06) (xy 76.2 99.06)
 		)
 		(stroke
@@ -1826,16 +1761,6 @@
 			(type default)
 		)
 		(uuid "a65ddef1-c0f9-4e5c-9ab4-3e5f819ad6be")
-	)
-	(wire
-		(pts
-			(xy 132.08 139.7) (xy 59.69 139.7)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a81591b9-347c-4e15-85ea-a603452582df")
 	)
 	(wire
 		(pts
@@ -1949,26 +1874,6 @@
 	)
 	(wire
 		(pts
-			(xy 59.69 101.6) (xy 76.2 101.6)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e4a9c03b-d16d-4e52-a8c6-f913ab987dea")
-	)
-	(wire
-		(pts
-			(xy 59.69 139.7) (xy 59.69 101.6)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f71a710e-6c7d-46b7-956c-3978ccbacdc7")
-	)
-	(wire
-		(pts
 			(xy 96.52 46.99) (xy 45.72 46.99)
 		)
 		(stroke
@@ -1996,7 +1901,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "164e9c6c-4434-4d64-a34f-3f2b29a93964")
-		(property "Reference" "2_Pin_connector1"
+		(property "Reference" "2_PIN_Connector1"
 			(at 147.32 76.8349 0)
 			(effects
 				(font
@@ -2014,7 +1919,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "autocam:2-pin connector"
+		(property "Footprint" "Autocam:2-PIN Connector"
 			(at 142.24 76.2 0)
 			(effects
 				(font
@@ -2050,7 +1955,7 @@
 		(instances
 			(project ""
 				(path "/c67b54ef-a957-493c-ad24-f307495fd83c"
-					(reference "2_Pin_connector1")
+					(reference "2_PIN_Connector1")
 					(unit 1)
 				)
 			)
@@ -2082,7 +1987,7 @@
 				)
 			)
 		)
-		(property "Footprint" "autocam:MP1584EN 5V regulator"
+		(property "Footprint" "Autocam:MP1584EN 5V Regulator"
 			(at 144.78 48.26 0)
 			(effects
 				(font
@@ -2158,7 +2063,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "autocam:resistor"
+		(property "Footprint" "Autocam:Simple Resistor"
 			(at 122.682 116.84 90)
 			(effects
 				(font
@@ -2228,7 +2133,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "autocam:Anode REB LED (round)"
+		(property "Footprint" "Autocam:Anode RGB LED (Round)"
 			(at 157.48 95.25 0)
 			(effects
 				(font
@@ -2277,76 +2182,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 170.18 116.84 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "41b88eb2-755a-454d-be5a-1037df8b7323")
-		(property "Reference" "R6"
-			(at 172.72 115.5699 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "2000Ω"
-			(at 172.72 118.1099 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "autocam:resistor"
-			(at 168.402 116.84 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 170.18 116.84 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 170.18 116.84 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "089176fa-cbcf-4ff7-9ed9-fa266e1f982c")
-		)
-		(pin "2"
-			(uuid "a9bdcebe-11e5-4602-8531-2abb7a9d2d8c")
-		)
-		(instances
-			(project "sensor"
-				(path "/c67b54ef-a957-493c-ad24-f307495fd83c"
-					(reference "R6")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "autocam:RGB_LED_round")
 		(at 119.38 99.06 0)
 		(unit 1)
@@ -2374,7 +2209,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "autocam:Anode REB LED (round)"
+		(property "Footprint" "Autocam:Anode RGB LED (Round)"
 			(at 119.38 99.06 0)
 			(effects
 				(font
@@ -2450,7 +2285,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "autocam:resistor"
+		(property "Footprint" "Autocam:Simple Resistor"
 			(at 165.862 116.84 90)
 			(effects
 				(font
@@ -2500,15 +2335,14 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "a6ffe3ac-2ade-46ff-87c0-af90791f52c7")
-		(property "Reference" "CAN_TRANSRECEIVER1"
+		(property "Reference" "CAN_Transreceiver1"
 			(at 113.9033 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Value" "~"
@@ -2520,7 +2354,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "autocam:Waveshare CAN transreceiver"
+		(property "Footprint" "Autocam:Waveshare CAN Transreceiver"
 			(at 101.6 39.37 0)
 			(effects
 				(font
@@ -2574,77 +2408,7 @@
 		(instances
 			(project ""
 				(path "/c67b54ef-a957-493c-ad24-f307495fd83c"
-					(reference "CAN_TRANSRECEIVER1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 132.08 116.84 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "bd49cb3a-74c6-4336-adb5-6aae6c19dde0")
-		(property "Reference" "R3"
-			(at 134.62 115.5699 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "2000Ω"
-			(at 134.62 118.1099 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "autocam:resistor"
-			(at 130.302 116.84 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 132.08 116.84 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 132.08 116.84 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "714df411-427c-45b8-bb8a-b6273a4d4de0")
-		)
-		(pin "2"
-			(uuid "3f18b4b7-8075-436e-9190-a352a0b297c5")
-		)
-		(instances
-			(project "sensor"
-				(path "/c67b54ef-a957-493c-ad24-f307495fd83c"
-					(reference "R3")
+					(reference "CAN_Transreceiver1")
 					(unit 1)
 				)
 			)
@@ -2678,7 +2442,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "autocam:resistor"
+		(property "Footprint" "Autocam:Simple Resistor"
 			(at 160.782 116.84 90)
 			(effects
 				(font
@@ -2748,7 +2512,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "autocam:resistor"
+		(property "Footprint" "Autocam:Simple Resistor"
 			(at 127.762 116.84 90)
 			(effects
 				(font
@@ -2816,7 +2580,7 @@
 				)
 			)
 		)
-		(property "Footprint" "autocam:esp32_uwb1000"
+		(property "Footprint" "Autocam:Makersfab ESP32 UWB"
 			(at 81.28 67.31 0)
 			(effects
 				(font
