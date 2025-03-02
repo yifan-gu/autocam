@@ -13,8 +13,8 @@ Arduino files for my auto-following camera car!
 - [ ] Add PCB boards
   - [x] Sensor
   - [ ] Verify LED resistor values
-  - [ ] Tag
-  - [ ] Server
+  - [x] Tag
+  - [x] Server
   - [ ] Remote
 - [ ] Assemble together
 - [ ] Calibrate the UWB tag and anchor
