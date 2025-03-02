@@ -87,11 +87,34 @@
 		(layer "F.SilkS")
 		(uuid "8a71c9e5-28de-4f81-89e8-d1ecef25f6f3")
 	)
+	(fp_rect
+		(start 66.04 12.7)
+		(end 73.66 20.32)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "8e49e3bf-f5de-4899-b3a8-6d9d95b4251b")
+	)
 	(fp_text user "UWB Antenna"
 		(at 44.45 5.08 0)
 		(unlocked yes)
 		(layer "F.SilkS")
 		(uuid "5130d7e2-1bf8-44e6-9dc2-7502f893053f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(fp_text user "USB"
+		(at 69.85 16.51 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "cd46d132-6720-4483-b1eb-cf21442f37cb")
 		(effects
 			(font
 				(size 1 1)
