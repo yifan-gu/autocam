@@ -1,4 +1,4 @@
-24753129928808750
+24754871049407778
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -76,6 +76,13 @@ Simple Resistor
 0
 2
 2
+Autocam
+USB-C 3.7V Lithium Battery Charger
+
+
+0
+6
+1
 Autocam
 Waveshare CAN Transreceiver
 

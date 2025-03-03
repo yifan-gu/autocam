@@ -109,6 +109,130 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Autocam:Simple Resistor"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Simple Resistor"
+				(at 0 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "R res resistor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "R_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "Simple Resistor_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Simple Resistor_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "autocam:MP1584EN_5V_regulator"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -1240,7 +1364,7 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 120.65) (xy 125.73 120.65)
+			(xy 93.98 120.65) (xy 125.73 120.65)
 		)
 		(stroke
 			(width 0)
@@ -1300,7 +1424,7 @@
 	)
 	(wire
 		(pts
-			(xy 113.03 130.81) (xy 137.16 130.81)
+			(xy 92.71 130.81) (xy 104.14 130.81)
 		)
 		(stroke
 			(width 0)
@@ -1330,13 +1454,23 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 133.35) (xy 125.73 133.35)
+			(xy 93.98 133.35) (xy 125.73 133.35)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "53d4c6ef-bad6-4ed2-88df-02c0af8cbaa2")
+	)
+	(wire
+		(pts
+			(xy 111.76 123.19) (xy 137.16 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "541cc024-bcf2-4224-bd98-178cdd72623a")
 	)
 	(wire
 		(pts
@@ -1350,6 +1484,16 @@
 	)
 	(wire
 		(pts
+			(xy 111.7236 135.89) (xy 137.16 135.89)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7321ef65-8d23-45f7-b16f-d9abe6fc8522")
+	)
+	(wire
+		(pts
 			(xy 213.36 92.71) (xy 203.2 92.71)
 		)
 		(stroke
@@ -1357,6 +1501,16 @@
 			(type default)
 		)
 		(uuid "9ac0c948-6677-4d4b-8459-bd860164faab")
+	)
+	(wire
+		(pts
+			(xy 111.76 118.11) (xy 137.16 118.11)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bc2d744d-e9f4-4286-8d68-a5bcc040ec26")
 	)
 	(wire
 		(pts
@@ -1390,7 +1544,7 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 135.89) (xy 137.16 135.89)
+			(xy 93.98 135.89) (xy 104.1036 135.89)
 		)
 		(stroke
 			(width 0)
@@ -1407,6 +1561,16 @@
 			(type default)
 		)
 		(uuid "dd4216e6-9f0c-4b25-a207-87938941cb6d")
+	)
+	(wire
+		(pts
+			(xy 111.76 130.81) (xy 137.16 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e184c709-8bf4-41cd-9fcc-deec97442915")
 	)
 	(wire
 		(pts
@@ -1430,7 +1594,7 @@
 	)
 	(wire
 		(pts
-			(xy 113.03 118.11) (xy 137.16 118.11)
+			(xy 92.71 118.11) (xy 104.14 118.11)
 		)
 		(stroke
 			(width 0)
@@ -1450,7 +1614,7 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 123.19) (xy 137.16 123.19)
+			(xy 93.98 123.19) (xy 104.14 123.19)
 		)
 		(stroke
 			(width 0)
@@ -1467,6 +1631,73 @@
 			(type default)
 		)
 		(uuid "f8920c8c-3976-4ee1-b8e1-e64feb4c086b")
+	)
+	(symbol
+		(lib_id "Autocam:Simple Resistor")
+		(at 107.95 130.81 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "053eb0f3-dad6-4458-bf3f-35cb42f5896e")
+		(property "Reference" "R3"
+			(at 107.95 124.46 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "2000Ω"
+			(at 107.95 127 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Autocam:Simple Resistor"
+			(at 107.95 132.588 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 107.95 130.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 107.95 130.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "9997bddf-2578-452a-a28f-a8f4e18e1904")
+		)
+		(pin "2"
+			(uuid "81b1b0c4-9d55-471c-b6cb-5a475260d0b9")
+		)
+		(instances
+			(project "sensor"
+				(path "/c67b54ef-a957-493c-ad24-f307495fd83c"
+					(reference "R3")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
 		(lib_id "autocam:MP1584EN_5V_regulator")
@@ -1543,7 +1774,7 @@
 	)
 	(symbol
 		(lib_id "autocam:RGB_LED_round")
-		(at 114.3 125.73 90)
+		(at 93.98 125.73 90)
 		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
@@ -1552,7 +1783,7 @@
 		(dnp no)
 		(uuid "3b6dde80-612d-4202-a0cd-f96e94feaa96")
 		(property "Reference" "TAG_LED1"
-			(at 104.394 134.62 90)
+			(at 84.074 134.62 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1561,7 +1792,7 @@
 			)
 		)
 		(property "Value" "~"
-			(at 118.11 133.35 90)
+			(at 97.79 133.35 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1570,7 +1801,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Anode RGB LED (Round)"
-			(at 114.3 125.73 0)
+			(at 93.98 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1579,7 +1810,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 114.3 125.73 0)
+			(at 93.98 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1588,7 +1819,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 114.3 125.73 0)
+			(at 93.98 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1619,7 +1850,7 @@
 	)
 	(symbol
 		(lib_id "autocam:RGB_LED_round")
-		(at 114.3 113.03 90)
+		(at 93.98 113.03 90)
 		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
@@ -1628,7 +1859,7 @@
 		(dnp no)
 		(uuid "5b28ed90-f73c-4a5c-ae7d-cbc4b5fd1315")
 		(property "Reference" "SERVER_LED1"
-			(at 115.062 121.92 90)
+			(at 94.742 121.92 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1637,7 +1868,7 @@
 			)
 		)
 		(property "Value" "~"
-			(at 111.4602 128.27 0)
+			(at 91.1402 128.27 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1646,7 +1877,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Anode RGB LED (Round)"
-			(at 114.3 113.03 0)
+			(at 93.98 113.03 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1655,7 +1886,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 114.3 113.03 0)
+			(at 93.98 113.03 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1664,7 +1895,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 114.3 113.03 0)
+			(at 93.98 113.03 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1688,6 +1919,73 @@
 			(project ""
 				(path "/c67b54ef-a957-493c-ad24-f307495fd83c"
 					(reference "SERVER_LED1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Autocam:Simple Resistor")
+		(at 107.9136 135.89 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "73b8bcdf-e46d-4f9d-bf14-916a49c3c720")
+		(property "Reference" "R4"
+			(at 107.9136 129.54 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "2000Ω"
+			(at 107.9136 132.08 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Autocam:Simple Resistor"
+			(at 107.9136 137.668 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 107.9136 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 107.9136 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "35be416c-1448-4a5a-814d-b12ee38724e2")
+		)
+		(pin "2"
+			(uuid "fe738caf-518d-4ca6-8bad-69c3b415754e")
+		)
+		(instances
+			(project "sensor"
+				(path "/c67b54ef-a957-493c-ad24-f307495fd83c"
+					(reference "R4")
 					(unit 1)
 				)
 			)
@@ -1775,6 +2073,73 @@
 			(project ""
 				(path "/c67b54ef-a957-493c-ad24-f307495fd83c"
 					(reference "CAN_Transreceiver1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Autocam:Simple Resistor")
+		(at 107.95 118.11 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "cb435f44-5a96-4aae-aa32-bf5c3fbe2fca")
+		(property "Reference" "R1"
+			(at 107.95 111.76 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "2000Ω"
+			(at 107.95 114.3 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Autocam:Simple Resistor"
+			(at 107.95 119.888 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 107.95 118.11 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 107.95 118.11 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "97322153-27ac-4fdd-b158-b3160fec1ce1")
+		)
+		(pin "2"
+			(uuid "f6acfc00-76a6-40c1-9686-0888c5eb692b")
+		)
+		(instances
+			(project ""
+				(path "/c67b54ef-a957-493c-ad24-f307495fd83c"
+					(reference "R1")
 					(unit 1)
 				)
 			)
@@ -2003,6 +2368,73 @@
 			(project ""
 				(path "/c67b54ef-a957-493c-ad24-f307495fd83c"
 					(reference "ESP32_UWB1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Autocam:Simple Resistor")
+		(at 107.95 123.19 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "fec9b20e-d916-4e39-acbd-feb809f66fff")
+		(property "Reference" "R2"
+			(at 107.95 116.84 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "2000Ω"
+			(at 107.95 119.38 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Autocam:Simple Resistor"
+			(at 107.95 124.968 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 107.95 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 107.95 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "74a14257-0133-4b23-a619-5a8dcaaace7c")
+		)
+		(pin "2"
+			(uuid "066ee4c0-a6e7-4932-a5c1-4aec94caee87")
+		)
+		(instances
+			(project "sensor"
+				(path "/c67b54ef-a957-493c-ad24-f307495fd83c"
+					(reference "R2")
 					(unit 1)
 				)
 			)

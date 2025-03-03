@@ -1,4 +1,4 @@
-24749648032452068
+24754870964165770
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -20,6 +20,20 @@ Autocam
 0
 2
 2
+Autocam
+5V DC-DC Step Up Converter (Rectangle)
+
+
+0
+5
+5
+Autocam
+5V DC-DC Step Up Converter (Square)
+
+
+0
+3
+3
 Autocam
 Anode RGB LED (Rectangle)
 
@@ -62,6 +76,13 @@ Simple Resistor
 0
 2
 2
+Autocam
+USB-C 3.7V Lithium Battery Charger
+
+
+0
+6
+1
 Autocam
 Waveshare CAN Transreceiver
 

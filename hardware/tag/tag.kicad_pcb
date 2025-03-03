@@ -375,6 +375,109 @@
 		)
 		(embedded_fonts no)
 	)
+	(footprint "Autocam:Simple Resistor"
+		(layer "F.Cu")
+		(uuid "115afd6a-8e68-4339-b0de-d3391734a280")
+		(at 132.08 115.57 90)
+		(property "Reference" "R1"
+			(at 3.774036 -0.672769 90)
+			(unlocked yes)
+			(layer "F.SilkS")
+			(uuid "a2de35bf-d7a2-4f5b-8c04-710789b806ed")
+			(effects
+				(font
+					(size 0.5 0.5)
+					(thickness 0.0625)
+				)
+			)
+		)
+		(property "Value" "2000Ω"
+			(at 3.81 0 90)
+			(unlocked yes)
+			(layer "F.SilkS")
+			(uuid "7e69a656-ee54-4baa-a2cd-4302e3742112")
+			(effects
+				(font
+					(size 0.5 0.5)
+					(thickness 0.0625)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 90)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "d2bc0c1c-aed8-4aea-bf6a-09636bd4e405")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 90)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "96725c9d-0b90-4dac-b726-2bb00f6218d5")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property ki_fp_filters "R_*")
+		(path "/551120cd-2188-4c05-86ad-ecc931499f0b")
+		(sheetname "/")
+		(sheetfile "tag.kicad_sch")
+		(fp_rect
+			(start -1.27 -1.27)
+			(end 8.89 1.27)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.SilkS")
+			(uuid "eef8c589-4f9b-4445-b180-3be69938ab97")
+		)
+		(fp_text user "${REFERENCE}"
+			(at 3.81 1.24 90)
+			(unlocked yes)
+			(layer "F.Fab")
+			(uuid "f3769e9b-d9a9-48d8-9dee-59ce8f03c758")
+			(effects
+				(font
+					(size 0.5 0.5)
+					(thickness 0.0625)
+				)
+			)
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 90)
+			(size 1.8 1.8)
+			(drill 0.8)
+			(layers "*.Cu" "*.Mask")
+			(remove_unused_layers no)
+			(net 34 "Net-(RGB_LED_ROUND1-R)")
+			(pintype "passive")
+			(uuid "368e550b-8e1d-4880-b2ba-924815c61720")
+		)
+		(pad "2" thru_hole circle
+			(at 7.62 0 90)
+			(size 1.8 1.8)
+			(drill 0.8)
+			(layers "*.Cu" "*.Mask")
+			(remove_unused_layers no)
+			(net 8 "Net-(ESP32_UWB1-IO2)")
+			(pintype "passive")
+			(uuid "44343554-e841-499f-9267-64f0631d53c0")
+		)
+		(embedded_fonts no)
+	)
 	(footprint "Autocam:Makersfab ESP32 UWB"
 		(layer "F.Cu")
 		(uuid "5a5716a7-2dcd-48aa-aca0-4b7873951df8")
@@ -1376,13 +1479,13 @@
 	)
 	(footprint "Autocam:Simple Resistor"
 		(layer "F.Cu")
-		(uuid "662928d0-816d-44a7-acfc-ea18c2838ef5")
-		(at 143.27 115.67 90)
-		(property "Reference" "R4"
+		(uuid "63c3344e-8b82-4d13-a30c-ff71b88752fb")
+		(at 136.06 115.57 90)
+		(property "Reference" "R2"
 			(at 3.774036 -0.672769 90)
 			(unlocked yes)
 			(layer "F.SilkS")
-			(uuid "81dfcdca-257b-415b-a7f3-e76dde2d29b9")
+			(uuid "c47a1b90-304e-48b5-ba1e-7fd5e506e9cb")
 			(effects
 				(font
 					(size 0.5 0.5)
@@ -1394,7 +1497,7 @@
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
-			(uuid "0242aae3-865e-4c0c-a2b3-17a67cfaf88a")
+			(uuid "4f9c0ea6-23a2-4df7-8000-4b41a26d13ce")
 			(effects
 				(font
 					(size 0.5 0.5)
@@ -1407,7 +1510,7 @@
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "a6e6b80b-fe53-462d-a5d1-59037ad50e87")
+			(uuid "5d56dde5-741a-4760-a649-dd2a0d6db69a")
 			(effects
 				(font
 					(size 1 1)
@@ -1420,7 +1523,7 @@
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "637ae414-5fdf-4b9f-8be1-f403f1874ea7")
+			(uuid "5b4156e4-cd20-429a-984a-b26f4dacb1d8")
 			(effects
 				(font
 					(size 1 1)
@@ -1429,7 +1532,7 @@
 			)
 		)
 		(property ki_fp_filters "R_*")
-		(path "/984b5206-27ae-4087-99d5-93e511645b33")
+		(path "/8dafabe5-456a-4700-81a0-741b075c9688")
 		(sheetname "/")
 		(sheetfile "tag.kicad_sch")
 		(fp_rect
@@ -1441,13 +1544,116 @@
 			)
 			(fill no)
 			(layer "F.SilkS")
-			(uuid "7f470b22-7bc7-4d83-b319-d26db3bd099d")
+			(uuid "4a405bd4-a2c3-46bc-aab4-f47c6be07bc2")
 		)
 		(fp_text user "${REFERENCE}"
 			(at 3.81 1.24 90)
 			(unlocked yes)
 			(layer "F.Fab")
-			(uuid "668eef74-ce65-47b9-896a-d7408ac15e2a")
+			(uuid "21322912-2bdd-4907-a759-9fe3d0082a68")
+			(effects
+				(font
+					(size 0.5 0.5)
+					(thickness 0.0625)
+				)
+			)
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 90)
+			(size 1.8 1.8)
+			(drill 0.8)
+			(layers "*.Cu" "*.Mask")
+			(remove_unused_layers no)
+			(net 35 "Net-(RGB_LED_ROUND1-G)")
+			(pintype "passive")
+			(uuid "731c91f8-3ef4-4c6d-a5dd-6282cdc08804")
+		)
+		(pad "2" thru_hole circle
+			(at 7.62 0 90)
+			(size 1.8 1.8)
+			(drill 0.8)
+			(layers "*.Cu" "*.Mask")
+			(remove_unused_layers no)
+			(net 17 "Net-(ESP32_UWB1-IO12)")
+			(pintype "passive")
+			(uuid "dbbb02a3-fa39-4e4a-bf02-98bcdf94a5f2")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "Autocam:Simple Resistor"
+		(layer "F.Cu")
+		(uuid "7c0c8c69-d765-41dd-8e9f-85cf94aa665c")
+		(at 143.34 115.57 90)
+		(property "Reference" "R4"
+			(at 3.774036 -0.672769 90)
+			(unlocked yes)
+			(layer "F.SilkS")
+			(uuid "47b2fccb-6041-4ad2-94e2-0c78cafbd94a")
+			(effects
+				(font
+					(size 0.5 0.5)
+					(thickness 0.0625)
+				)
+			)
+		)
+		(property "Value" "2000Ω"
+			(at 3.81 0 90)
+			(unlocked yes)
+			(layer "F.SilkS")
+			(uuid "100db453-99a6-4aef-8e5a-ec8fd5b019fa")
+			(effects
+				(font
+					(size 0.5 0.5)
+					(thickness 0.0625)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 90)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "e63f127d-020e-4c15-b44e-3e97c7609711")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 90)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "e550c3d6-9a65-432e-aca5-3431043946c2")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property ki_fp_filters "R_*")
+		(path "/003a148b-862f-4dda-aa28-b8c265bdc1b3")
+		(sheetname "/")
+		(sheetfile "tag.kicad_sch")
+		(fp_rect
+			(start -1.27 -1.27)
+			(end 8.89 1.27)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.SilkS")
+			(uuid "38e43114-28fa-4b55-b4e3-6cbafe854e4f")
+		)
+		(fp_text user "${REFERENCE}"
+			(at 3.81 1.24 90)
+			(unlocked yes)
+			(layer "F.Fab")
+			(uuid "3af58a46-554c-481a-bcb5-f1a51969f73c")
 			(effects
 				(font
 					(size 0.5 0.5)
@@ -1463,7 +1669,7 @@
 			(remove_unused_layers no)
 			(net 37 "Net-(RGB_LED_ROUND2-G)")
 			(pintype "passive")
-			(uuid "c9cb05f7-7ed4-494f-8225-4ec8eacd4167")
+			(uuid "5a14b77b-d13d-49f0-b8a7-a67ce36b9f9f")
 		)
 		(pad "2" thru_hole circle
 			(at 7.62 0 90)
@@ -1473,7 +1679,7 @@
 			(remove_unused_layers no)
 			(net 18 "Net-(ESP32_UWB1-IO14)")
 			(pintype "passive")
-			(uuid "df83b9c5-65af-485e-ac90-4f6b4ea71986")
+			(uuid "4d11fc23-edb2-40d7-a472-efff83548c9b")
 		)
 		(embedded_fonts no)
 	)
@@ -1829,116 +2035,13 @@
 	)
 	(footprint "Autocam:Simple Resistor"
 		(layer "F.Cu")
-		(uuid "a0418cbf-b5bb-4ff9-8701-a84de8e20986")
-		(at 135.99 115.67 90)
-		(property "Reference" "R2"
-			(at 3.774036 -0.672769 90)
-			(unlocked yes)
-			(layer "F.SilkS")
-			(uuid "0245d4c9-51cf-444f-976d-556e2d9afeac")
-			(effects
-				(font
-					(size 0.5 0.5)
-					(thickness 0.0625)
-				)
-			)
-		)
-		(property "Value" "2000Ω"
-			(at 3.81 0 90)
-			(unlocked yes)
-			(layer "F.SilkS")
-			(uuid "376bc97a-368e-4e8b-8110-a0afeef4a812")
-			(effects
-				(font
-					(size 0.5 0.5)
-					(thickness 0.0625)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 0 0 90)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "0f208921-8913-4e3d-aa47-7fbe6d9e8af8")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 0 0 90)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "08396ade-cfbe-4e56-90dc-04eae95a4abe")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property ki_fp_filters "R_*")
-		(path "/ea5ed01a-7842-4622-9da9-c9bf82fe2c41")
-		(sheetname "/")
-		(sheetfile "tag.kicad_sch")
-		(fp_rect
-			(start -1.27 -1.27)
-			(end 8.89 1.27)
-			(stroke
-				(width 0.1)
-				(type solid)
-			)
-			(fill no)
-			(layer "F.SilkS")
-			(uuid "a47ea4be-1ba4-4f8b-8598-f761084a3199")
-		)
-		(fp_text user "${REFERENCE}"
-			(at 3.81 1.24 90)
-			(unlocked yes)
-			(layer "F.Fab")
-			(uuid "bf3568dd-e196-424e-a9ac-d5a4ea89a12e")
-			(effects
-				(font
-					(size 0.5 0.5)
-					(thickness 0.0625)
-				)
-			)
-		)
-		(pad "1" thru_hole circle
-			(at 0 0 90)
-			(size 1.8 1.8)
-			(drill 0.8)
-			(layers "*.Cu" "*.Mask")
-			(remove_unused_layers no)
-			(net 35 "Net-(RGB_LED_ROUND1-G)")
-			(pintype "passive")
-			(uuid "4f6cbf12-e293-4996-9d13-b1c51f15b249")
-		)
-		(pad "2" thru_hole circle
-			(at 7.62 0 90)
-			(size 1.8 1.8)
-			(drill 0.8)
-			(layers "*.Cu" "*.Mask")
-			(remove_unused_layers no)
-			(net 17 "Net-(ESP32_UWB1-IO12)")
-			(pintype "passive")
-			(uuid "4a6d078e-4771-4a82-bdca-bb3cd2ac351f")
-		)
-		(embedded_fonts no)
-	)
-	(footprint "Autocam:Simple Resistor"
-		(layer "F.Cu")
-		(uuid "ad6578df-1928-41e1-acd9-277602eb185a")
-		(at 139.63 115.67 90)
+		(uuid "a5669e39-280d-4dce-913f-506a2a2eb498")
+		(at 139.7 115.57 90)
 		(property "Reference" "R3"
 			(at 3.774036 -0.672769 90)
 			(unlocked yes)
 			(layer "F.SilkS")
-			(uuid "deea42f3-8a71-409e-bbb7-ff5fd0bce828")
+			(uuid "d1d59469-b9fd-4cc0-b68a-7abb0373c6ef")
 			(effects
 				(font
 					(size 0.5 0.5)
@@ -1950,7 +2053,7 @@
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
-			(uuid "897744d8-479d-4af2-b9f5-7630d5a5bdf4")
+			(uuid "1ea415e2-467d-4b85-a6ff-4253fa737e6e")
 			(effects
 				(font
 					(size 0.5 0.5)
@@ -1963,7 +2066,7 @@
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "a3666cd0-f75c-438a-845d-d877fd4a2f1a")
+			(uuid "bfd31e70-22fa-4e90-a3b9-8f893acf7f0c")
 			(effects
 				(font
 					(size 1 1)
@@ -1976,7 +2079,7 @@
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "eb83acaa-cf9d-495c-9347-63b8b38e21b3")
+			(uuid "b4fde728-242d-476e-9779-1beb9c68dcc6")
 			(effects
 				(font
 					(size 1 1)
@@ -1985,7 +2088,7 @@
 			)
 		)
 		(property ki_fp_filters "R_*")
-		(path "/2757973c-c1ce-47bf-8d6f-db0466a634f2")
+		(path "/0513814d-97b3-444d-a6c3-54eea938b949")
 		(sheetname "/")
 		(sheetfile "tag.kicad_sch")
 		(fp_rect
@@ -1997,13 +2100,13 @@
 			)
 			(fill no)
 			(layer "F.SilkS")
-			(uuid "a96c5732-d9f3-44bd-ae12-7aa4bf4eecd0")
+			(uuid "91ada0ea-1c70-4582-9edc-c437b56ba3ad")
 		)
 		(fp_text user "${REFERENCE}"
 			(at 3.81 1.24 90)
 			(unlocked yes)
 			(layer "F.Fab")
-			(uuid "0ea4a9ef-1924-4789-a90b-6bba3fd57bfb")
+			(uuid "f6564cbe-7fdf-4b14-b7e1-a5be3f4a86c0")
 			(effects
 				(font
 					(size 0.5 0.5)
@@ -2019,7 +2122,7 @@
 			(remove_unused_layers no)
 			(net 36 "Net-(RGB_LED_ROUND2-R)")
 			(pintype "passive")
-			(uuid "d98890c3-af05-498e-b718-c4e8a4eb1897")
+			(uuid "853b5c06-d8b6-4b1b-a3b4-2206c19afda6")
 		)
 		(pad "2" thru_hole circle
 			(at 7.62 0 90)
@@ -2029,110 +2132,7 @@
 			(remove_unused_layers no)
 			(net 21 "Net-(ESP32_UWB1-IO13)")
 			(pintype "passive")
-			(uuid "6794219c-1191-4079-977b-04d4d95fa1d5")
-		)
-		(embedded_fonts no)
-	)
-	(footprint "Autocam:Simple Resistor"
-		(layer "F.Cu")
-		(uuid "e42d8fb7-36cd-4320-8f49-9b180b9e57a2")
-		(at 132.35 115.67 90)
-		(property "Reference" "R1"
-			(at 3.774036 -0.672769 90)
-			(unlocked yes)
-			(layer "F.SilkS")
-			(uuid "94611fdd-c246-43aa-94d5-430c3450fc7f")
-			(effects
-				(font
-					(size 0.5 0.5)
-					(thickness 0.0625)
-				)
-			)
-		)
-		(property "Value" "2000Ω"
-			(at 3.81 0 90)
-			(unlocked yes)
-			(layer "F.SilkS")
-			(uuid "3f81b875-ab79-4c2d-a9af-77068ec2a703")
-			(effects
-				(font
-					(size 0.5 0.5)
-					(thickness 0.0625)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 0 0 90)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "397f9eca-b56b-4289-9878-8619e631281c")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 0 0 90)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "2704d8e1-595a-40c3-9638-4990eda6f03b")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property ki_fp_filters "R_*")
-		(path "/77ebdd2d-d791-40d2-b03b-4ff0be8c471e")
-		(sheetname "/")
-		(sheetfile "tag.kicad_sch")
-		(fp_rect
-			(start -1.27 -1.27)
-			(end 8.89 1.27)
-			(stroke
-				(width 0.1)
-				(type solid)
-			)
-			(fill no)
-			(layer "F.SilkS")
-			(uuid "3202ec2f-c293-45cf-9218-4cde83c3d673")
-		)
-		(fp_text user "${REFERENCE}"
-			(at 3.81 1.24 90)
-			(unlocked yes)
-			(layer "F.Fab")
-			(uuid "f5a259ba-897a-434c-b550-6c1bd48c40b7")
-			(effects
-				(font
-					(size 0.5 0.5)
-					(thickness 0.0625)
-				)
-			)
-		)
-		(pad "1" thru_hole circle
-			(at 0 0 90)
-			(size 1.8 1.8)
-			(drill 0.8)
-			(layers "*.Cu" "*.Mask")
-			(remove_unused_layers no)
-			(net 34 "Net-(RGB_LED_ROUND1-R)")
-			(pintype "passive")
-			(uuid "8884a5b0-68c7-43fd-8b8d-3d4b589f4405")
-		)
-		(pad "2" thru_hole circle
-			(at 7.62 0 90)
-			(size 1.8 1.8)
-			(drill 0.8)
-			(layers "*.Cu" "*.Mask")
-			(remove_unused_layers no)
-			(net 8 "Net-(ESP32_UWB1-IO2)")
-			(pintype "passive")
-			(uuid "bd5f7aac-b23b-4f3d-aa2e-3dbbdbedac60")
+			(uuid "7eb404c0-c518-4411-9816-7772a1e9a22e")
 		)
 		(embedded_fonts no)
 	)

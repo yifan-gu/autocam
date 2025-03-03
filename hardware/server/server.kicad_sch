@@ -982,7 +982,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Device:R"
+		(symbol "Autocam:Simple Resistor"
 			(pin_numbers
 				(hide yes)
 			)
@@ -1000,7 +1000,7 @@
 					)
 				)
 			)
-			(property "Value" "R"
+			(property "Value" "Simple Resistor"
 				(at 0 0 90)
 				(effects
 					(font
@@ -1053,7 +1053,7 @@
 					(hide yes)
 				)
 			)
-			(symbol "R_0_1"
+			(symbol "Simple Resistor_0_1"
 				(rectangle
 					(start -1.016 -2.54)
 					(end 1.016 2.54)
@@ -1066,7 +1066,7 @@
 					)
 				)
 			)
-			(symbol "R_1_1"
+			(symbol "Simple Resistor_1_1"
 				(pin passive line
 					(at 0 3.81 270)
 					(length 1.27)
@@ -1505,140 +1505,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 143.51 104.14 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "11374196-18bd-4c80-ba75-919a4ebf022a")
-		(property "Reference" "R2"
-			(at 143.51 101.6 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "2000Ω"
-			(at 143.51 104.14 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Autocam:Simple Resistor"
-			(at 143.51 105.918 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 143.51 104.14 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 143.51 104.14 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "80c70332-c8c6-489b-899a-2dc7facc576f")
-		)
-		(pin "2"
-			(uuid "84c9893f-c489-4b52-a4e7-8884e704ae83")
-		)
-		(instances
-			(project "server"
-				(path "/2207becf-5ee2-475e-b366-27d8c790b7c3"
-					(reference "R2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 143.51 109.22 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "14a0e439-b020-497b-91e2-ce018f55670a")
-		(property "Reference" "R4"
-			(at 143.51 106.68 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "2000Ω"
-			(at 143.51 109.22 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Autocam:Simple Resistor"
-			(at 143.51 110.998 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 143.51 109.22 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 143.51 109.22 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "729cd62d-4f55-4d1d-90cb-bcdbca161fe3")
-		)
-		(pin "2"
-			(uuid "4f4ba437-87f9-488f-9809-f03fa407831b")
-		)
-		(instances
-			(project "server"
-				(path "/2207becf-5ee2-475e-b366-27d8c790b7c3"
-					(reference "R4")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Autocam:2_PIN_Connector")
 		(at 140.97 69.85 0)
 		(unit 1)
@@ -1861,6 +1727,140 @@
 		)
 	)
 	(symbol
+		(lib_id "Autocam:Simple Resistor")
+		(at 143.51 101.6 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "53afb238-c660-47ad-a207-dae1b5a81d24")
+		(property "Reference" "R1"
+			(at 143.51 99.314 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "2000Ω"
+			(at 143.764 101.6 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Autocam:Simple Resistor"
+			(at 143.51 103.378 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 143.51 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 143.51 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "49a00bdf-4746-43c8-a4db-99ef67656600")
+		)
+		(pin "1"
+			(uuid "ca78edd9-222b-4b44-8012-b75e193c7e05")
+		)
+		(instances
+			(project ""
+				(path "/2207becf-5ee2-475e-b366-27d8c790b7c3"
+					(reference "R1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Autocam:Simple Resistor")
+		(at 143.51 114.3 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "587ea374-9073-4d54-9281-f7ac601ee9a0")
+		(property "Reference" "R6"
+			(at 143.51 112.014 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "2000Ω"
+			(at 143.764 114.3 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Autocam:Simple Resistor"
+			(at 143.51 116.078 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 143.51 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 143.51 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "e358f7ad-745e-4235-af68-22189c6cc8e5")
+		)
+		(pin "1"
+			(uuid "71dd9740-188b-45b2-8a26-90a2459f68b0")
+		)
+		(instances
+			(project "server"
+				(path "/2207becf-5ee2-475e-b366-27d8c790b7c3"
+					(reference "R6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Autocam:ANODE_RGB_LED_Round")
 		(at 186.69 97.79 0)
 		(unit 1)
@@ -1936,16 +1936,16 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 143.51 111.76 90)
+		(lib_id "Autocam:Simple Resistor")
+		(at 143.51 104.14 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "820f85ac-fa0d-4d89-8369-a1c2c7308d2e")
-		(property "Reference" "R5"
-			(at 143.51 109.22 90)
+		(uuid "91c167b0-36d8-41b5-9239-04c116486398")
+		(property "Reference" "R2"
+			(at 143.51 101.854 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1953,7 +1953,7 @@
 			)
 		)
 		(property "Value" "2000Ω"
-			(at 143.51 111.76 90)
+			(at 143.764 104.14 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1961,7 +1961,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Simple Resistor"
-			(at 143.51 113.538 90)
+			(at 143.51 105.918 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1970,7 +1970,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 143.51 111.76 0)
+			(at 143.51 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1979,7 +1979,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 143.51 111.76 0)
+			(at 143.51 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1987,32 +1987,32 @@
 				(hide yes)
 			)
 		)
-		(pin "1"
-			(uuid "a7f2f605-5258-4e0b-8f9b-246a0d376b06")
-		)
 		(pin "2"
-			(uuid "2f19123b-8a0b-44c2-9a81-e9a9e9c6725d")
+			(uuid "1358f69f-8865-4001-840e-a7fc339781ef")
+		)
+		(pin "1"
+			(uuid "f3661c5c-5ee9-4967-a6d8-2f50fda94962")
 		)
 		(instances
 			(project "server"
 				(path "/2207becf-5ee2-475e-b366-27d8c790b7c3"
-					(reference "R5")
+					(reference "R2")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 143.51 101.6 90)
+		(lib_id "Autocam:Simple Resistor")
+		(at 143.51 109.22 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8cfafd64-4070-48af-821a-4345e77d8e56")
-		(property "Reference" "R1"
-			(at 143.51 99.06 90)
+		(uuid "9e4f8a61-9e4f-4cd5-81e0-a1aa8345a37d")
+		(property "Reference" "R4"
+			(at 143.51 106.934 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2020,7 +2020,7 @@
 			)
 		)
 		(property "Value" "2000Ω"
-			(at 143.51 101.6 90)
+			(at 143.764 109.22 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2028,7 +2028,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Simple Resistor"
-			(at 143.51 103.378 90)
+			(at 143.51 110.998 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2037,7 +2037,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 143.51 101.6 0)
+			(at 143.51 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2046,91 +2046,24 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 143.51 101.6 0)
+			(at 143.51 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(hide yes)
 			)
-		)
-		(pin "1"
-			(uuid "7c64eac9-d667-47c2-b071-0a45df61c60c")
 		)
 		(pin "2"
-			(uuid "e5d8835f-49c5-41e2-a1c3-80b67bbbd517")
-		)
-		(instances
-			(project ""
-				(path "/2207becf-5ee2-475e-b366-27d8c790b7c3"
-					(reference "R1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 143.51 114.3 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "a00ee1b2-170f-48df-8743-d138b88bc4ed")
-		(property "Reference" "R6"
-			(at 143.51 111.76 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "2000Ω"
-			(at 143.51 114.3 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Autocam:Simple Resistor"
-			(at 143.51 116.078 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 143.51 114.3 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 143.51 114.3 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
+			(uuid "ea655fa7-0b5a-40dc-a020-468cf7ecc956")
 		)
 		(pin "1"
-			(uuid "518ba68a-d6d3-404e-8922-66a0cbc78839")
-		)
-		(pin "2"
-			(uuid "44905053-c36f-4cf6-b493-1d9a5ecd910b")
+			(uuid "e02f93ed-43d6-4ad4-9818-c5530e3b52e2")
 		)
 		(instances
 			(project "server"
 				(path "/2207becf-5ee2-475e-b366-27d8c790b7c3"
-					(reference "R6")
+					(reference "R4")
 					(unit 1)
 				)
 			)
@@ -2212,6 +2145,73 @@
 		)
 	)
 	(symbol
+		(lib_id "Autocam:Simple Resistor")
+		(at 143.51 106.68 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "d3992388-2fe1-490e-8143-1a5387b78958")
+		(property "Reference" "R3"
+			(at 143.51 104.394 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "2000Ω"
+			(at 143.764 106.68 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Autocam:Simple Resistor"
+			(at 143.51 108.458 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 143.51 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 143.51 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "650fe16f-7223-4eaf-bf75-a8c7143e94a7")
+		)
+		(pin "1"
+			(uuid "8134a40a-50fb-44d8-bd70-74183ed0110d")
+		)
+		(instances
+			(project "server"
+				(path "/2207becf-5ee2-475e-b366-27d8c790b7c3"
+					(reference "R3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Autocam:2_PIN_Connector")
 		(at 154.94 69.85 0)
 		(unit 1)
@@ -2282,16 +2282,16 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 143.51 106.68 90)
+		(lib_id "Autocam:Simple Resistor")
+		(at 143.51 111.76 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e4fe324c-9080-41ca-b4b0-bbf44864d034")
-		(property "Reference" "R3"
-			(at 143.51 104.14 90)
+		(uuid "f4f498e2-322c-4971-ad00-0f2af523697d")
+		(property "Reference" "R5"
+			(at 143.51 109.474 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2299,7 +2299,7 @@
 			)
 		)
 		(property "Value" "2000Ω"
-			(at 143.51 106.68 90)
+			(at 143.764 111.76 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2307,7 +2307,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Simple Resistor"
-			(at 143.51 108.458 90)
+			(at 143.51 113.538 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2316,7 +2316,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 143.51 106.68 0)
+			(at 143.51 111.76 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2325,7 +2325,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 143.51 106.68 0)
+			(at 143.51 111.76 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2333,16 +2333,16 @@
 				(hide yes)
 			)
 		)
-		(pin "1"
-			(uuid "cf11907d-e97e-442b-b6b4-bec240d863fc")
-		)
 		(pin "2"
-			(uuid "2e026f2a-1138-4542-8652-b6eacb49229c")
+			(uuid "7666bb90-84b8-44a5-9cbc-d8428de4bab7")
+		)
+		(pin "1"
+			(uuid "dbaf0f5a-80b0-4905-82cc-11061ccb9db8")
 		)
 		(instances
 			(project "server"
 				(path "/2207becf-5ee2-475e-b366-27d8c790b7c3"
-					(reference "R3")
+					(reference "R5")
 					(unit 1)
 				)
 			)

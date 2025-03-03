@@ -15,10 +15,10 @@
 			)
 		)
 	)
-	(property "Value" "Resistor"
+	(property "Value" "Resistor Value"
 		(at 3.81 0 0)
 		(unlocked yes)
-		(layer "F.Fab")
+		(layer "F.SilkS")
 		(uuid "ab35fe6a-cf5a-4dbb-a26a-0ed89f330ad2")
 		(effects
 			(font

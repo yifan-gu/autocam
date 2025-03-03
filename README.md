@@ -10,6 +10,7 @@ Arduino files for my auto-following camera car!
 - [x] Add state indicator in the web UI
 - [x] Add LED state indicators
 - [ ] Add battery state LED
+- [ ] Add remote lock mode
 - [ ] Add PCB boards
   - [x] Sensor
   - [ ] Verify LED resistor values
