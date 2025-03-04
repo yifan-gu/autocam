@@ -13,7 +13,7 @@ Arduino files for my auto-following camera car!
 - [ ] Add remote lock mode
 - [ ] Add PCB boards
   - [x] Sensor
-  - [ ] Verify LED resistor values
+  - [x] Verify LED resistor values
   - [x] Tag
   - [x] Server
   - [ ] Remote
