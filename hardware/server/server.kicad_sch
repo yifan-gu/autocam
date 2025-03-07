@@ -109,141 +109,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Autocam:ANODE_RGB_LED_Rectangle"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "U?"
-				(at 0 1.27 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" ""
-				(at -8.89 -3.81 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at -8.89 -3.81 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at -8.89 -3.81 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" ""
-				(at -8.89 -3.81 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "ANODE_RGB_LED_Rectangle_1_1"
-				(rectangle
-					(start -6.35 5.08)
-					(end 6.35 -2.54)
-					(stroke
-						(width 0)
-						(type solid)
-					)
-					(fill
-						(type color)
-						(color 255 255 194 1)
-					)
-				)
-				(pin passive line
-					(at -3.81 -2.54 270)
-					(length 2.54)
-					(name "R"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at -1.27 -2.54 270)
-					(length 2.54)
-					(name "VCC"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 1.27 -2.54 270)
-					(length 2.54)
-					(name "G"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 3.81 -2.54 270)
-					(length 2.54)
-					(name "B"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "Autocam:ANODE_RGB_LED_Round"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -1141,7 +1006,7 @@
 	)
 	(wire
 		(pts
-			(xy 185.42 119.38) (xy 203.2 119.38)
+			(xy 185.42 119.38) (xy 205.74 119.38)
 		)
 		(stroke
 			(width 0)
@@ -1211,7 +1076,7 @@
 	)
 	(wire
 		(pts
-			(xy 147.32 111.76) (xy 200.66 111.76)
+			(xy 147.32 111.76) (xy 203.2 111.76)
 		)
 		(stroke
 			(width 0)
@@ -1281,7 +1146,7 @@
 	)
 	(wire
 		(pts
-			(xy 205.74 100.33) (xy 205.74 114.3)
+			(xy 208.28 102.87) (xy 208.28 114.3)
 		)
 		(stroke
 			(width 0)
@@ -1341,7 +1206,7 @@
 	)
 	(wire
 		(pts
-			(xy 205.74 114.3) (xy 147.32 114.3)
+			(xy 208.28 114.3) (xy 147.32 114.3)
 		)
 		(stroke
 			(width 0)
@@ -1361,7 +1226,7 @@
 	)
 	(wire
 		(pts
-			(xy 203.2 100.33) (xy 203.2 119.38)
+			(xy 205.74 102.87) (xy 205.74 119.38)
 		)
 		(stroke
 			(width 0)
@@ -1411,7 +1276,7 @@
 	)
 	(wire
 		(pts
-			(xy 200.66 111.76) (xy 200.66 100.33)
+			(xy 203.2 101.6) (xy 203.2 111.76)
 		)
 		(stroke
 			(width 0)
@@ -2070,81 +1935,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Autocam:ANODE_RGB_LED_Rectangle")
-		(at 204.47 97.79 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "a1a3eb23-cb2a-49f5-92b7-641958a995a8")
-		(property "Reference" "RGB_LED_RECTANGLE1"
-			(at 197.104 94.234 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "DRIVE MODE"
-			(at 197.104 96.1391 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Autocam:Anode RGB LED (Rectangle)"
-			(at 195.58 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 195.58 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 195.58 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "63a6d280-9fc6-48bd-beb6-90621513989d")
-		)
-		(pin "2"
-			(uuid "3cadf99f-2174-4f23-a9a1-3e40bb0a0fc2")
-		)
-		(pin "3"
-			(uuid "9ad2271e-271f-4923-ad08-106b918dc6a3")
-		)
-		(pin "4"
-			(uuid "4c89fd44-a141-4343-bebc-ad2539316914")
-		)
-		(instances
-			(project ""
-				(path "/2207becf-5ee2-475e-b366-27d8c790b7c3"
-					(reference "RGB_LED_RECTANGLE1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Autocam:Simple Resistor")
 		(at 143.51 106.68 90)
 		(unit 1)
@@ -2343,6 +2133,81 @@
 			(project "server"
 				(path "/2207becf-5ee2-475e-b366-27d8c790b7c3"
 					(reference "R5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Autocam:ANODE_RGB_LED_Round")
+		(at 207.01 97.79 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "f6bf6f14-35d4-4daa-9655-34fcc6fc018a")
+		(property "Reference" "RGB_LED_ROUND3"
+			(at 198.374 94.234 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "DRIVE_MODE"
+			(at 198.374 96.1391 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Autocam:Anode RGB LED (Round)"
+			(at 198.12 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 198.12 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 198.12 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "dad275f3-1bc6-4d69-bd58-643d001c79ed")
+		)
+		(pin "2"
+			(uuid "34e60cdc-996c-425c-aff5-cc9ffc7949bf")
+		)
+		(pin "3"
+			(uuid "993d3b6a-ff1f-420a-b6eb-064d48d06b82")
+		)
+		(pin "4"
+			(uuid "a05048fb-9702-419c-aa98-5858d837568b")
+		)
+		(instances
+			(project "server"
+				(path "/2207becf-5ee2-475e-b366-27d8c790b7c3"
+					(reference "RGB_LED_ROUND3")
 					(unit 1)
 				)
 			)
