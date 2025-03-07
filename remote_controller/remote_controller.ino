@@ -40,6 +40,7 @@
 #define THROTTLE_STICK_Y_PIN 32
 #define GIMBAL_STICK_X_PIN 14
 #define GIMBAL_STICK_Y_PIN 15
+#define BATTERY_ADC_PIN 36  // ADC pin to measure battery voltage.
 
 #define STICK_DEAD_ZONE 200
 #define ADC_MAX 4095   // ESP32 ADC range
@@ -96,8 +97,15 @@ ButtonDebounce activeTrackDebounce = { ACTIVE_TRACK_SWITCH_PIN, HIGH, HIGH, fals
 LEDController ledController(
   SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN,
   REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN, REMOTE_CONTROLLER_LED_BLUE_PIN,
-  DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN, DRIVE_MODE_LED_BLUE_PIN
+  DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN, DRIVE_MODE_LED_BLUE_PIN,
+  BATTERY_LED_RED_PIN, BATTERY_LED_GREEN_PIN, BATTERY_LED_BLUE_PIN
 );
+
+float minVoltage = 3.0; // TODO(yifan): To verify
+float maxVoltage = 4.2; // TODO(yifan): To verify.
+
+unsigned int lastBatteryCheckTimeMillis = 0;
+unsigned int batteryCheckIntervalMillis = 2000;
 
 void setup() {
   // Start Serial for debugging
@@ -109,6 +117,7 @@ void setup() {
     // Wait for Serial or timeout
   }
   ledController.setupLED(state, driveMode);
+  ledController.updateBatteryLED(minVoltage, maxVoltage, BATTERY_ADC_PIN);
   setupInput();
   setupBLE();
 }
@@ -117,6 +126,7 @@ void loop() {
   readStatusData();
   readControllerData();
   sendControllerData();
+  checkBattery();
   delay(1000 / DATA_RATE); // Control the data rate.
 }
 
@@ -302,4 +312,12 @@ void sendControllerData() {
   }
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
+}
+
+void checkBattery() {
+  unsigned int now = millis();
+  if (now - lastBatteryCheckTimeMillis > batteryCheckIntervalMillis) {
+    lastBatteryCheckTimeMillis = now;
+    ledController.updateBatteryLED(minVoltage, maxVoltage, BATTERY_ADC_PIN);
+  }
 }

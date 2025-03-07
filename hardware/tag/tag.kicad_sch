@@ -1351,6 +1351,36 @@
 		)
 	)
 	(junction
+		(at 182.88 129.54)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "111f52ba-aad2-45b3-a1e7-e4de9811d4e6")
+	)
+	(junction
+		(at 182.88 82.55)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "1dbe8df8-f8bf-411a-8e0e-78f4c102e0c6")
+	)
+	(junction
+		(at 182.88 114.3)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "6662f3e8-0b66-46e0-91b0-0129e856fa99")
+	)
+	(junction
+		(at 201.93 87.63)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "80355bbc-e906-4fa2-8de8-db4679aa228a")
+	)
+	(junction
+		(at 199.39 107.95)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "88ae6878-a327-488b-b671-f34cd294e280")
+	)
+	(junction
 		(at 119.38 107.95)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1361,6 +1391,16 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "d8c4f546-5ca2-47de-a39e-9a0d0eb616e1")
+	)
+	(wire
+		(pts
+			(xy 163.83 135.89) (xy 163.83 114.3)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "01703b7c-e449-4e86-ad5f-d95b34957020")
 	)
 	(wire
 		(pts
@@ -1404,6 +1444,16 @@
 	)
 	(wire
 		(pts
+			(xy 207.01 147.32) (xy 207.01 139.7)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1a44c5a3-9dd7-446a-9550-e820d38692ff")
+	)
+	(wire
+		(pts
 			(xy 95.25 105.41) (xy 104.14 105.41)
 		)
 		(stroke
@@ -1411,6 +1461,16 @@
 			(type default)
 		)
 		(uuid "1b534d26-c8f4-411d-be9c-2421f2238ce1")
+	)
+	(wire
+		(pts
+			(xy 129.54 135.89) (xy 163.83 135.89)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1ca9bba2-e4f6-480c-a021-9fd97e577022")
 	)
 	(wire
 		(pts
@@ -1424,6 +1484,16 @@
 	)
 	(wire
 		(pts
+			(xy 170.18 139.7) (xy 170.18 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2036429c-aa56-4e8b-9ffb-7e24613dff60")
+	)
+	(wire
+		(pts
 			(xy 111.76 92.71) (xy 135.89 92.71)
 		)
 		(stroke
@@ -1434,13 +1504,13 @@
 	)
 	(wire
 		(pts
-			(xy 193.04 124.46) (xy 196.85 124.46)
+			(xy 199.39 87.63) (xy 199.39 107.95)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "2ebdc91d-7eeb-4b6a-aa14-b1b5fc0dac38")
+		(uuid "33c39937-2396-482a-858a-8854dcc47a7f")
 	)
 	(wire
 		(pts
@@ -1494,6 +1564,26 @@
 	)
 	(wire
 		(pts
+			(xy 182.88 82.55) (xy 182.88 102.87)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3fdf809d-8799-49b4-94cd-3aec4549aa09")
+	)
+	(wire
+		(pts
+			(xy 199.39 87.63) (xy 201.93 87.63)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "40f0c48f-db29-4a8a-a2d5-968939842c80")
+	)
+	(wire
+		(pts
 			(xy 161.29 80.01) (xy 204.47 80.01)
 		)
 		(stroke
@@ -1524,23 +1614,13 @@
 	)
 	(wire
 		(pts
-			(xy 161.29 82.55) (xy 201.93 82.55)
+			(xy 161.29 82.55) (xy 182.88 82.55)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "7147ee39-2c40-4318-8251-eeea7449d2fc")
-	)
-	(wire
-		(pts
-			(xy 204.47 107.95) (xy 204.47 147.32)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "78200dfc-be58-4647-b1d4-0b4c9746ff2c")
 	)
 	(wire
 		(pts
@@ -1554,13 +1634,23 @@
 	)
 	(wire
 		(pts
-			(xy 184.15 121.92) (xy 184.15 118.11)
+			(xy 207.01 139.7) (xy 170.18 139.7)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "9153c524-97b2-4c16-85df-4fb13f0cdaab")
+		(uuid "88723ac2-b385-43df-b304-98fa2233d60e")
+	)
+	(wire
+		(pts
+			(xy 172.72 129.54) (xy 182.88 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8c167a83-dc58-410c-a165-925941ada379")
 	)
 	(wire
 		(pts
@@ -1584,13 +1674,23 @@
 	)
 	(wire
 		(pts
-			(xy 184.15 118.11) (xy 199.39 118.11)
+			(xy 182.88 114.3) (xy 182.88 118.11)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "a455f160-a53d-4c41-ac2a-e41a477b5def")
+		(uuid "9fc4d385-6398-480b-896e-c0889d5e66a3")
+	)
+	(wire
+		(pts
+			(xy 182.88 82.55) (xy 201.93 82.55)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a0fcd93a-b9bb-4d96-836e-99ac47753a85")
 	)
 	(wire
 		(pts
@@ -1614,13 +1714,13 @@
 	)
 	(wire
 		(pts
-			(xy 196.85 124.46) (xy 196.85 147.32)
+			(xy 163.83 114.3) (xy 182.88 114.3)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "ac2692a5-b014-4ed2-8be7-80c32edbd651")
+		(uuid "ac45298f-aa37-4517-a63a-3f3f2a7398b1")
 	)
 	(wire
 		(pts
@@ -1644,6 +1744,16 @@
 	)
 	(wire
 		(pts
+			(xy 182.88 110.49) (xy 182.88 114.3)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bde041cf-283e-446e-9614-124a1ce6b22e")
+	)
+	(wire
+		(pts
 			(xy 201.93 82.55) (xy 201.93 87.63)
 		)
 		(stroke
@@ -1651,6 +1761,16 @@
 			(type default)
 		)
 		(uuid "c347386c-8ad4-48f7-ae27-f1e0668978a2")
+	)
+	(wire
+		(pts
+			(xy 204.47 129.54) (xy 204.47 107.95)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ca5a70a5-5dc5-4bc3-909a-ec8aae094156")
 	)
 	(wire
 		(pts
@@ -1664,6 +1784,16 @@
 	)
 	(wire
 		(pts
+			(xy 199.39 107.95) (xy 199.39 147.32)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d59743b7-8883-49e9-9663-5db49b8e9377")
+	)
+	(wire
+		(pts
 			(xy 111.76 130.81) (xy 127 130.81)
 		)
 		(stroke
@@ -1674,6 +1804,26 @@
 	)
 	(wire
 		(pts
+			(xy 182.88 129.54) (xy 204.47 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "daac37ff-a006-42c2-a24e-6ae34d5db67b")
+	)
+	(wire
+		(pts
+			(xy 182.88 125.73) (xy 182.88 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dd5b07cb-0940-4f8c-965b-d6e4a35a2d3a")
+	)
+	(wire
+		(pts
 			(xy 95.25 87.63) (xy 104.14 87.63)
 		)
 		(stroke
@@ -1681,6 +1831,16 @@
 			(type default)
 		)
 		(uuid "e2b2a677-5158-44bc-a518-1d4c87fde972")
+	)
+	(wire
+		(pts
+			(xy 135.89 125.73) (xy 129.54 125.73)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "eb9ecc45-1c33-41ef-ac18-2ed235b16d1d")
 	)
 	(wire
 		(pts
@@ -1704,13 +1864,13 @@
 	)
 	(wire
 		(pts
-			(xy 199.39 118.11) (xy 199.39 107.95)
+			(xy 129.54 125.73) (xy 129.54 135.89)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "fd9b472e-3f80-41ba-adc7-94f275da0cac")
+		(uuid "fe3c778d-ffef-4035-80d5-b9feb701f9e8")
 	)
 	(symbol
 		(lib_id "Autocam:Simple Resistor")
@@ -1774,6 +1934,73 @@
 			(project "tag"
 				(path "/3bb4c93b-765a-419c-8c17-50efa2d27859"
 					(reference "R4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Autocam:Simple Resistor")
+		(at 182.88 106.68 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "028b4cf3-302a-45ac-bfb6-de7e90d1120a")
+		(property "Reference" "R7"
+			(at 180.086 106.426 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "100KΩ"
+			(at 182.88 106.172 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Autocam:Simple Resistor"
+			(at 184.658 106.68 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 182.88 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 182.88 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d2a7304e-26d0-4741-bb01-a20c911f0025")
+		)
+		(pin "2"
+			(uuid "0a982645-7b64-485c-b20d-825d1d039cf3")
+		)
+		(instances
+			(project "tag"
+				(path "/3bb4c93b-765a-419c-8c17-50efa2d27859"
+					(reference "R7")
 					(unit 1)
 				)
 			)
@@ -2225,6 +2452,73 @@
 	)
 	(symbol
 		(lib_id "Autocam:Simple Resistor")
+		(at 182.88 121.92 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "5424eb84-1e3f-41c6-b699-1e7bfcb8709a")
+		(property "Reference" "R6"
+			(at 180.086 121.666 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "220KΩ"
+			(at 182.88 121.412 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Autocam:Simple Resistor"
+			(at 184.658 121.92 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 182.88 121.92 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 182.88 121.92 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "53ef4fa3-cd2a-4e20-8795-9235aaa6ec16")
+		)
+		(pin "2"
+			(uuid "8a0acc95-d47f-4539-bb10-9f52f0785fb1")
+		)
+		(instances
+			(project "tag"
+				(path "/3bb4c93b-765a-419c-8c17-50efa2d27859"
+					(reference "R6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Autocam:Simple Resistor")
 		(at 107.95 87.63 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -2447,7 +2741,7 @@
 	)
 	(symbol
 		(lib_id "Autocam:USB-C_3.7V_Lithium_Battery_Charger")
-		(at 200.66 152.4 270)
+		(at 203.2 152.4 270)
 		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
@@ -2456,7 +2750,7 @@
 		(dnp no)
 		(uuid "74c82fb9-660a-465a-a028-7e286a1cc3c4")
 		(property "Reference" "Battery_Charger1"
-			(at 195.58 151.7649 90)
+			(at 198.12 151.7649 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2465,7 +2759,7 @@
 			)
 		)
 		(property "Value" "~"
-			(at 195.58 153.67 90)
+			(at 198.12 153.67 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2474,7 +2768,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:USB-C 3.7V Lithium Battery Charger"
-			(at 199.39 152.4 0)
+			(at 201.93 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2483,7 +2777,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 199.39 152.4 0)
+			(at 201.93 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2492,7 +2786,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 199.39 152.4 0)
+			(at 201.93 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2596,7 +2890,7 @@
 	)
 	(symbol
 		(lib_id "Autocam:3_PIN_Switch")
-		(at 184.15 124.46 0)
+		(at 170.18 129.54 90)
 		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
@@ -2605,7 +2899,7 @@
 		(dnp no)
 		(uuid "fde1b4b0-ac87-4c45-bf79-5cc318b622ca")
 		(property "Reference" "ON_OFF_SWITCH1"
-			(at 184.15 118.11 0)
+			(at 176.53 129.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2613,7 +2907,7 @@
 			)
 		)
 		(property "Value" "OFF ON"
-			(at 184.15 115.57 0)
+			(at 179.07 129.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2621,7 +2915,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:3-PIN Switch"
-			(at 184.15 124.46 0)
+			(at 170.18 129.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2630,7 +2924,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 184.15 124.46 0)
+			(at 170.18 129.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2639,7 +2933,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 184.15 124.46 0)
+			(at 170.18 129.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)

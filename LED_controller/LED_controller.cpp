@@ -9,6 +9,13 @@
 #define DRIVE_MODE_MANUAL 0
 #define DRIVE_MODE_AUTO_FOLLOW 1
 
+// Resistor values in ohms
+#define R1 220000  // Resistor from battery+ to ADC pin
+#define R2 100000  // Resistor from ADC pin to ground
+
+// Calculate the divider factor (inverse of the ratio)
+const float dividerFactor = (float)(R1 + R2) / R2;  // (100k+220k)/100k = 3.2
+
 // Private helper: setup a single pin
 void LEDController::setupLEDPIN(int pin) {
   if (pin < 0) {
@@ -57,13 +64,42 @@ void LEDController::setLEDBlue(int red_pin, int green_pin, int blue_pin) {
   }
 }
 
+// Private helper: set LED to yellow (red and green on, blue off)
+void LEDController::setLEDYellow(int red_pin, int green_pin, int blue_pin) {
+  if (red_pin > 0) {
+    digitalWrite(red_pin, LOW);   // Red on
+  }
+  if (green_pin > 0) {
+    digitalWrite(green_pin, LOW);   // Green on
+  }
+  if (blue_pin > 0) {
+    digitalWrite(blue_pin, HIGH);   // Blue off
+  }
+}
+
+// Private helper: read the battery percentage from the ESP32 ADC
+int LEDController::readBatteryPercentage(float minVoltage, float maxVoltage, int battery_adc_pin) {
+  int measuredMilliVoltage = analogReadMilliVolts(battery_adc_pin);
+  // Scale measured voltage back up to actual battery voltage
+  float voltage = measuredMilliVoltage * dividerFactor / 1000;
+  // Debug: print the measured voltage
+  Serial.printf("Measured battery voltage: %f\n", voltage);
+
+  // Map voltage to battery percentage.
+  if (voltage >= maxVoltage) return 100;
+  if (voltage <= minVoltage) return 0;
+  return (int)(((voltage - minVoltage) / (maxVoltage - minVoltage)) * 100);
+}
+
 // Constructor
 LEDController::LEDController(int sensorRed, int sensorGreen, int sensorBlue,
                              int remoteRed, int remoteGreen, int remoteBlue,
-                             int driveRed, int driveGreen, int driveBlue)
+                             int driveRed, int driveGreen, int driveBlue,
+                             int batteryRed, int batteryGreen, int batteryBlue)
   : sensorR(sensorRed), sensorG(sensorGreen), sensorB(sensorBlue),
     remoteR(remoteRed), remoteG(remoteGreen), remoteB(remoteBlue),
-    driveR(driveRed), driveG(driveGreen), driveB(driveBlue)
+    driveR(driveRed), driveG(driveGreen), driveB(driveBlue),
+    batteryR(batteryRed), batteryG(batteryGreen), batteryB(batteryBlue)
 { }
 
 // Setup all LED pins by configuring them as outputs and set the initial state.
@@ -80,6 +116,10 @@ void LEDController::setupLED(int state, int driveMode) {
   setupLEDPIN(driveR);
   setupLEDPIN(driveG);
   setupLEDPIN(driveB);
+  // Battery LED pins
+  setupLEDPIN(batteryR);
+  setupLEDPIN(batteryG);
+  setupLEDPIN(batteryB);
 
   updateStateLED(state);
   updateDriveModeLED(driveMode);
@@ -114,5 +154,25 @@ void LEDController::updateDriveModeLED(int driveMode) {
   } else {
     Serial.println("drive mode, green");
     setLEDGreen(driveR, driveG, driveB);
+  }
+}
+
+// Update battery LED based on battery percentage thresholds.
+void LEDController::updateBatteryLED(float minVoltage, float maxVoltage, int battery_adc_pin) {
+  int batteryPercentage = readBatteryPercentage(minVoltage, maxVoltage, battery_adc_pin);
+  Serial.print("Battery percentage: ");
+  Serial.println(batteryPercentage);
+
+  if (batteryPercentage >= 50) {
+    Serial.println("battery, green");
+    setLEDGreen(batteryR, batteryG, batteryB);
+  }
+  else if (batteryPercentage >= 10) {  // 10% to 24%
+    Serial.println("battery, yellow");
+    setLEDYellow(batteryR, batteryG, batteryB);
+  }
+  else {  // Less than 10%
+    Serial.println("battery, red");
+    setLEDRed(batteryR, batteryG, batteryB);
   }
 }
