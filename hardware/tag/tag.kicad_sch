@@ -10,6 +10,123 @@
 		(rev "v0.1")
 	)
 	(lib_symbols
+		(symbol "Autocam:3_PIN_Switch"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U?"
+				(at -0.254 5.334 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "3_PIN_Switch_1_1"
+				(rectangle
+					(start -8.89 2.54)
+					(end 8.89 -2.54)
+					(stroke
+						(width 0)
+						(type solid)
+					)
+					(fill
+						(type color)
+						(color 255 255 194 1)
+					)
+				)
+				(pin passive line
+					(at -8.89 0 180)
+					(length 2.54)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -2.54 270)
+					(length 2.54)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 8.89 0 0)
+					(length 2.54)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Autocam:5V_DC_Converter_Rectangle"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -1061,6 +1178,183 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Autocam:USB-C_3.7V_Lithium_Battery_Charger"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U"
+				(at 0 7.366 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" ""
+				(at 0 -1.27 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 -1.27 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 -1.27 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" ""
+				(at 0 -1.27 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "USB-C_3.7V_Lithium_Battery_Charger_1_1"
+				(rectangle
+					(start -5.08 5.08)
+					(end 5.08 -5.08)
+					(stroke
+						(width 0)
+						(type solid)
+					)
+					(fill
+						(type color)
+						(color 255 255 194 1)
+					)
+				)
+				(pin input line
+					(at -5.08 1.27 180)
+					(length 2.54)
+					(name "+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -5.08 -1.27 180)
+					(length 2.54)
+					(name "-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 5.08 3.81 0)
+					(length 2.54)
+					(name "OUT+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 5.08 1.27 0)
+					(length 2.54)
+					(name "B+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 5.08 -1.27 0)
+					(length 2.54)
+					(name "B-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 5.08 -3.81 0)
+					(length 2.54)
+					(name "OUT-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(junction
+		(at 119.38 107.95)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "c60f53d7-586c-4a04-ae82-0fa6d69cb429")
 	)
 	(junction
 		(at 119.38 90.17)
@@ -1090,16 +1384,6 @@
 	)
 	(wire
 		(pts
-			(xy 176.53 80.01) (xy 161.29 80.01)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "12e2e7c7-89d6-4b30-977c-6ab25e5d504f")
-	)
-	(wire
-		(pts
 			(xy 119.38 80.01) (xy 119.38 90.17)
 		)
 		(stroke
@@ -1107,6 +1391,16 @@
 			(type default)
 		)
 		(uuid "1368f108-1284-492e-98c2-7bd5fb5960ac")
+	)
+	(wire
+		(pts
+			(xy 127 130.81) (xy 127 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1694eb51-67a2-49e7-b34c-4e2538afe919")
 	)
 	(wire
 		(pts
@@ -1140,6 +1434,16 @@
 	)
 	(wire
 		(pts
+			(xy 193.04 124.46) (xy 196.85 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2ebdc91d-7eeb-4b6a-aa14-b1b5fc0dac38")
+	)
+	(wire
+		(pts
 			(xy 127 87.63) (xy 127 90.17)
 		)
 		(stroke
@@ -1147,6 +1451,16 @@
 			(type default)
 		)
 		(uuid "372f6905-34b1-4a5d-84a3-960956db7956")
+	)
+	(wire
+		(pts
+			(xy 95.25 130.81) (xy 104.14 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "372fc138-f1e2-474d-96b6-98cb19c8b418")
 	)
 	(wire
 		(pts
@@ -1180,13 +1494,13 @@
 	)
 	(wire
 		(pts
-			(xy 176.53 76.2) (xy 176.53 80.01)
+			(xy 161.29 80.01) (xy 204.47 80.01)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "3b9be0cb-01b8-4f28-a926-7288b777b8c9")
+		(uuid "45d88bea-48d4-4697-ac1d-d2b6875406e2")
 	)
 	(wire
 		(pts
@@ -1210,6 +1524,26 @@
 	)
 	(wire
 		(pts
+			(xy 161.29 82.55) (xy 201.93 82.55)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7147ee39-2c40-4318-8251-eeea7449d2fc")
+	)
+	(wire
+		(pts
+			(xy 204.47 107.95) (xy 204.47 147.32)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "78200dfc-be58-4647-b1d4-0b4c9746ff2c")
+	)
+	(wire
+		(pts
 			(xy 119.38 80.01) (xy 135.89 80.01)
 		)
 		(stroke
@@ -1217,6 +1551,16 @@
 			(type default)
 		)
 		(uuid "7a9d0a21-6e61-496d-a666-190a69999de5")
+	)
+	(wire
+		(pts
+			(xy 184.15 121.92) (xy 184.15 118.11)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9153c524-97b2-4c16-85df-4fb13f0cdaab")
 	)
 	(wire
 		(pts
@@ -1240,6 +1584,16 @@
 	)
 	(wire
 		(pts
+			(xy 184.15 118.11) (xy 199.39 118.11)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a455f160-a53d-4c41-ac2a-e41a477b5def")
+	)
+	(wire
+		(pts
 			(xy 111.76 87.63) (xy 127 87.63)
 		)
 		(stroke
@@ -1260,23 +1614,63 @@
 	)
 	(wire
 		(pts
-			(xy 173.99 82.55) (xy 161.29 82.55)
+			(xy 196.85 124.46) (xy 196.85 147.32)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "beafe0f6-815a-40bf-852b-968d872434f4")
+		(uuid "ac2692a5-b014-4ed2-8be7-80c32edbd651")
 	)
 	(wire
 		(pts
-			(xy 173.99 76.2) (xy 173.99 82.55)
+			(xy 119.38 125.73) (xy 119.38 107.95)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "cb2fcf7e-d750-4235-8f6e-96a1d7a133aa")
+		(uuid "adfff7a9-6d78-4755-aeb8-90d9b6e0504f")
+	)
+	(wire
+		(pts
+			(xy 127 100.33) (xy 135.89 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b9fc3b57-ad63-4da7-ba42-0bd62b67ddb5")
+	)
+	(wire
+		(pts
+			(xy 201.93 82.55) (xy 201.93 87.63)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c347386c-8ad4-48f7-ae27-f1e0668978a2")
+	)
+	(wire
+		(pts
+			(xy 96.52 125.73) (xy 119.38 125.73)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cefa375c-419d-4bf8-b734-6fbc45fedcbd")
+	)
+	(wire
+		(pts
+			(xy 111.76 130.81) (xy 127 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d6252e48-4100-4e85-8b66-c6f94a21ec55")
 	)
 	(wire
 		(pts
@@ -1290,6 +1684,16 @@
 	)
 	(wire
 		(pts
+			(xy 204.47 87.63) (xy 204.47 80.01)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "eea2a560-edca-4feb-b68d-9179d776285a")
+	)
+	(wire
+		(pts
 			(xy 111.76 110.49) (xy 124.46 110.49)
 		)
 		(stroke
@@ -1297,6 +1701,16 @@
 			(type default)
 		)
 		(uuid "efeb7c06-6968-4b65-b4d1-644fdc60f6a1")
+	)
+	(wire
+		(pts
+			(xy 199.39 118.11) (xy 199.39 107.95)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fd9b472e-3f80-41ba-adc7-94f275da0cac")
 	)
 	(symbol
 		(lib_id "Autocam:Simple Resistor")
@@ -1427,6 +1841,73 @@
 			(project "tag"
 				(path "/3bb4c93b-765a-419c-8c17-50efa2d27859"
 					(reference "R3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Autocam:Simple Resistor")
+		(at 107.95 130.81 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "058d9740-1733-4678-9efd-a81de1df8d47")
+		(property "Reference" "R5"
+			(at 108.204 128.016 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "2000Ω"
+			(at 108.458 130.81 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Autocam:Simple Resistor"
+			(at 107.95 132.588 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 107.95 130.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 107.95 130.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "20c6b993-2d2c-4416-800b-cc1e8601d664")
+		)
+		(pin "2"
+			(uuid "8eb37140-9043-4878-9cdf-aad17119161f")
+		)
+		(instances
+			(project "tag"
+				(path "/3bb4c93b-765a-419c-8c17-50efa2d27859"
+					(reference "R5")
 					(unit 1)
 				)
 			)
@@ -1609,8 +2090,8 @@
 				(justify right)
 			)
 		)
-		(property "Value" "BATTERY_STATUS"
-			(at 85.09 117.602 0)
+		(property "Value" "SENSOR"
+			(at 87.884 108.966 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1685,8 +2166,8 @@
 				(justify right)
 			)
 		)
-		(property "Value" "SENSOR_CONNECTED"
-			(at 83.312 98.298 0)
+		(property "Value" "BATTERY"
+			(at 87.63 91.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1811,34 +2292,34 @@
 	)
 	(symbol
 		(lib_id "Autocam:5V_DC_Converter_Rectangle")
-		(at 173.99 66.04 270)
+		(at 201.93 97.79 270)
+		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "5a6d3745-44b1-4136-b00e-00f881f198e7")
 		(property "Reference" "5V_DC_DC_Converter1"
-			(at 180.34 65.4049 90)
+			(at 195.58 97.1549 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Value" "~"
-			(at 180.34 67.31 90)
+			(at 195.58 99.06 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Footprint" "Autocam:5V DC-DC Step Up Converter (Rectangle)"
-			(at 173.99 63.5 0)
+			(at 201.93 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1847,7 +2328,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 173.99 63.5 0)
+			(at 201.93 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1856,7 +2337,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 173.99 63.5 0)
+			(at 201.93 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1883,6 +2364,164 @@
 			(project ""
 				(path "/3bb4c93b-765a-419c-8c17-50efa2d27859"
 					(reference "5V_DC_DC_Converter1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Autocam:ANODE_RGB_LED_Round")
+		(at 91.44 127 0)
+		(mirror y)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "69114e1e-d04e-498a-9f47-608e0ba8a275")
+		(property "Reference" "RGB_LED_ROUND3"
+			(at 84.836 119.634 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "TAG_ACTIVE"
+			(at 85.598 126.746 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Autocam:Anode RGB LED (Round)"
+			(at 96.52 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 96.52 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 96.52 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "c80e4cdd-fa7f-492a-9f44-e030df9c8c58")
+		)
+		(pin "4"
+			(uuid "14a633a6-5482-4a01-82b9-d29553d1576e")
+		)
+		(pin "2"
+			(uuid "1f7eb043-8d23-46bb-aa14-e3b9cbe03688")
+		)
+		(pin "3"
+			(uuid "2f971606-d46c-4fea-9fc4-42b1a6d0ffc0")
+		)
+		(instances
+			(project "tag"
+				(path "/3bb4c93b-765a-419c-8c17-50efa2d27859"
+					(reference "RGB_LED_ROUND3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Autocam:USB-C_3.7V_Lithium_Battery_Charger")
+		(at 200.66 152.4 270)
+		(mirror x)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "74c82fb9-660a-465a-a028-7e286a1cc3c4")
+		(property "Reference" "Battery_Charger1"
+			(at 195.58 151.7649 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "~"
+			(at 195.58 153.67 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Autocam:USB-C 3.7V Lithium Battery Charger"
+			(at 199.39 152.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 199.39 152.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 199.39 152.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "1efd3a95-38d3-42a2-bc06-591b69c8c4ea")
+		)
+		(pin "2"
+			(uuid "00fc6a13-1d40-4145-9efa-b18613ed881b")
+		)
+		(pin "3"
+			(uuid "ecdfb785-a374-4a91-b1ff-20484df89b77")
+		)
+		(pin "4"
+			(uuid "e66576ab-cfe0-4c6f-8105-6d568ac1f8ff")
+		)
+		(pin "5"
+			(uuid "0bba4878-8836-4b65-8a3a-4cbcab63f250")
+		)
+		(pin "6"
+			(uuid "0ca3a488-21c4-449d-8755-77787887e920")
+		)
+		(instances
+			(project ""
+				(path "/3bb4c93b-765a-419c-8c17-50efa2d27859"
+					(reference "Battery_Charger1")
 					(unit 1)
 				)
 			)
@@ -1950,6 +2589,77 @@
 			(project "tag"
 				(path "/3bb4c93b-765a-419c-8c17-50efa2d27859"
 					(reference "R2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Autocam:3_PIN_Switch")
+		(at 184.15 124.46 0)
+		(mirror x)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "fde1b4b0-ac87-4c45-bf79-5cc318b622ca")
+		(property "Reference" "ON_OFF_SWITCH1"
+			(at 184.15 118.11 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "OFF ON"
+			(at 184.15 115.57 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Autocam:3-PIN Switch"
+			(at 184.15 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 184.15 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 184.15 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "3"
+			(uuid "a402af80-9ac2-4f95-8e5a-2b312710b7fd")
+		)
+		(pin "2"
+			(uuid "39f5f6d6-70c3-468f-8592-5de71d67df87")
+		)
+		(pin "1"
+			(uuid "6d354b25-db3a-432c-92b7-dbc3cdab4a63")
+		)
+		(instances
+			(project ""
+				(path "/3bb4c93b-765a-419c-8c17-50efa2d27859"
+					(reference "ON_OFF_SWITCH1")
 					(unit 1)
 				)
 			)

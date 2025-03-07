@@ -15,23 +15,31 @@
 #define DRIVE_MODE_MANUAL 0
 #define DRIVE_MODE_AUTO_FOLLOW 1
 
-#define MODE_SWITCH_PIN 2
-#define ACTIVE_TRACK_TOGGLE_PIN 3
+#define LOCK_SWITCH_PIN 25
+#define MODE_SWITCH_PIN 26
+#define ACTIVE_TRACK_SWITCH_PIN 13
+#define TAG_SELECTOR_PIN 12
 
-#define REMOTE_CONTROLLER_LED_RED_PIN 12
-#define REMOTE_CONTROLLER_LED_GREEN_PIN 13
-#define REMOTE_CONTROLLER_LED_BLUE_PIN -1
-#define SENSOR_LED_RED_PIN 14
-#define SENSOR_LED_GREEN_PIN 15
+#define BATTERY_LED_RED_PIN 3
+#define BATTERY_LED_GREEN_PIN 1
+#define BATTERY_LED_BLUE_PIN -1
+#define TAG_ACTIVE_LED_RED_PIN -1
+#define TAG_ACTIVE_LED_GREEN_PIN -1
+#define TAG_ACTIVE_LED_BLUE_PIN 0
+#define SENSOR_LED_RED_PIN 5
+#define SENSOR_LED_GREEN_PIN 16
 #define SENSOR_LED_BLUE_PIN -1
-#define DRIVE_MODE_LED_RED_PIN 18
-#define DRIVE_MODE_LED_GREEN_PIN 19
+#define REMOTE_CONTROLLER_LED_RED_PIN 17
+#define REMOTE_CONTROLLER_LED_GREEN_PIN 21
+#define REMOTE_CONTROLLER_LED_BLUE_PIN -1
+#define DRIVE_MODE_LED_RED_PIN 22
+#define DRIVE_MODE_LED_GREEN_PIN 33
 #define DRIVE_MODE_LED_BLUE_PIN -1
 
-#define STEERING_STICK_X_PIN 25
-#define THROTTLE_STICK_Y_PIN 26
-#define GIMBAL_STICK_X_PIN 27
-#define GIMBAL_STICK_Y_PIN 32
+#define STEERING_STICK_X_PIN 2
+#define THROTTLE_STICK_Y_PIN 32
+#define GIMBAL_STICK_X_PIN 14
+#define GIMBAL_STICK_Y_PIN 15
 
 #define STICK_DEAD_ZONE 200
 #define ADC_MAX 4095   // ESP32 ADC range
@@ -83,7 +91,7 @@ struct ButtonDebounce {
 
 // Instantiate debounce objects for each button.
 ButtonDebounce modeSwitchDebounce = { MODE_SWITCH_PIN, HIGH, HIGH, DRIVE_MODE_MANUAL };
-ButtonDebounce activeTrackDebounce = { ACTIVE_TRACK_TOGGLE_PIN, HIGH, HIGH, false };
+ButtonDebounce activeTrackDebounce = { ACTIVE_TRACK_SWITCH_PIN, HIGH, HIGH, false };
 
 LEDController ledController(
   SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN,
@@ -115,7 +123,7 @@ void loop() {
 void setupInput() {
   // Set button input pins as input with internal pull-up.
   pinMode(MODE_SWITCH_PIN, INPUT_PULLUP);
-  pinMode(ACTIVE_TRACK_TOGGLE_PIN, INPUT_PULLUP);
+  pinMode(ACTIVE_TRACK_SWITCH_PIN, INPUT_PULLUP);
 }
 
 void setupBLE() {

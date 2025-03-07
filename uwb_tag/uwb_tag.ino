@@ -14,6 +14,17 @@
 #define SPI_MOSI 23
 #define DW_CS 4
 
+#define BATTERY_LED_RED_PIN 2
+#define BATTERY_LED_GREEN_PIN 12
+#define BATTERY_LED_BLUE_PIN -1
+#define SENSOR_LED_RED_PIN 13
+#define SENSOR_LED_GREEN_PIN 14
+#define SENSOR_LED_BLUE_PIN -1
+#define TAG_ACTIVE_LED_RED_PIN -1
+#define TAG_ACTIVE_LED_GREEN_PIN -1
+#define TAG_ACTIVE_LED_BLUE_PIN 15
+
+
 // connection pins
 const uint8_t PIN_RST = 27; // reset pin
 const uint8_t PIN_IRQ = 34; // irq pin

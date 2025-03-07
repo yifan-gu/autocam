@@ -25,10 +25,10 @@
 #define CAN_RATE 1000 // Speed rate in kbps
 
 #define SERVER_LED_RED_PIN 25
-#define SERVER_LED_GREEN_PIN 27
+#define SERVER_LED_GREEN_PIN 26
 #define SERVER_LED_BLUE_PIN -1
-#define TAG_LED_RED_PIN 34
-#define TAG_LED_GREEN_PIN 36
+#define TAG_LED_RED_PIN 32
+#define TAG_LED_GREEN_PIN 33
 #define TAG_LED_BLUE_PIN -1
 
 // leftmost two bytes below will become the "short address"

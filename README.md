@@ -9,11 +9,13 @@ Arduino files for my auto-following camera car!
 - [x] Read mode switch button for remote controller
 - [x] Add state indicator in the web UI
 - [x] Add LED state indicators
-- [ ] Add battery state LED
-- [ ] Add remote lock mode
+- [ ] Add battery state LED (tag, remote)
+- [ ] Add lock mode (remote)
+- [ ] Add tag selector (tag, remote)
 - [ ] Add PCB boards
   - [x] Sensor
   - [x] Verify LED resistor values
+  - [ ] Verify IO0/IO1 port on the ESP32 UWB is usable.
   - [x] Tag
   - [x] Server
   - [ ] Remote

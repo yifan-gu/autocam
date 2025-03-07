@@ -4,7 +4,7 @@
 	(generator_version "9.0")
 	(layer "F.Cu")
 	(property "Reference" "REF**"
-		(at 13.95 8.7 0)
+		(at 13.95 -8.7 0)
 		(unlocked yes)
 		(layer "F.SilkS")
 		(uuid "259f372a-684f-4e80-88a3-56c06d349e9e")
@@ -16,7 +16,7 @@
 		)
 	)
 	(property "Value" "USB-C 3.7V Lithium Battery Charger"
-		(at 13.95 10.2 0)
+		(at 13.95 -7.2 0)
 		(unlocked yes)
 		(layer "F.Fab")
 		(uuid "079038ad-9e41-4950-b7b9-19f99ddfa7a6")
@@ -28,7 +28,7 @@
 		)
 	)
 	(property "Datasheet" ""
-		(at -2.54 0.445 0)
+		(at -2.54 -16.955 0)
 		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
@@ -41,7 +41,7 @@
 		)
 	)
 	(property "Description" ""
-		(at -2.54 0.445 0)
+		(at -2.54 -16.955 0)
 		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
@@ -54,8 +54,8 @@
 		)
 	)
 	(fp_rect
-		(start -1.34 4.18)
-		(end 5.52 13.22)
+		(start -1.34 -13.22)
+		(end 5.52 -4.18)
 		(stroke
 			(width 0.1)
 			(type solid)
@@ -65,8 +65,8 @@
 		(uuid "ad1a5266-e127-4dc4-ab3d-336da4d409ee")
 	)
 	(fp_rect
-		(start 0 0)
-		(end 27.9 17.4)
+		(start 0 -17.4)
+		(end 27.9 0)
 		(stroke
 			(width 0.1)
 			(type solid)
@@ -75,8 +75,86 @@
 		(layer "F.SilkS")
 		(uuid "21ca47af-88a1-4b94-9a2b-7174555ca0bd")
 	)
+	(fp_text user "+"
+		(at 3.81 -15.685 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "0dcbd0b5-f43a-4955-965d-68d0d1e01d22")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.1)
+			)
+			(justify right)
+		)
+	)
+	(fp_text user "-"
+		(at 3.81 -1.715 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "16bd06e1-b5de-40b9-87db-7c30fc1148e0")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.1)
+			)
+			(justify right)
+		)
+	)
+	(fp_text user "OUT-"
+		(at 19.05 -1.715 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "4562d782-9654-4d18-9f2d-989dba6fe768")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.1)
+			)
+			(justify left)
+		)
+	)
+	(fp_text user "B+"
+		(at 24.13 -10.605 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "51870496-258f-47be-a34b-5eea63d4b6d0")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.1)
+			)
+			(justify bottom)
+		)
+	)
+	(fp_text user "B-"
+		(at 24.13 -6.795 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "d244efc3-e9f1-452e-81ed-7e9d19652435")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.1)
+			)
+			(justify top)
+		)
+	)
+	(fp_text user "OUT+"
+		(at 19.05 -15.685 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "da9b4815-5218-4773-a965-36298f5fd279")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.1)
+			)
+			(justify left)
+		)
+	)
 	(fp_text user "${REFERENCE}"
-		(at 13.95 11.7 0)
+		(at 13.95 -5.7 0)
 		(unlocked yes)
 		(layer "F.Fab")
 		(uuid "2e05897d-0e10-43ae-959f-4cb66289e53e")
@@ -88,47 +166,47 @@
 		)
 	)
 	(pad "1" thru_hole rect
-		(at 1.27 1.715)
+		(at 1.27 -15.685)
 		(size 1.8 1.8)
 		(drill 0.8)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
 		(uuid "a7d70380-6a55-426a-b27b-b177088a19af")
 	)
-	(pad "1" thru_hole rect
-		(at 1.27 15.685)
+	(pad "2" thru_hole rect
+		(at 1.27 -1.715)
 		(size 1.8 1.8)
 		(drill 0.8)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
 		(uuid "5b4d0acc-3952-4e4f-bfdf-458bbd1c9b9e")
 	)
-	(pad "1" thru_hole rect
-		(at 24.13 1.715)
+	(pad "3" thru_hole rect
+		(at 24.13 -15.685)
 		(size 1.8 1.8)
 		(drill 0.8)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
 		(uuid "f062d698-0aae-4271-a36c-6aa8b095c53f")
 	)
-	(pad "1" thru_hole rect
-		(at 24.13 4.255)
+	(pad "4" thru_hole rect
+		(at 24.13 -13.145)
 		(size 1.8 1.8)
 		(drill 0.8)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
 		(uuid "82ecedae-6c6a-4bd0-b21a-ef60eb2f41f5")
 	)
-	(pad "1" thru_hole rect
-		(at 24.13 13.145)
+	(pad "5" thru_hole rect
+		(at 24.13 -4.255)
 		(size 1.8 1.8)
 		(drill 0.8)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
 		(uuid "5bcfb78d-c5c2-45cb-996c-ccb5f0cae79b")
 	)
-	(pad "1" thru_hole rect
-		(at 24.13 15.685)
+	(pad "6" thru_hole rect
+		(at 24.13 -1.715)
 		(size 1.8 1.8)
 		(drill 0.8)
 		(layers "*.Cu" "*.Mask")

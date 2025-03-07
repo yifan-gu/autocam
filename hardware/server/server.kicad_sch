@@ -1447,7 +1447,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "SENSOR_STATE_LED"
+		(property "Value" "SENSOR"
 			(at 157.734 96.52 0)
 			(effects
 				(font
@@ -1878,7 +1878,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "REMOTE_STATE_LED"
+		(property "Value" "REMOTE"
 			(at 178.054 96.1391 0)
 			(effects
 				(font
@@ -2087,7 +2087,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "DRIVE_MODE_LED"
+		(property "Value" "DRIVE MODE"
 			(at 197.104 96.1391 0)
 			(effects
 				(font

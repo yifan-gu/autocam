@@ -70,7 +70,7 @@
 						(color 255 255 194 1)
 					)
 				)
-				(pin bidirectional line
+				(pin passive line
 					(at -2.54 -2.54 270)
 					(length 2.54)
 					(name "Pin_1"
@@ -88,7 +88,7 @@
 						)
 					)
 				)
-				(pin bidirectional line
+				(pin passive line
 					(at 2.54 -2.54 270)
 					(length 2.54)
 					(name "Pin_2"
@@ -1351,20 +1351,20 @@
 		)
 	)
 	(junction
-		(at 125.73 120.65)
+		(at 105.41 90.17)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "145e9bf6-2f4d-4c28-9149-0dfde531b027")
+		(uuid "4049628d-a54b-4951-a519-154364f64f87")
 	)
 	(junction
-		(at 125.73 90.17)
+		(at 101.6 120.65)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "ee446985-10c0-482a-9eef-10026c7699fa")
+		(uuid "efb0db77-4d2f-4fa1-a229-49b195059cb0")
 	)
 	(wire
 		(pts
-			(xy 93.98 120.65) (xy 125.73 120.65)
+			(xy 93.98 120.65) (xy 101.6 120.65)
 		)
 		(stroke
 			(width 0)
@@ -1374,7 +1374,7 @@
 	)
 	(wire
 		(pts
-			(xy 125.73 90.17) (xy 125.73 120.65)
+			(xy 101.6 90.17) (xy 101.6 120.65)
 		)
 		(stroke
 			(width 0)
@@ -1394,13 +1394,13 @@
 	)
 	(wire
 		(pts
-			(xy 125.73 90.17) (xy 137.16 90.17)
+			(xy 104.14 125.73) (xy 104.14 130.81)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "2cb11147-1692-41c6-a5a0-ecd89530ed9c")
+		(uuid "27f9067d-d5b3-4580-b30b-2b1ae6d6f36e")
 	)
 	(wire
 		(pts
@@ -1424,16 +1424,6 @@
 	)
 	(wire
 		(pts
-			(xy 92.71 130.81) (xy 104.14 130.81)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3afc74d2-b48f-4ec6-8d13-4f79f948567e")
-	)
-	(wire
-		(pts
 			(xy 110.49 100.33) (xy 137.16 100.33)
 		)
 		(stroke
@@ -1454,23 +1444,13 @@
 	)
 	(wire
 		(pts
-			(xy 93.98 133.35) (xy 125.73 133.35)
+			(xy 93.98 133.35) (xy 101.6 133.35)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "53d4c6ef-bad6-4ed2-88df-02c0af8cbaa2")
-	)
-	(wire
-		(pts
-			(xy 111.76 123.19) (xy 137.16 123.19)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "541cc024-bcf2-4224-bd98-178cdd72623a")
 	)
 	(wire
 		(pts
@@ -1484,13 +1464,43 @@
 	)
 	(wire
 		(pts
-			(xy 111.7236 135.89) (xy 137.16 135.89)
+			(xy 106.68 128.27) (xy 106.68 135.89)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "7321ef65-8d23-45f7-b16f-d9abe6fc8522")
+		(uuid "598073fc-76fa-49f3-8baa-54207b8eea31")
+	)
+	(wire
+		(pts
+			(xy 104.14 130.81) (xy 92.71 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5e4a4506-acd0-4074-8233-fa806c254ce4")
+	)
+	(wire
+		(pts
+			(xy 105.41 90.17) (xy 137.16 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "83c266bf-d0df-4620-ae94-4b00092b1340")
+	)
+	(wire
+		(pts
+			(xy 101.6 90.17) (xy 105.41 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9111e0b6-9999-4b11-a29b-f8ff94ae20c9")
 	)
 	(wire
 		(pts
@@ -1504,7 +1514,37 @@
 	)
 	(wire
 		(pts
-			(xy 111.76 118.11) (xy 137.16 118.11)
+			(xy 125.73 128.27) (xy 137.16 128.27)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a23d7c56-d3bc-4d27-b18c-894eb4598428")
+	)
+	(wire
+		(pts
+			(xy 125.73 120.65) (xy 137.16 120.65)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a60c09e7-23d6-4de7-a2dd-f5d3cc7c0a85")
+	)
+	(wire
+		(pts
+			(xy 125.73 125.73) (xy 137.16 125.73)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b0b8f217-b347-4194-abe4-54b7e3153465")
+	)
+	(wire
+		(pts
+			(xy 125.73 118.11) (xy 137.16 118.11)
 		)
 		(stroke
 			(width 0)
@@ -1534,6 +1574,26 @@
 	)
 	(wire
 		(pts
+			(xy 118.11 128.27) (xy 106.68 128.27)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d4c7326d-30ba-47fa-a4d4-1ee4708d0c0d")
+	)
+	(wire
+		(pts
+			(xy 102.87 120.65) (xy 102.87 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d68e7bf1-41f4-447d-86f1-e1fdd82a1f2f")
+	)
+	(wire
+		(pts
 			(xy 113.03 83.82) (xy 113.03 102.87)
 		)
 		(stroke
@@ -1541,16 +1601,6 @@
 			(type default)
 		)
 		(uuid "d9b4d4b0-622c-47ea-929d-e0595a2ef7e4")
-	)
-	(wire
-		(pts
-			(xy 93.98 135.89) (xy 104.1036 135.89)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "db2c6bed-d94c-40f3-b347-b7f80d4108bb")
 	)
 	(wire
 		(pts
@@ -1564,23 +1614,13 @@
 	)
 	(wire
 		(pts
-			(xy 111.76 130.81) (xy 137.16 130.81)
+			(xy 118.11 125.73) (xy 104.14 125.73)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "e184c709-8bf4-41cd-9fcc-deec97442915")
-	)
-	(wire
-		(pts
-			(xy 105.41 90.17) (xy 125.73 90.17)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e239cc48-4761-4c8b-8684-976603d6cb51")
+		(uuid "e9646ec6-a11c-4d6c-82a0-40ec94398cca")
 	)
 	(wire
 		(pts
@@ -1594,7 +1634,7 @@
 	)
 	(wire
 		(pts
-			(xy 92.71 118.11) (xy 104.14 118.11)
+			(xy 92.71 118.11) (xy 118.11 118.11)
 		)
 		(stroke
 			(width 0)
@@ -1604,7 +1644,7 @@
 	)
 	(wire
 		(pts
-			(xy 125.73 120.65) (xy 125.73 133.35)
+			(xy 101.6 120.65) (xy 101.6 133.35)
 		)
 		(stroke
 			(width 0)
@@ -1614,7 +1654,17 @@
 	)
 	(wire
 		(pts
-			(xy 93.98 123.19) (xy 104.14 123.19)
+			(xy 106.68 135.89) (xy 93.98 135.89)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f54d9964-74da-463c-b635-40e9dc4a5afd")
+	)
+	(wire
+		(pts
+			(xy 102.87 120.65) (xy 118.11 120.65)
 		)
 		(stroke
 			(width 0)
@@ -1632,9 +1682,19 @@
 		)
 		(uuid "f8920c8c-3976-4ee1-b8e1-e64feb4c086b")
 	)
+	(wire
+		(pts
+			(xy 102.87 123.19) (xy 93.98 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fad84661-1a03-4188-b906-75cdd065fc93")
+	)
 	(symbol
 		(lib_id "Autocam:Simple Resistor")
-		(at 107.95 130.81 90)
+		(at 121.92 125.73 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -1642,7 +1702,7 @@
 		(dnp no)
 		(uuid "053eb0f3-dad6-4458-bf3f-35cb42f5896e")
 		(property "Reference" "R3"
-			(at 107.95 124.46 90)
+			(at 126.492 124.714 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1650,7 +1710,7 @@
 			)
 		)
 		(property "Value" "2000Ω"
-			(at 107.95 127 90)
+			(at 121.92 125.73 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1658,7 +1718,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Simple Resistor"
-			(at 107.95 132.588 90)
+			(at 121.92 127.508 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1667,7 +1727,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 107.95 130.81 0)
+			(at 121.92 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1676,7 +1736,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 107.95 130.81 0)
+			(at 121.92 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1791,8 +1851,8 @@
 				(justify right)
 			)
 		)
-		(property "Value" "~"
-			(at 97.79 133.35 90)
+		(property "Value" "TAG"
+			(at 86.868 142.24 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1867,8 +1927,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "~"
-			(at 91.1402 128.27 0)
+		(property "Value" "SERVER"
+			(at 92.456 113.792 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1926,7 +1986,7 @@
 	)
 	(symbol
 		(lib_id "Autocam:Simple Resistor")
-		(at 107.9136 135.89 90)
+		(at 121.92 128.27 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -1934,7 +1994,7 @@
 		(dnp no)
 		(uuid "73b8bcdf-e46d-4f9d-bf14-916a49c3c720")
 		(property "Reference" "R4"
-			(at 107.9136 129.54 90)
+			(at 126.5284 127.254 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1942,7 +2002,7 @@
 			)
 		)
 		(property "Value" "2000Ω"
-			(at 107.9136 132.08 90)
+			(at 121.9564 128.27 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1950,7 +2010,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Simple Resistor"
-			(at 107.9136 137.668 90)
+			(at 121.92 130.048 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1959,7 +2019,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 107.9136 135.89 0)
+			(at 121.92 128.27 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1968,7 +2028,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 107.9136 135.89 0)
+			(at 121.92 128.27 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2080,7 +2140,7 @@
 	)
 	(symbol
 		(lib_id "Autocam:Simple Resistor")
-		(at 107.95 118.11 90)
+		(at 121.92 118.11 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2088,7 +2148,7 @@
 		(dnp no)
 		(uuid "cb435f44-5a96-4aae-aa32-bf5c3fbe2fca")
 		(property "Reference" "R1"
-			(at 107.95 111.76 90)
+			(at 126.492 117.094 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2096,7 +2156,7 @@
 			)
 		)
 		(property "Value" "2000Ω"
-			(at 107.95 114.3 90)
+			(at 121.92 117.856 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2104,7 +2164,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Simple Resistor"
-			(at 107.95 119.888 90)
+			(at 121.92 119.888 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2113,7 +2173,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 107.95 118.11 0)
+			(at 121.92 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2122,7 +2182,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 107.95 118.11 0)
+			(at 121.92 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2375,7 +2435,7 @@
 	)
 	(symbol
 		(lib_id "Autocam:Simple Resistor")
-		(at 107.95 123.19 90)
+		(at 121.92 120.65 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2383,7 +2443,7 @@
 		(dnp no)
 		(uuid "fec9b20e-d916-4e39-acbd-feb809f66fff")
 		(property "Reference" "R2"
-			(at 107.95 116.84 90)
+			(at 126.492 119.634 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2391,7 +2451,7 @@
 			)
 		)
 		(property "Value" "2000Ω"
-			(at 107.95 119.38 90)
+			(at 121.92 120.65 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2399,7 +2459,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Simple Resistor"
-			(at 107.95 124.968 90)
+			(at 121.92 122.428 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2408,7 +2468,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 107.95 123.19 0)
+			(at 121.92 120.65 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2417,7 +2477,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 107.95 123.19 0)
+			(at 121.92 120.65 0)
 			(effects
 				(font
 					(size 1.27 1.27)
