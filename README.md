@@ -12,13 +12,13 @@ Arduino files for my auto-following camera car!
 - [ ] Add battery state LED (tag, remote)
 - [ ] Add lock mode (remote)
 - [ ] Add tag selector (tag, remote)
-- [ ] Add PCB boards
+- [x] Add PCB boards
   - [x] Sensor
   - [x] Verify LED resistor values
-  - [ ] Verify IO0/IO1 port on the ESP32 UWB is usable.
+  - [x] Verify IO0/IO1 port on the ESP32 UWB is usable (PIN 4, 18, 19, 23, 27 are reserved, PIN 34, 35, 36, 39 are not usable).
   - [x] Tag
   - [x] Server
-  - [ ] Remote
+  - [x] Remote
 - [ ] Assemble together
 - [ ] Calibrate the UWB tag and anchor
 - [ ] (optimize) Store settings in external storage (SD card)
