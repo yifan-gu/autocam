@@ -140,6 +140,7 @@ void setupInput() {
   // Set button input pins as input with internal pull-up.
   pinMode(MODE_SWITCH_PIN, INPUT_PULLUP);
   pinMode(ACTIVE_TRACK_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(LOCK_SWITCH_PIN, INPUT_PULLUP);
 }
 
 void setupBLE() {
@@ -218,7 +219,6 @@ bool buttonPressed(ButtonDebounce &button) {
   int previousState = button.stableState;
   button.stableState = digitalRead(button.pin);
   return previousState != button.stableState && button.stableState == LOW;
-  return false;
 }
 
 // Check both buttons using the shared debounce function.
@@ -238,7 +238,18 @@ void checkButtons() {
   }
 }
 
+bool lockSwitchLocked() {
+  return digitalRead(LOCK_SWITCH_PIN) == LOW;
+}
+
 void readControllerData() {
+  if (lockSwitchLocked()) {
+    // Check the lock switch first.
+    // If locked then skip reading the inputs.
+    // TODO(yifan): maybe reset all inputs??
+    return;
+  }
+
   // Check buttons.
   checkButtons();
 

@@ -11,7 +11,7 @@ Arduino files for my auto-following camera car!
 - [x] Add LED state indicators
 - [x] Add battery state LED (tag, remote)
 - [x] Add LED logic for tag.
-- [ ] Add lock mode (remote)
+- [x] Add lock mode (remote)
 - [ ] Add tag selector (sensor, remote)
 - [x] Add PCB boards
   - [x] Sensor
