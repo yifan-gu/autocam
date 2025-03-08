@@ -1601,14 +1601,14 @@
 		(dnp no)
 		(uuid "53afb238-c660-47ad-a207-dae1b5a81d24")
 		(property "Reference" "R1"
-			(at 143.51 99.314 90)
+			(at 138.684 100.584 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 143.764 101.6 90)
 			(effects
 				(font
@@ -1668,14 +1668,14 @@
 		(dnp no)
 		(uuid "587ea374-9073-4d54-9281-f7ac601ee9a0")
 		(property "Reference" "R6"
-			(at 143.51 112.014 90)
+			(at 138.938 113.284 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 143.764 114.3 90)
 			(effects
 				(font
@@ -1810,14 +1810,14 @@
 		(dnp no)
 		(uuid "91c167b0-36d8-41b5-9239-04c116486398")
 		(property "Reference" "R2"
-			(at 143.51 101.854 90)
+			(at 138.684 103.124 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 143.764 104.14 90)
 			(effects
 				(font
@@ -1877,14 +1877,14 @@
 		(dnp no)
 		(uuid "9e4f8a61-9e4f-4cd5-81e0-a1aa8345a37d")
 		(property "Reference" "R4"
-			(at 143.51 106.934 90)
+			(at 138.938 108.204 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 143.764 109.22 90)
 			(effects
 				(font
@@ -1944,14 +1944,14 @@
 		(dnp no)
 		(uuid "d3992388-2fe1-490e-8143-1a5387b78958")
 		(property "Reference" "R3"
-			(at 143.51 104.394 90)
+			(at 138.938 105.664 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 143.764 106.68 90)
 			(effects
 				(font
@@ -2081,14 +2081,14 @@
 		(dnp no)
 		(uuid "f4f498e2-322c-4971-ad00-0f2af523697d")
 		(property "Reference" "R5"
-			(at 143.51 109.474 90)
+			(at 138.938 110.998 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 143.764 111.76 90)
 			(effects
 				(font

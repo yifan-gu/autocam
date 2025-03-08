@@ -1598,6 +1598,16 @@
 	)
 	(wire
 		(pts
+			(xy 127 132.08) (xy 127 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6ff8a632-01ab-494d-a722-d98d94a84a14")
+	)
+	(wire
+		(pts
 			(xy 158.75 78.74) (xy 180.34 78.74)
 		)
 		(stroke
@@ -1605,6 +1615,16 @@
 			(type default)
 		)
 		(uuid "7147ee39-2c40-4318-8251-eeea7449d2fc")
+	)
+	(wire
+		(pts
+			(xy 127 124.46) (xy 133.35 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "73a0c108-3e80-4698-bbc8-65bd727ea7e3")
 	)
 	(wire
 		(pts
@@ -1768,16 +1788,6 @@
 	)
 	(wire
 		(pts
-			(xy 133.35 121.92) (xy 127 121.92)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "eb9ecc45-1c33-41ef-ac18-2ed235b16d1d")
-	)
-	(wire
-		(pts
 			(xy 201.93 83.82) (xy 201.93 76.2)
 		)
 		(stroke
@@ -1796,16 +1806,6 @@
 		)
 		(uuid "efeb7c06-6968-4b65-b4d1-644fdc60f6a1")
 	)
-	(wire
-		(pts
-			(xy 127 121.92) (xy 127 132.08)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "fe3c778d-ffef-4035-80d5-b9feb701f9e8")
-	)
 	(symbol
 		(lib_id "Autocam:Simple Resistor")
 		(at 105.41 106.68 90)
@@ -1823,7 +1823,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 105.918 106.68 90)
 			(effects
 				(font
@@ -1957,7 +1957,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 105.918 101.6 90)
 			(effects
 				(font
@@ -2401,7 +2401,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 105.918 83.82 90)
 			(effects
 				(font
@@ -2629,7 +2629,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 105.918 88.9 90)
 			(effects
 				(font

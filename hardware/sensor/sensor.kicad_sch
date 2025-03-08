@@ -1709,7 +1709,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 121.92 125.73 90)
 			(effects
 				(font
@@ -2001,7 +2001,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 121.9564 128.27 90)
 			(effects
 				(font
@@ -2155,7 +2155,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 121.92 117.856 90)
 			(effects
 				(font
@@ -2450,7 +2450,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 121.92 120.65 90)
 			(effects
 				(font

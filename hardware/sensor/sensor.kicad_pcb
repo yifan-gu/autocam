@@ -1144,7 +1144,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -1247,7 +1247,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -1350,7 +1350,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -2225,7 +2225,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")

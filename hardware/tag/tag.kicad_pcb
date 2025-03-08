@@ -131,7 +131,7 @@
 	(net 6 "unconnected-(ESP32_UWB1-IO22-Pad31)")
 	(net 7 "Net-(ESP32_UWB1-IO2)")
 	(net 8 "Net-(ESP32_UWB1-3V3)")
-	(net 9 "Net-(ESP32_UWB1-IO36)")
+	(net 9 "Net-(ESP32_UWB1-IO39)")
 	(net 10 "unconnected-(ESP32_UWB1-IO21-Pad30)")
 	(net 11 "unconnected-(ESP32_UWB1-IO35-Pad18)")
 	(net 12 "unconnected-(ESP32_UWB1-IO16-Pad28)")
@@ -150,7 +150,7 @@
 	(net 25 "unconnected-(ESP32_UWB1-IO0-Pad25)")
 	(net 26 "unconnected-(ESP32_UWB1-RST-Pad3)")
 	(net 27 "unconnected-(ESP32_UWB1-IO18-Pad10)")
-	(net 28 "unconnected-(ESP32_UWB1-IO39-Pad20)")
+	(net 28 "unconnected-(ESP32_UWB1-IO36-Pad19)")
 	(net 29 "unconnected-(ESP32_UWB1-IO23-Pad32)")
 	(net 30 "unconnected-(ESP32_UWB1-GND-Pad2)")
 	(net 31 "unconnected-(ESP32_UWB1-GND-Pad4)")
@@ -952,7 +952,7 @@
 			(drill 0.8)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 9 "Net-(ESP32_UWB1-IO36)")
+			(net 28 "unconnected-(ESP32_UWB1-IO36-Pad19)")
 			(pinfunction "IO36")
 			(pintype "bidirectional")
 			(uuid "31f897b4-018d-4097-ae65-be3c6ac730e1")
@@ -963,7 +963,7 @@
 			(drill 0.8)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 28 "unconnected-(ESP32_UWB1-IO39-Pad20)")
+			(net 9 "Net-(ESP32_UWB1-IO39)")
 			(pinfunction "IO39")
 			(pintype "bidirectional")
 			(uuid "27ea9579-33e2-4958-9713-972c9d01d8d4")
@@ -1434,7 +1434,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -1712,7 +1712,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -1815,7 +1815,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -2093,7 +2093,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -2277,7 +2277,7 @@
 			(drill 0.8)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 9 "Net-(ESP32_UWB1-IO36)")
+			(net 9 "Net-(ESP32_UWB1-IO39)")
 			(pintype "passive")
 			(uuid "fe87bb96-59fc-49e9-9a0b-f8168bf1489c")
 		)
@@ -2530,7 +2530,7 @@
 			(drill 0.8)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 9 "Net-(ESP32_UWB1-IO36)")
+			(net 9 "Net-(ESP32_UWB1-IO39)")
 			(pintype "passive")
 			(uuid "22ff29c5-cfd3-40b1-a5f6-5d2913749841")
 		)
@@ -4597,12 +4597,20 @@
 		(uuid "e03b0d4c-c5c7-4351-ab06-8aba06c4f6e4")
 	)
 	(segment
-		(start 171.45 109.22)
-		(end 167.64 113.03)
+		(start 171.45 111.76)
+		(end 173.99 109.22)
 		(width 0.3)
 		(layer "F.Cu")
 		(net 9)
-		(uuid "36d8ec51-9fd4-41ef-84a3-6680b420deba")
+		(uuid "205deb2e-c435-4d06-bda5-a56cd1c294fb")
+	)
+	(segment
+		(start 167.64 113.03)
+		(end 168.91 111.76)
+		(width 0.3)
+		(layer "F.Cu")
+		(net 9)
+		(uuid "3b5a044d-636b-43c3-8178-296c632bebd2")
 	)
 	(segment
 		(start 165.1 113.03)
@@ -4611,6 +4619,14 @@
 		(layer "F.Cu")
 		(net 9)
 		(uuid "c28d4799-6fd3-4e16-b2ed-af33071db258")
+	)
+	(segment
+		(start 168.91 111.76)
+		(end 171.45 111.76)
+		(width 0.3)
+		(layer "F.Cu")
+		(net 9)
+		(uuid "d6720853-8e95-4b5d-a779-8aa3eb9148f2")
 	)
 	(segment
 		(start 138.43 109.22)

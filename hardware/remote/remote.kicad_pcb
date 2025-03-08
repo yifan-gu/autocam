@@ -99,10 +99,10 @@
 	(net 13 "Net-(ESP32_UWB1-IO3)")
 	(net 14 "unconnected-(BUTTON2-S1_2-Pad2)")
 	(net 15 "unconnected-(ESP32_UWB1-IO35-Pad18)")
-	(net 16 "unconnected-(ESP32_UWB1-IO39-Pad20)")
+	(net 16 "unconnected-(ESP32_UWB1-IO36-Pad19)")
 	(net 17 "Net-(ESP32_UWB1-3V3)")
 	(net 18 "unconnected-(ESP32_UWB1-IO34-Pad17)")
-	(net 19 "Net-(ESP32_UWB1-IO36)")
+	(net 19 "Net-(ESP32_UWB1-IO39)")
 	(net 20 "unconnected-(ESP32_UWB1-RST-Pad3)")
 	(net 21 "unconnected-(BUTTON2-S1_1-Pad1)")
 	(net 22 "Net-(ESP32_UWB1-IO15)")
@@ -765,7 +765,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -868,7 +868,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -1560,7 +1560,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -1744,7 +1744,7 @@
 			(drill 0.8)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 19 "Net-(ESP32_UWB1-IO36)")
+			(net 19 "Net-(ESP32_UWB1-IO39)")
 			(pintype "passive")
 			(uuid "d0e2b489-08bc-4397-a8b9-ec6503cb1b4f")
 		)
@@ -2520,7 +2520,7 @@
 			(drill 0.8)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 19 "Net-(ESP32_UWB1-IO36)")
+			(net 16 "unconnected-(ESP32_UWB1-IO36-Pad19)")
 			(pinfunction "IO36")
 			(pintype "bidirectional")
 			(uuid "60b8c7e2-efc3-415b-b730-37da0d3edd89")
@@ -2531,7 +2531,7 @@
 			(drill 0.8)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 16 "unconnected-(ESP32_UWB1-IO39-Pad20)")
+			(net 19 "Net-(ESP32_UWB1-IO39)")
 			(pinfunction "IO39")
 			(pintype "bidirectional")
 			(uuid "c45c4279-04fe-42ee-923f-ea13658fdccf")
@@ -2900,7 +2900,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -3457,7 +3457,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -4853,7 +4853,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -4956,7 +4956,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -5140,7 +5140,7 @@
 			(drill 0.8)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 19 "Net-(ESP32_UWB1-IO36)")
+			(net 19 "Net-(ESP32_UWB1-IO39)")
 			(pintype "passive")
 			(uuid "756decad-65cb-4280-a2e8-96e4b53239fe")
 		)
@@ -5486,7 +5486,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -5737,7 +5737,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -8837,23 +8837,23 @@
 		(width 0.3)
 		(layer "F.Cu")
 		(net 19)
-		(uuid "20e5c977-7c0c-4f3f-ad4b-23adcae88166")
+		(uuid "1434b1af-2c3e-42b2-bc39-ebf8722b709f")
 	)
 	(segment
-		(start 175.508942 119.38)
-		(end 170.18 114.051058)
+		(start 172.72 114.051058)
+		(end 187.711058 114.051058)
 		(width 0.3)
 		(layer "F.Cu")
 		(net 19)
-		(uuid "6f5c459f-1c52-42e0-9953-e54f71d6a432")
+		(uuid "6455db73-23c2-41f1-89ca-ef9954707c89")
 	)
 	(segment
-		(start 193.04 119.38)
-		(end 175.508942 119.38)
+		(start 187.711058 114.051058)
+		(end 193.04 119.38)
 		(width 0.3)
 		(layer "F.Cu")
 		(net 19)
-		(uuid "e2248fcc-a3de-4eed-b0cc-a89526fae8eb")
+		(uuid "8d4a5b63-12c1-409d-a127-19a23b01cfb4")
 	)
 	(segment
 		(start 147.32 125.82)

@@ -2369,6 +2369,16 @@
 	)
 	(wire
 		(pts
+			(xy 134.62 120.65) (xy 134.62 140.97)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5ba7046c-a8fe-4ff7-bc56-84b96495eea0")
+	)
+	(wire
+		(pts
 			(xy 127 39.37) (xy 127 85.09)
 		)
 		(stroke
@@ -2436,16 +2446,6 @@
 			(type default)
 		)
 		(uuid "612ebff7-06c2-4f35-9e55-683186da8a25")
-	)
-	(wire
-		(pts
-			(xy 134.62 118.11) (xy 134.62 140.97)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "65dcd7f9-615c-437e-a8c7-555359686da6")
 	)
 	(wire
 		(pts
@@ -2576,6 +2576,16 @@
 			(type default)
 		)
 		(uuid "78c92534-a125-4708-81e0-e8b0ea2bd657")
+	)
+	(wire
+		(pts
+			(xy 134.62 120.65) (xy 142.24 120.65)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7b850443-2109-4309-837c-81b6e02839ec")
 	)
 	(wire
 		(pts
@@ -3026,16 +3036,6 @@
 			(type default)
 		)
 		(uuid "ddd2acca-128e-4d9a-8f63-7f29b18b6b1a")
-	)
-	(wire
-		(pts
-			(xy 142.24 118.11) (xy 134.62 118.11)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "df3a9a6d-85ea-4b51-b2f8-d730703ca46b")
 	)
 	(wire
 		(pts
@@ -3491,7 +3491,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 180.34 82.55 90)
 			(effects
 				(font
@@ -3559,7 +3559,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 180.34 80.01 90)
 			(effects
 				(font
@@ -3846,7 +3846,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 180.34 97.79 90)
 			(effects
 				(font
@@ -3913,7 +3913,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 154.94 129.54 90)
 			(effects
 				(font
@@ -4287,7 +4287,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 180.34 90.17 90)
 			(effects
 				(font
@@ -4505,7 +4505,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 180.34 87.63 90)
 			(effects
 				(font
@@ -4891,7 +4891,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 180.34 77.47 90)
 			(effects
 				(font
@@ -4958,7 +4958,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 180.34 95.25 90)
 			(effects
 				(font
@@ -5162,7 +5162,7 @@
 				)
 			)
 		)
-		(property "Value" "2000Ω"
+		(property "Value" "10KΩ"
 			(at 180.34 92.71 90)
 			(effects
 				(font
