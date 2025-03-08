@@ -72,6 +72,19 @@ void LEDController::setLEDYellow(int red_pin, int green_pin, int blue_pin) {
   }
 }
 
+// Private helper: set LED to yellow (all LEDs off).
+void LEDController::setLEDOff(int red_pin, int green_pin, int blue_pin) {
+  if (red_pin > 0) {
+    digitalWrite(red_pin, HIGH);   // Red off
+  }
+  if (green_pin > 0) {
+    digitalWrite(green_pin, HIGH);   // Green off
+  }
+  if (blue_pin > 0) {
+    digitalWrite(blue_pin, HIGH);   // Blue off
+  }
+}
+
 // Private helper: read the battery percentage from the ESP32 ADC
 int LEDController::readBatteryPercentage() {
   int measuredMilliVoltage = analogReadMilliVolts(batteryADCPin);
@@ -119,6 +132,17 @@ void LEDController::initDriveLED(int driveRed, int driveGreen, int driveBlue) {
   setupLEDPIN(driveB);
 }
 
+// UWB selector LED initialization
+void LEDController::initUWBSelectorLED(int uwbSelectorRed, int uwbSelectorGreen, int uwbSelectorBlue) {
+  uwbSelectorR = uwbSelectorRed;
+  uwbSelectorG = uwbSelectorGreen;
+  uwbSelectorB = uwbSelectorBlue;
+
+  setupLEDPIN(uwbSelectorR);
+  setupLEDPIN(uwbSelectorG);
+  setupLEDPIN(uwbSelectorB);
+}
+
 // Battery LED initialization
 void LEDController::initBatteryLED(int batteryRed, int batteryGreen, int batteryBlue, int battery_adc_pin, float battery_min_v, float battery_max_v, int R1, int R2) {
   batteryR = batteryRed;
@@ -127,7 +151,7 @@ void LEDController::initBatteryLED(int batteryRed, int batteryGreen, int battery
 
   batteryADCPin = battery_adc_pin;
   batteryMinVoltage = battery_min_v;
-  batteryMinVoltage = battery_max_v;
+  batteryMaxVoltage = battery_max_v;
   batteryVoltageDividerR1 = R1;
   batteryVoltageDividerR2 = R2;
   if (R2 != 0 ) {
@@ -168,6 +192,15 @@ void LEDController::updateDriveModeLED(int driveMode) {
   } else {
     Serial.println("drive mode, green");
     setLEDGreen(driveR, driveG, driveB);
+  }
+}
+
+// Update LEDs based on UWB Selector
+void LEDController::updateUWBSelectorLED(uint16_t uwbSelector) {
+  if (uwbSelector == 1) {
+    setLEDBlue(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+  } else {
+    setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
   }
 }
 

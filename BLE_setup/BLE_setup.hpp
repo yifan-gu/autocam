@@ -26,6 +26,7 @@ struct SensorDataRecv {
   float yawSpeed;
   float pitchSpeed;
   bool activeTrackToggled;
+  uint16_t uwbSelector;
 };
 
 struct ControllerData {
@@ -35,6 +36,7 @@ struct ControllerData {
   float yawSpeed;
   float pitchSpeed;
   bool activeTrackToggled;
+  uint16_t uwbSelector;
 
   int state; // This value is written by the central (server).
 };

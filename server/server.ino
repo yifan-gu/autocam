@@ -77,8 +77,9 @@ float targetHeading = 0;
 float yawSpeed = 0;
 float pitchSpeed = 0;
 bool activeTrackToggled = false;
+uint16_t uwbSelector = 0;
 
-bool gimbalControllerValueUpdated = false;
+bool gimbalControllerValueChanged = false;
 
 // The calculated coordinates of the tag.
 float currentX = 0, currentY = 0;
@@ -394,7 +395,7 @@ void establishUWBAnchorBLEConnection() {
 }
 
 void sendGimbalControllerData() {
-  if (!gimbalControllerValueUpdated) {
+  if (!gimbalControllerValueChanged) {
     return;
   }
 
@@ -403,11 +404,12 @@ void sendGimbalControllerData() {
     return;
   }
 
-  SensorDataRecv data = {.yawSpeed = yawSpeed, .pitchSpeed = pitchSpeed, .activeTrackToggled = activeTrackToggled};
+  SensorDataRecv data = {.yawSpeed = yawSpeed, .pitchSpeed = pitchSpeed, .activeTrackToggled = activeTrackToggled, .uwbSelector = uwbSelector};
   UWBAnchorSensorDataRecv.writeValue((uint8_t *)&data, sizeof(SensorDataRecv));
-  gimbalControllerValueUpdated = false;
+  activeTrackToggled = false; // Reset active track toggle after triggering it.
+  gimbalControllerValueChanged = false;
 
-  Serial.printf("Sent via BLE: yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d\n", data.yawSpeed, data.pitchSpeed, data.activeTrackToggled);
+  Serial.printf("Sent via BLE: yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
 }
 
@@ -466,11 +468,11 @@ void getAutocamControllerData() {
 
   ControllerData data;
   AutocamControllerData.readValue((uint8_t *)&data, sizeof(ControllerData));
-  Serial.printf("Received throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.activeTrackToggled);
+  Serial.printf("Received throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 
-  gimbalControllerValueUpdated = yawSpeed != data.yawSpeed || pitchSpeed != data.pitchSpeed || activeTrackToggled != data.activeTrackToggled;
+  gimbalControllerValueChanged = yawSpeed != data.yawSpeed || pitchSpeed != data.pitchSpeed || activeTrackToggled != data.activeTrackToggled || uwbSelector != data.uwbSelector;
 
   throttleValue = data.throttleValue;
   steeringValue = data.steeringValue;
@@ -479,6 +481,7 @@ void getAutocamControllerData() {
   activeTrackToggled = data.activeTrackToggled;
 
   setDriveMode(data.driveMode);
+  setUWBSelector(data.uwbSelector);
 }
 
 void updateState(int newState) {
@@ -495,7 +498,7 @@ void updateAutocamControllerStatus() {
     return;
   }
 
-  ControllerData data = {.driveMode = driveMode, .activeTrackToggled = activeTrackToggled, .state = state};
+  ControllerData data = {.driveMode = driveMode, .activeTrackToggled = activeTrackToggled, .uwbSelector = uwbSelector, .state = state};
   AutocamControllerData.writeValue((uint8_t *)&data, sizeof(ControllerData));
   Serial.printf("Sent status to remote via BLE: driveMode = %d, state=%d\n", driveMode, state);
   return;
@@ -507,6 +510,15 @@ void setDriveMode(int newDriveMode) {
   }
   driveMode = newDriveMode;
   ledController.updateDriveModeLED(driveMode);
+  updateAutocamControllerStatus();
+}
+
+void setUWBSelector(uint16_t newUWBSelector) {
+  if (uwbSelector == newUWBSelector) {
+    return;
+  }
+  uwbSelector = newUWBSelector;
+  updateAutocamControllerStatus();
 }
 
 void calculateSteeringThrottle() {
@@ -657,5 +669,5 @@ void emergencyStop() { //TODO(yifan): Refactor out this with a state machine.
   pitchSpeed = 0;
   throttleValue = midThrottle;
   steeringValue = midSteering;
-  gimbalControllerValueUpdated = true; // Force gimbal to stop.
+  gimbalControllerValueChanged = true; // Force gimbal to stop.
 }

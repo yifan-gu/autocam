@@ -15,6 +15,10 @@ private:
   int driveR = -1;
   int driveG = -1;
   int driveB = -1;
+  // UWB Selector Mode LED pins
+  int uwbSelectorR = -1;
+  int uwbSelectorG = -1;
+  int uwbSelectorB = -1;
   // Battery LED pins
   int batteryR = -1;
   int batteryG = -1;
@@ -39,15 +43,19 @@ public:
   void setLEDGreen(int red_pin, int green_pin, int blue_pin);
   void setLEDBlue(int red_pin, int green_pin, int blue_pin); // Optional, if needed
   void setLEDYellow(int red_pin, int green_pin, int blue_pin);
+  void setLEDOff(int red_pin, int green_pin, int blue_pin);
 
   void initSensorLED(int sensorRed, int sensorGreen, int sensorBlue);
   void initRemoteLED(int remoteRed, int remoteGreen, int remoteBlue);
   void initDriveLED(int driveRed, int driveGreen, int driveBlue);
+  void initUWBSelectorLED(int uwbSelectorRed, int uwbSelectorGreen, int uwbSelectorBlue);
   void initBatteryLED(int batteryRed, int batteryGreen, int batteryBlue, int battery_adc_pin, float battery_min_v, float battery_max_v, int R1 = 220000, int R2 = 100000);
   // Update LEDs based on state.
   void updateStateLED(int state);
   // Update LEDs based on drive mode.
   void updateDriveModeLED(int driveMode);
+  // Update LEDs based on UWB Selector
+  void updateUWBSelectorLED(uint16_t uwbSelector);
   // Update battery LED based on battery percentage thresholds.
   void updateBatteryLED();
 };

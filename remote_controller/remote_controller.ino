@@ -15,32 +15,44 @@
 #define DRIVE_MODE_MANUAL 0
 #define DRIVE_MODE_AUTO_FOLLOW 1
 
-#define LOCK_SWITCH_PIN 25
-#define MODE_SWITCH_PIN 26
-#define ACTIVE_TRACK_SWITCH_PIN 13
-#define TAG_SELECTOR_PIN 12
+// SPI pins
+#define SPI_SCK 18
+#define SPI_MISO 19
+#define SPI_MOSI 23
+#define DW_CS 4
 
-#define BATTERY_LED_RED_PIN 3
-#define BATTERY_LED_GREEN_PIN 1
+// DW1000 pins
+#define PIN_RST 27 // reset pin
+#define PIN_IRQ 34 // irq pin
+#define PIN_SS 4   // spi select pin
+
+// Remote controller pins
+#define UWB_SELECTOR_SWITCH_PIN 12
+#define ACTIVE_TRACK_BUTTON_PIN 13
+#define MODE_BUTTON_PIN 26
+#define LOCK_SWITCH_PIN 32
+
+#define BATTERY_LED_RED_PIN 5
+#define BATTERY_LED_GREEN_PIN 16
 #define BATTERY_LED_BLUE_PIN -1
-#define TAG_ACTIVE_LED_RED_PIN -1
-#define TAG_ACTIVE_LED_GREEN_PIN -1
-#define TAG_ACTIVE_LED_BLUE_PIN 0
-#define SENSOR_LED_RED_PIN 5
-#define SENSOR_LED_GREEN_PIN 16
+#define UWB_SELECTOR_LED_RED_PIN -1
+#define UWB_SELECTOR_LED_GREEN_PIN -1
+#define UWB_SELECTOR_LED_BLUE_PIN 17
+#define SENSOR_LED_RED_PIN 21
+#define SENSOR_LED_GREEN_PIN 22
 #define SENSOR_LED_BLUE_PIN -1
-#define REMOTE_CONTROLLER_LED_RED_PIN 17
-#define REMOTE_CONTROLLER_LED_GREEN_PIN 21
+#define REMOTE_CONTROLLER_LED_RED_PIN 25
+#define REMOTE_CONTROLLER_LED_GREEN_PIN 26
 #define REMOTE_CONTROLLER_LED_BLUE_PIN -1
-#define DRIVE_MODE_LED_RED_PIN 22
+#define DRIVE_MODE_LED_RED_PIN 33
 #define DRIVE_MODE_LED_GREEN_PIN 33
 #define DRIVE_MODE_LED_BLUE_PIN -1
 
 #define STEERING_STICK_X_PIN 2
-#define THROTTLE_STICK_Y_PIN 32
+#define THROTTLE_STICK_Y_PIN 35
 #define GIMBAL_STICK_X_PIN 14
 #define GIMBAL_STICK_Y_PIN 15
-#define BATTERY_ADC_PIN 36  // ADC pin to measure battery voltage.
+#define BATTERY_ADC_PIN 39  // ADC pin to measure battery voltage.
 
 #define STICK_DEAD_ZONE 200
 #define ADC_MAX 4095   // ESP32 ADC range
@@ -62,9 +74,14 @@ const float minYaw = -1, maxYaw = 1, midYaw = 0;
 // State indicators.
 int state = STATE_NOT_READY;
 int driveMode = DRIVE_MODE_MANUAL;
+uint16_t uwbSelector = 0;
+bool uwbStarted = false;
 
-// Variables toggle the drive mode.
+// Variables to store the drive mode button trigger events.
 int driveModeTriggerValue = DRIVE_MODE_MANUAL;
+
+// Variables toggle the UWB selector switch trigger events.
+uint16_t uwbSelectorTriggerValue = 0;
 
 // Variables to store values
 int throttleValue = midThrottle, steeringValue = midSteering;
@@ -78,9 +95,15 @@ ControllerData receivedData;
 
 // Global variable to hold last sent data.
 // (Initialize with known defaults.)
-ControllerData lastSentData = { midThrottle, midSteering, DRIVE_MODE_MANUAL, midPitch, midYaw, false };
+ControllerData lastSentData = { midThrottle, midSteering, DRIVE_MODE_MANUAL, midPitch, midYaw, false, uwbSelector };
 
 unsigned int lastPingTime = 0;
+
+//calibrated Antenna Delay setting for this anchor
+uint16_t Adelay = 16630;
+
+// leftmost two bytes below will become the "short address"
+char uwb_addr[] = "01:00:BC:FE:41:2A:39:80";
 
 // --- Button Debounce Helpers ---
 struct ButtonDebounce {
@@ -91,8 +114,8 @@ struct ButtonDebounce {
 };
 
 // Instantiate debounce objects for each button.
-ButtonDebounce modeSwitchDebounce = { MODE_SWITCH_PIN, HIGH, HIGH, DRIVE_MODE_MANUAL };
-ButtonDebounce activeTrackDebounce = { ACTIVE_TRACK_SWITCH_PIN, HIGH, HIGH, false };
+ButtonDebounce modeSwitchDebounce = { MODE_BUTTON_PIN, HIGH, HIGH, DRIVE_MODE_MANUAL };
+ButtonDebounce activeTrackDebounce = { ACTIVE_TRACK_BUTTON_PIN, HIGH, HIGH, false };
 
 LEDController ledController;
 
@@ -112,35 +135,105 @@ void setup() {
     // Wait for Serial or timeout
   }
 
+
   setupLED();
   setupInput();
   setupBLE();
+  setupPinnedTask();
+}
+
+void setupPinnedTask() {
+  // Create a task and pin it to core 0.
+  // Parameters: task function, name, stack size, parameter, priority, task handle, core id.
+  xTaskCreatePinnedToCore(
+    nonUWBTask,   // Task function.
+    "nonUWBTask",            // Name of task.
+    4096,                   // Stack size in words.
+    NULL,                   // Task input parameter.
+    1,                      // Task priority.
+    NULL,                   // Task handle.
+    0                       // Core where the task should run (0 or 1).
+  );
+}
+
+// Task function for non UWB computation that's not time critical.
+void nonUWBTask(void * parameter) {
+  while (true) {
+    readStatusData();
+    readControllerData();
+    sendControllerData();
+    checkBattery();
+
+    // Short delay to yield to other tasks; adjust as necessary.
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+  }
 }
 
 void loop() {
-  readStatusData();
-  readControllerData();
-  sendControllerData();
-  checkBattery();
-  delay(1000 / DATA_RATE); // Control the data rate.
+  checkUWB();
 }
 
 void setupLED() {
   ledController.initSensorLED(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN);
   ledController.initRemoteLED(REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN, REMOTE_CONTROLLER_LED_BLUE_PIN);
   ledController.initDriveLED(DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN, DRIVE_MODE_LED_BLUE_PIN);
+  ledController.initUWBSelectorLED(UWB_SELECTOR_LED_RED_PIN, UWB_SELECTOR_LED_GREEN_PIN, UWB_SELECTOR_LED_BLUE_PIN);
   ledController.initBatteryLED(BATTERY_LED_RED_PIN, BATTERY_LED_GREEN_PIN, BATTERY_LED_BLUE_PIN, BATTERY_ADC_PIN, minVoltage, maxVoltage);
 
   ledController.updateStateLED(state);
   ledController.updateDriveModeLED(driveMode);
   ledController.updateBatteryLED();
+  ledController.updateUWBSelectorLED(uwbSelector);
 }
 
 void setupInput() {
   // Set button input pins as input with internal pull-up.
-  pinMode(MODE_SWITCH_PIN, INPUT_PULLUP);
-  pinMode(ACTIVE_TRACK_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(MODE_BUTTON_PIN, INPUT_PULLUP);
+  pinMode(ACTIVE_TRACK_BUTTON_PIN, INPUT_PULLUP);
   pinMode(LOCK_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(UWB_SELECTOR_SWITCH_PIN, INPUT_PULLUP);
+}
+
+void startUWB() {
+  //init the configuration
+  SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
+  DW1000Ranging.initCommunication(PIN_RST, PIN_SS, PIN_IRQ); //Reset, CS, IRQ pin
+
+  // set antenna delay for anchors only. Tag is default (16384)
+  DW1000.setAntennaDelay(Adelay);
+
+  DW1000Ranging.attachNewRange(newRange);
+  DW1000Ranging.attachNewDevice(newDevice);
+  DW1000Ranging.attachInactiveDevice(inactiveDevice);
+
+  // NOTE (yifan): The DW1000 "tag" is different from the Autocam "tag".
+  // In fact, the naming conventions are reversed:
+  //   - DW1000 "anchors" correspond to Autocam Remote and Autocam Tag.
+  //   - DW1000 "tag" corresponds to sensor.
+  // This reversal is due to the DW1000 library's limitation of supporting a single tag with multiple anchors,
+  // whereas our system uses multiple anchors (Autocam Remote and Autocam Tag).
+  DW1000Ranging.startAsAnchor(uwb_addr, DW1000.MODE_LONGDATA_RANGE_LOWPOWER, false);
+}
+
+void stopUWB() {
+  DW1000.end();
+}
+
+void checkUWB() {
+  if (uwbSelector == 0) {
+    if (!uwbStarted) {
+      return; // Do nothing.
+    }
+    stopUWB();
+    uwbStarted = false;
+    return;
+  }
+
+  if (!uwbStarted) {
+    startUWB();
+    uwbStarted = true;
+  }
+  DW1000Ranging.loop();
 }
 
 void setupBLE() {
@@ -167,6 +260,14 @@ void updateDriveMode(int newDriveMode) {
   Serial.printf("Update drive mode=%d\n", driveMode);
 }
 
+void updateUWBSelector(uint16_t newUWBSelector) {
+  if (uwbSelector == newUWBSelector) {
+    return;
+  }
+  uwbSelector = newUWBSelector;
+  ledController.updateUWBSelectorLED(uwbSelector);
+}
+
 void readStatusData() {
   if (!(BLECentral && BLECentral.connected())) {
     updateState(state & ~STATE_REMOTE_CONTROLLER_READY);
@@ -179,9 +280,10 @@ void readStatusData() {
 
   if (AutocamControllerData.written()) {
     AutocamControllerData.readValue((uint8_t *)&receivedData, sizeof(ControllerData));
-    Serial.printf("Received state=%d, driveMode=%d, activeTrackToggled=%d\n", receivedData.state, receivedData.driveMode, receivedData.activeTrackToggled);
+    Serial.printf("Received state=%d, driveMode=%d, activeTrackToggled=%d, uwbSelector=%d\n", receivedData.state, receivedData.driveMode, receivedData.activeTrackToggled, receivedData.uwbSelector);
     updateState(receivedData.state);
     updateDriveMode(receivedData.driveMode);
+    updateUWBSelector(receivedData.uwbSelector);
 
     //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
     //lastPingTime = millis();
@@ -231,6 +333,7 @@ void checkButtons() {
     Serial.printf("Drive mode toggled: %d\n", driveModeTriggerValue);
   }
 
+  activeTrackToggledValue = false;
   if (buttonPressed(activeTrackDebounce)) {
     // Toggle active track.
     activeTrackToggledValue = true;
@@ -240,6 +343,10 @@ void checkButtons() {
 
 bool lockSwitchLocked() {
   return digitalRead(LOCK_SWITCH_PIN) == LOW;
+}
+
+uint16_t readUWBSelector() {
+  return digitalRead(UWB_SELECTOR_SWITCH_PIN) == LOW ? 1 : 0;
 }
 
 void readControllerData() {
@@ -252,6 +359,7 @@ void readControllerData() {
 
   // Check buttons.
   checkButtons();
+  uwbSelectorTriggerValue = readUWBSelector();
 
   // Read raw joystick values
   int rawX = analogRead(STEERING_STICK_X_PIN);
@@ -297,6 +405,7 @@ bool controllerDataChanged(const ControllerData &oldData, const ControllerData &
   if (fabs(oldData.yawSpeed - newData.yawSpeed) > 0.01) return true;
   if (fabs(oldData.pitchSpeed - newData.pitchSpeed) > 0.01) return true;
   if (oldData.activeTrackToggled != newData.activeTrackToggled) return true;
+  if (oldData.uwbSelector != newData.uwbSelector) return true;
   return false;
 }
 
@@ -315,17 +424,18 @@ void sendControllerData() {
     .driveMode = driveModeTriggerValue,
     .yawSpeed = yawSpeedValue,
     .pitchSpeed = pitchSpeedValue,
-    .activeTrackToggled = activeTrackToggledValue
+    .activeTrackToggled = activeTrackToggledValue,
+    .uwbSelector = uwbSelectorTriggerValue,
   };
 
   // Send update only if there is a change.
   static bool firstUpdate = true;
   if (firstUpdate || controllerDataChanged(lastSentData, data)) {
     AutocamControllerData.writeValue((uint8_t *)&data, sizeof(ControllerData));
-    activeTrackToggledValue = false;
     lastSentData = data;
+    lastSentData.activeTrackToggled = false; // Do not resend "activeTrackToggled = false" because it's an no-op anyway.
     firstUpdate = false;
-    Serial.printf("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d, yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state, data.yawSpeed, data.pitchSpeed, data.activeTrackToggled);
+    //Serial.printf("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d, yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state, data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
   }
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
@@ -337,4 +447,16 @@ void checkBattery() {
     lastBatteryCheckTimeMillis = now;
     ledController.updateBatteryLED();
   }
+}
+
+void newRange() {
+  Serial.printf("UWB Sensor address=%X, distance=%f(m)\n", DW1000Ranging.getDistantDevice()->getShortAddress(), DW1000Ranging.getDistantDevice()->getRange());
+}
+
+void newDevice(DW1000Device *device) {
+  Serial.printf("UWB Sensor connected, address=%X\n", device->getShortAddress());
+}
+
+void inactiveDevice(DW1000Device *device) {
+  Serial.printf("UWB Sensor disconnected, address=%X\n", device->getShortAddress());
 }

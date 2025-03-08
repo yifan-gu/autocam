@@ -10,9 +10,11 @@ Arduino files for my auto-following camera car!
 - [x] Add state indicator in the web UI
 - [x] Add LED state indicators
 - [x] Add battery state LED (tag, remote)
-- [x] Add LED logic for tag.
+- [x] Add LED logic for tag
 - [x] Add lock mode (remote)
-- [ ] Add tag selector (sensor, remote)
+- [x] Add tag selector (sensor, remote)
+- [ ] Control the BLE data rate
+- [ ] Fix UWB Anchor naming, fix GimbalController naming
 - [x] Add PCB boards
   - [x] Sensor
   - [x] Verify LED resistor values
@@ -23,6 +25,7 @@ Arduino files for my auto-following camera car!
 - [ ] Assemble together
 - [ ] Calibrate the UWB tag and anchor
 - [ ] Measure battery voltage.
+- [ ] Smooth the distance measurement.
 - [ ] (optimize) Store settings in external storage (SD card)
 - [ ] (optimize) Refactor the server code with a state machine
 - [ ] (optimize) Refactor the sensor LED control with LED controller

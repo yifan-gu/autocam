@@ -32,10 +32,22 @@
 #define TAG_LED_BLUE_PIN -1
 
 // leftmost two bytes below will become the "short address"
-char anchor_addr[] = "80:00:5B:D5:A9:9A:E2:9C";
+char uwbAddr[] = "AA:AA:6F:BE:08:3D:4E:72";
 
-//calibrated Antenna Delay setting for this anchor
-uint16_t Adelay = 16630;
+struct Anchor {
+  uint16_t address;
+  bool connected;
+};
+
+Anchor uwbAnchors[] = {
+  {0x0000, false}, // NOTE(yifan): Make the UWB short address same as the index, for quick looking up.
+  {0x0001, false}
+};
+
+uint16_t uwbSelector = 0;
+
+// TAG antenna delay defaults to 16384
+uint16_t Adelay = 16384;
 
 #define STATE_NOT_READY 0
 #define STATE_TAG_CONNECTED 1
@@ -64,17 +76,42 @@ void setup() {
 
   setupLED();
   setupUWBAnchor();
-  setupDJIRoninController();
+  //setupDJIRoninController();
   setupBLE();
+  setupPinnedTask();
+}
+
+void setupPinnedTask() {
+  // Create a task and pin it to core 0.
+  // Parameters: task function, name, stack size, parameter, priority, task handle, core id.
+  xTaskCreatePinnedToCore(
+    nonUWBTask,   // Task function.
+    "nonUWBTask",            // Name of task.
+    4096,                   // Stack size in words.
+    NULL,                   // Task input parameter.
+    1,                      // Task priority.
+    NULL,                   // Task handle.
+    0                       // Core where the task should run (0 or 1).
+  );
+}
+
+// Task function for non UWB computation that's not time critical.
+void nonUWBTask(void * parameter) {
+  while (true) {
+    //getHeading();
+    sendSensorData();
+    getGimbalControllerData();
+    applyUWBSelector();
+    //setGimbalPosition();
+    checkActiveTrack();
+
+    // Short delay to yield to other tasks; adjust as necessary.
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+  }
 }
 
 void loop() {
   getDistance();
-  getHeading();
-  sendSensorData();
-  getGimbalControllerData();
-  setGimbalPosition();
-  delay(1000 / DATA_RATE); // Control the data rate.
 }
 
 void setupLED() {
@@ -93,7 +130,7 @@ void setupLED() {
 void setupBLE() {
   UWBAnchorService.addCharacteristic(UWBAnchorSensorDataSend);
   UWBAnchorService.addCharacteristic(UWBAnchorSensorDataRecv);
-  setupBLEPeripheral("UWB Anchor", "uwb-anchor", UWBAnchorService);
+  setupBLEPeripheral("Autocam Sensor", "autocam-sensor", UWBAnchorService);
 }
 
 void setupUWBAnchor() {
@@ -102,14 +139,19 @@ void setupUWBAnchor() {
   DW1000Ranging.initCommunication(PIN_RST, PIN_SS, PIN_IRQ); //Reset, CS, IRQ pin
 
   // set antenna delay for anchors only. Tag is default (16384)
-  DW1000.setAntennaDelay(Adelay);
+  //DW1000.setAntennaDelay(Adelay);
 
   DW1000Ranging.attachNewRange(newRange);
   DW1000Ranging.attachNewDevice(newDevice);
   DW1000Ranging.attachInactiveDevice(inactiveDevice);
 
-  //start the module as an anchor, do not assign random short address
-  DW1000Ranging.startAsAnchor(anchor_addr, DW1000.MODE_LONGDATA_RANGE_LOWPOWER, false);
+  // NOTE (yifan): The DW1000 "tag" is different from the Autocam "tag".
+  // In fact, the naming conventions are reversed:
+  //   - DW1000 "anchors" correspond to Autocam Remote and Autocam Tag.
+  //   - DW1000 "tag" corresponds to sensor.
+  // This reversal is due to the DW1000 library's limitation of supporting a single tag with multiple anchors,
+  // whereas our system uses multiple anchors (Autocam Remote and Autocam Tag).
+  DW1000Ranging.startAsTag(uwbAddr, DW1000.MODE_LONGDATA_RANGE_LOWPOWER, false);
 }
 
 void getGimbalControllerData() {
@@ -125,14 +167,16 @@ void getGimbalControllerData() {
     return;
   }
 
+  // TODO(yifan): Maybe verify the input.
   SensorDataRecv data;
   UWBAnchorSensorDataRecv.readValue((uint8_t *)&data, sizeof(SensorDataRecv));
-  Serial.printf("Received yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d\n", data.yawSpeed, data.pitchSpeed, data.activeTrackToggled);
+  //Serial.printf("Received yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
   yawSpeed = data.yawSpeed;
   pitchSpeed = data.pitchSpeed;
   activeTrackToggled = data.activeTrackToggled;
+  uwbSelector = data.uwbSelector;
 
-  Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 }
 
@@ -141,6 +185,15 @@ void setGimbalPosition() {
   float pitch = convert_gimbal_speed(pitchSpeed);
   if (!djiRoninController.set_position(yaw, 0, pitch, 0, 100)) {
     Serial.println("Failed to set DJI Ronin position");
+  }
+}
+
+void checkActiveTrack() {
+  if (activeTrackToggled) {
+    if (!djiRoninController.gimbal_active_track()) {
+      Serial.println("Failed to trigger DJI Ronin active track");
+    }
+    activeTrackToggled = false;
   }
 }
 
@@ -207,17 +260,37 @@ void sendSensorData() {
 }
 
 void newRange() {
-  distance = DW1000Ranging.getDistantDevice()->getRange();
+  DW1000Device *device = DW1000Ranging.getDistantDevice();
+  if (device->getShortAddress() == uwbSelector) {
+    distance = device->getRange();
+    Serial.printf("Anchor address=%X, distance=%f(m)\n", uwbSelector, distance);
+  }
 }
 
 void newDevice(DW1000Device *device) {
-  Serial.printf("Tag connected, address=%X\n", device->getShortAddress());
-  updateState(state | STATE_TAG_CONNECTED);
+  uint16_t address = device->getShortAddress();
+  uwbAnchors[address].connected = true;
+  Serial.printf("Anchor connected, address=%X\n", address);
+  if (address == uwbSelector) {
+    updateState(state | STATE_TAG_CONNECTED);
+  }
 }
 
 void inactiveDevice(DW1000Device *device) {
-  Serial.printf("Anchor disconnected, address=%X\n", device->getShortAddress());
-  updateState(state & ~STATE_TAG_CONNECTED);
+  uint16_t address = device->getShortAddress();
+  uwbAnchors[address].connected = false;
+  Serial.printf("Anchor disconnected, address=%X\n", address);
+  if (address == uwbSelector) {
+    updateState(state & ~STATE_TAG_CONNECTED);
+  }
+}
+
+void applyUWBSelector() {
+  if (uwbAnchors[uwbSelector].connected) {
+    updateState(state | STATE_TAG_CONNECTED);
+  } else {
+    updateState(state & ~STATE_TAG_CONNECTED);
+  }
 }
 
 void updateLED(int state) {
