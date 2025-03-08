@@ -94,12 +94,7 @@ struct ButtonDebounce {
 ButtonDebounce modeSwitchDebounce = { MODE_SWITCH_PIN, HIGH, HIGH, DRIVE_MODE_MANUAL };
 ButtonDebounce activeTrackDebounce = { ACTIVE_TRACK_SWITCH_PIN, HIGH, HIGH, false };
 
-LEDController ledController(
-  SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN,
-  REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN, REMOTE_CONTROLLER_LED_BLUE_PIN,
-  DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN, DRIVE_MODE_LED_BLUE_PIN,
-  BATTERY_LED_RED_PIN, BATTERY_LED_GREEN_PIN, BATTERY_LED_BLUE_PIN
-);
+LEDController ledController;
 
 float minVoltage = 3.0; // TODO(yifan): To verify
 float maxVoltage = 4.2; // TODO(yifan): To verify.
@@ -116,8 +111,8 @@ void setup() {
   while (!Serial && (millis() - startTime < timeout)) {
     // Wait for Serial or timeout
   }
-  ledController.setupLED(state, driveMode);
-  ledController.updateBatteryLED(minVoltage, maxVoltage, BATTERY_ADC_PIN);
+
+  setupLED();
   setupInput();
   setupBLE();
 }
@@ -128,6 +123,17 @@ void loop() {
   sendControllerData();
   checkBattery();
   delay(1000 / DATA_RATE); // Control the data rate.
+}
+
+void setupLED() {
+  ledController.initSensorLED(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN);
+  ledController.initRemoteLED(REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN, REMOTE_CONTROLLER_LED_BLUE_PIN);
+  ledController.initDriveLED(DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN, DRIVE_MODE_LED_BLUE_PIN);
+  ledController.initBatteryLED(BATTERY_LED_RED_PIN, BATTERY_LED_GREEN_PIN, BATTERY_LED_BLUE_PIN, BATTERY_ADC_PIN, minVoltage, maxVoltage);
+
+  ledController.updateStateLED(state);
+  ledController.updateDriveModeLED(driveMode);
+  ledController.updateBatteryLED();
 }
 
 void setupInput() {
@@ -318,6 +324,6 @@ void checkBattery() {
   unsigned int now = millis();
   if (now - lastBatteryCheckTimeMillis > batteryCheckIntervalMillis) {
     lastBatteryCheckTimeMillis = now;
-    ledController.updateBatteryLED(minVoltage, maxVoltage, BATTERY_ADC_PIN);
+    ledController.updateBatteryLED();
   }
 }

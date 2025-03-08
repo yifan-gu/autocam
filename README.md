@@ -9,10 +9,10 @@ Arduino files for my auto-following camera car!
 - [x] Read mode switch button for remote controller
 - [x] Add state indicator in the web UI
 - [x] Add LED state indicators
-- [ ] Add battery state LED (tag, remote)
-- [ ] Add LED logic for tag.
+- [x] Add battery state LED (tag, remote)
+- [x] Add LED logic for tag.
 - [ ] Add lock mode (remote)
-- [ ] Add tag selector (tag, remote)
+- [ ] Add tag selector (sensor, remote)
 - [x] Add PCB boards
   - [x] Sensor
   - [x] Verify LED resistor values
@@ -25,6 +25,7 @@ Arduino files for my auto-following camera car!
 - [ ] Measure battery voltage.
 - [ ] (optimize) Store settings in external storage (SD card)
 - [ ] (optimize) Refactor the server code with a state machine
+- [ ] (optimize) Refactor the sensor LED control with LED controller
 - [ ] (optimize) Reorganize shared code into libraries, add external dependencies 
 
 - [ ] <s> Nice to have, detect active track failure</s> Turns out there's no API support for that

@@ -33,11 +33,7 @@
 #define DRIVE_MODE_LED_GREEN_PIN 17 // A0
 #define DRIVE_MODE_LED_BLUE_PIN -1
 
-LEDController ledController(
-  SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN,
-  REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN, REMOTE_CONTROLLER_LED_BLUE_PIN,
-  DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN, DRIVE_MODE_LED_BLUE_PIN
-);
+LEDController ledController;
 
 // Access Point credentials
 const char* ssid = "RC-Controller";
@@ -137,7 +133,7 @@ void setup() {
     // Wait for Serial or timeout
   }
 
-  ledController.setupLED(state, driveMode);
+  setupLED();
   setupESC();
   setupServer();
   setupBLECentral();
@@ -153,6 +149,15 @@ void loop() {
   calculateSteeringThrottle();
   runESCController();
   runHealthCheck();
+}
+
+void setupLED() {
+  ledController.initSensorLED(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN);
+  ledController.initRemoteLED(REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN, REMOTE_CONTROLLER_LED_BLUE_PIN);
+  ledController.initDriveLED(DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN, DRIVE_MODE_LED_BLUE_PIN);
+
+  ledController.updateStateLED(state);
+  ledController.updateDriveModeLED(driveMode);
 }
 
 void setupESC() {
