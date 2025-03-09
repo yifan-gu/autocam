@@ -79,7 +79,7 @@ void setup() {
 
   setupLED();
   setupUWB();
-  setupDJIRoninController();
+  //setupDJIRoninController();
   setupBLE();
   setupPinnedTask();
 }
@@ -113,15 +113,14 @@ void nonUWBTask(void * parameter) {
     previousIteration = currentIteration;
     //LOGF("Interval since last iteration: %u ms\n", intervalMs);
 
-    getHeading();
+    //getHeading();
     sendSensorData();
     getGimbalControllerData();
     applyUWBSelector();
-    setGimbalPosition();
+    //setGimbalPosition();
     checkActiveTrack();
 
-    // Wait until the next period; vTaskDelayUntil ensures a steady 10 ms period.
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(LOOP_PERIOD_MS));
+    vTaskDelay(pdMS_TO_TICKS(LOOP_PERIOD_MS));
   }
 }
 
@@ -278,7 +277,7 @@ void newRange() {
   DW1000Device *device = DW1000Ranging.getDistantDevice();
   if (device->getShortAddress() == uwbSelector) {
     distance = device->getRange();
-    LOGF("UWB device address=%X, distance=%f(m)\n", uwbSelector, distance);
+    LOGF("UWB device address=%X, distance=%f(m), state=%d\n", uwbSelector, distance, state);
   }
 }
 

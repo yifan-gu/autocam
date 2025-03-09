@@ -12,7 +12,7 @@
 // Available state.
 #define STATE_NOT_READY 0
 #define STATE_SENSOR_READY 1
-#define STATE_REMOTE_CONTROLLER_READY 2
+#define STATE_REMOTE_READY 2
 
 #define DRIVE_MODE_MANUAL 0
 #define DRIVE_MODE_AUTO_PILOT 1
@@ -32,7 +32,7 @@
 #define UWB_SELECTOR_SWITCH_PIN 12
 #define ACTIVE_TRACK_BUTTON_PIN 13
 #define LOCK_SWITCH_PIN 14
-#define MODE_BUTTON_PIN 15
+#define DRIVE_MODE_BUTTON_PIN 15
 
 #define BATTERY_LED_RED_PIN 16
 #define BATTERY_LED_GREEN_PIN 5
@@ -43,9 +43,9 @@
 #define SENSOR_LED_RED_PIN 21
 #define SENSOR_LED_GREEN_PIN 22
 #define SENSOR_LED_BLUE_PIN -1
-#define REMOTE_CONTROLLER_LED_RED_PIN 26
-#define REMOTE_CONTROLLER_LED_GREEN_PIN 32
-#define REMOTE_CONTROLLER_LED_BLUE_PIN -1
+#define REMOTE_LED_RED_PIN 26
+#define REMOTE_LED_GREEN_PIN 32
+#define REMOTE_LED_BLUE_PIN -1
 #define DRIVE_MODE_LED_RED_PIN -1
 #define DRIVE_MODE_LED_GREEN_PIN -1
 #define DRIVE_MODE_LED_BLUE_PIN 33
@@ -116,7 +116,7 @@ struct ButtonDebounce {
 };
 
 // Instantiate debounce objects for each button.
-ButtonDebounce modeSwitchDebounce = { MODE_BUTTON_PIN, HIGH, HIGH, DRIVE_MODE_MANUAL };
+ButtonDebounce modeSwitchDebounce = { DRIVE_MODE_BUTTON_PIN, HIGH, HIGH, DRIVE_MODE_MANUAL };
 ButtonDebounce activeTrackDebounce = { ACTIVE_TRACK_BUTTON_PIN, HIGH, HIGH, false };
 
 LEDController ledController;
@@ -177,8 +177,7 @@ void nonUWBTask(void * parameter) {
     sendRemoteDataBidirection();
     checkBattery();
 
-    // Wait until the next period; vTaskDelayUntil ensures a steady 10 ms period.
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(LOOP_PERIOD_MS));
+    vTaskDelay(pdMS_TO_TICKS(LOOP_PERIOD_MS));
   }
 }
 
@@ -188,7 +187,7 @@ void loop() {
 
 void setupLED() {
   ledController.initSensorLED(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN);
-  ledController.initRemoteLED(REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN, REMOTE_CONTROLLER_LED_BLUE_PIN);
+  ledController.initRemoteLED(REMOTE_LED_RED_PIN, REMOTE_LED_GREEN_PIN, REMOTE_LED_BLUE_PIN);
   ledController.initDriveLED(DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN, DRIVE_MODE_LED_BLUE_PIN);
   ledController.initUWBSelectorLED(UWB_SELECTOR_LED_RED_PIN, UWB_SELECTOR_LED_GREEN_PIN, UWB_SELECTOR_LED_BLUE_PIN);
   ledController.initBatteryLED(BATTERY_LED_RED_PIN, BATTERY_LED_GREEN_PIN, BATTERY_LED_BLUE_PIN, BATTERY_ADC_PIN, minVoltage, maxVoltage);
@@ -201,7 +200,7 @@ void setupLED() {
 
 void setupInput() {
   // Set button input pins as input with internal pull-up.
-  pinMode(MODE_BUTTON_PIN, INPUT_PULLUP);
+  pinMode(DRIVE_MODE_BUTTON_PIN, INPUT_PULLUP);
   pinMode(ACTIVE_TRACK_BUTTON_PIN, INPUT_PULLUP);
   pinMode(LOCK_SWITCH_PIN, INPUT_PULLUP);
   pinMode(UWB_SELECTOR_SWITCH_PIN, INPUT_PULLUP);
@@ -283,12 +282,12 @@ void updateUWBSelector(uint16_t newUWBSelector) {
 
 void readStatusData() {
   if (!(BLECentral && BLECentral.connected())) {
-    updateState(state & ~STATE_REMOTE_CONTROLLER_READY);
+    updateState(state & ~STATE_REMOTE_READY);
     driveModeTriggerValue = DRIVE_MODE_MANUAL;
     if (!connectToCentral()) {
       return;
     }
-    updateState(state | STATE_REMOTE_CONTROLLER_READY);
+    updateState(state | STATE_REMOTE_READY);
   }
 
   if (AutocamRemoteDataBidirection.written()) {
@@ -425,11 +424,11 @@ bool dataChanged(const RemoteDataBidirection &oldData, const RemoteDataBidirecti
 
 void sendRemoteDataBidirection() {
   if (!(BLECentral && BLECentral.connected())) {
-    updateState(state & ~STATE_REMOTE_CONTROLLER_READY);
+    updateState(state & ~STATE_REMOTE_READY);
     if (!connectToCentral()) {
       return;
     }
-    updateState(state | STATE_REMOTE_CONTROLLER_READY);
+    updateState(state | STATE_REMOTE_READY);
   }
 
   RemoteDataBidirection data = {

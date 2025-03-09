@@ -734,14 +734,14 @@ char const* index_html = R"rawliteral(
 
       const STATE_NOT_READY = 0;
       const STATE_SENSOR_READY = 1;
-      const STATE_REMOTE_CONTROLLER_READY = 2;
+      const STATE_REMOTE_READY = 2;
 
       function updateLEDs() {
         const sensorLed = document.getElementById("sensor-led");
         const remoteLed = document.getElementById("remote-led");
 
         sensorLed.style.backgroundColor = data.state & STATE_SENSOR_READY ? "green" : "red";
-        remoteLed.style.backgroundColor = data.state & STATE_REMOTE_CONTROLLER_READY ? "green" : "#red";
+        remoteLed.style.backgroundColor = data.state & STATE_REMOTE_READY ? "green" : "#red";
       }
 
       // Variables for double tap continuous zoom gesture
@@ -853,7 +853,7 @@ char const* parameters_page_html = R"rawliteral(
         margin: 0; /* Remove default margin */
       }
       .slider-container {
-        margin: 10px 0; /* Smaller margin between sliders */
+        margin: 5px 0; /* Reduced vertical margin between sliders */
         width: 100%;
       }
       .slider-container label {
@@ -941,10 +941,10 @@ char const* parameters_page_html = R"rawliteral(
         <label>Min Steering: <span id="minMoveSteering-value">-500</span></label>
         <input class="slider" type="range" name="minMoveSteering" min="0" max="500" step="1" value="500" oninput="updateValue('minMoveSteering', this.value)" />
       </div>
-      <!-- New slider container for distanceSmoothFactor -->
+      <!-- New slider container for distanceSmoothFactor with min set to 0.01 -->
       <div class="slider-container">
         <label>Distance Smooth Factor: <span id="distanceSmoothFactor-value">0.10</span></label>
-        <input class="slider" type="range" name="distanceSmoothFactor" min="0" max="1" step="0.01" value="0.10" oninput="updateValue('distanceSmoothFactor', this.value)" />
+        <input class="slider" type="range" name="distanceSmoothFactor" min="0.01" max="1" step="0.01" value="0.10" oninput="updateValue('distanceSmoothFactor', this.value)" />
       </div>
       <input type="submit" value="Update" />
     </form>

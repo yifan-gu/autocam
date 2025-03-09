@@ -5,7 +5,7 @@
 
 #define STATE_NOT_READY 0
 #define STATE_SENSOR_READY 1
-#define STATE_REMOTE_CONTROLLER_READY 2
+#define STATE_REMOTE_READY 2
 
 #define DRIVE_MODE_MANUAL 0
 #define DRIVE_MODE_AUTO_PILOT 1
@@ -176,7 +176,7 @@ void LEDController::updateStateLED(int state) {
   }
 
   // Remote Controller LED update
-  if (state & STATE_REMOTE_CONTROLLER_READY) {
+  if (state & STATE_REMOTE_READY) {
     LOGLN("remote, green");
     setLEDGreen(remoteR, remoteG, remoteB);
   } else {

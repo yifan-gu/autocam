@@ -11,12 +11,12 @@
 
 #define PI 3.14159265359
 
-#define DATA_RATE 10  // 100 Hz
-#define LOOP_PERIOD_MS (1000 / DATA_RATE)  // 10 ms period
+#define DATA_RATE 100  // The Magic Number
+#define LOOP_PERIOD_MS (1000 / DATA_RATE) // Convert DATA_RATE into milliseconds.
 
 #define STATE_NOT_READY 0
 #define STATE_SENSOR_READY 1
-#define STATE_REMOTE_CONTROLLER_READY 2
+#define STATE_REMOTE_READY 2
 
 #define DRIVE_MODE_MANUAL 0
 #define DRIVE_MODE_AUTO_PILOT 1
@@ -29,9 +29,9 @@
 #define SENSOR_LED_GREEN_PIN 20 // A3
 #define SENSOR_LED_BLUE_PIN -1
 
-#define REMOTE_CONTROLLER_LED_RED_PIN 19 // A2
-#define REMOTE_CONTROLLER_LED_GREEN_PIN 18 // A1
-#define REMOTE_CONTROLLER_LED_BLUE_PIN -1
+#define REMOTE_LED_RED_PIN 19 // A2
+#define REMOTE_LED_GREEN_PIN 18 // A1
+#define REMOTE_LED_BLUE_PIN -1
 
 #define DRIVE_MODE_LED_RED_PIN -1
 #define DRIVE_MODE_LED_GREEN_PIN -1
@@ -200,7 +200,7 @@ void loop() {
 
 void setupLED() {
   ledController.initSensorLED(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN);
-  ledController.initRemoteLED(REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN, REMOTE_CONTROLLER_LED_BLUE_PIN);
+  ledController.initRemoteLED(REMOTE_LED_RED_PIN, REMOTE_LED_GREEN_PIN, REMOTE_LED_BLUE_PIN);
   ledController.initDriveLED(DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN, DRIVE_MODE_LED_BLUE_PIN);
 
   ledController.updateStateLED(globalState.state);
@@ -417,7 +417,7 @@ void runHealthCheck() {
     LOGLN("AutocamRemote not connected, will reconnect...");
     emergencyStop();
     sendGimbalControllerData();
-    updateState(globalState.state & ~STATE_REMOTE_CONTROLLER_READY); // Clear the remote controller ready indicator bit.
+    updateState(globalState.state & ~STATE_REMOTE_READY); // Clear the remote controller ready indicator bit.
     establishAutocamRemoteBLEConnection();
   }
 
@@ -433,7 +433,7 @@ void establishAutocamRemoteBLEConnection() {
   while (!scanForPeripheral(AutocamRemote, AutocamRemoteService, AutocamRemoteDataBidirection, AutocamRemoteServiceUUID, AutocamRemoteDataBidirectionCharacteristicUUID)) {
     delay(1000);
   }
-  updateState(globalState.state | STATE_REMOTE_CONTROLLER_READY);
+  updateState(globalState.state | STATE_REMOTE_READY);
 }
 
 void establishAutocamSensorBLEConnection() {
@@ -443,6 +443,7 @@ void establishAutocamSensorBLEConnection() {
   while (!scanForPeripheral(AutocamSensor, AutocamSensorService, AutocamSensorDataRecv, AutocamSensorServiceUUID, AutocamSensorDataRecvCharacteristicUUID)) {
     delay(1000);
   };
+  updateState(globalState.state | STATE_SENSOR_READY);
 }
 
 void sendGimbalControllerData() {
@@ -510,7 +511,7 @@ void getAutocamSensorData() {
 void getAutocamRemoteDataBidirection() {
   if (!AutocamRemote.connected()) {
     emergencyStop();
-    updateState(globalState.state & ~STATE_REMOTE_CONTROLLER_READY); // Clear the remote controller ready indicator bit.
+    updateState(globalState.state & ~STATE_REMOTE_READY); // Clear the remote controller ready indicator bit.
     return;
   }
 
@@ -720,7 +721,9 @@ void setMoveBackward(float throttleDiff) {
 void emergencyStop() { //TODO(yifan): Refactor out this with a state machine.
   setDriveMode(DRIVE_MODE_MANUAL);
   globalState.distance = 0;
+  globalState.targetDistance = 0;
   globalState.heading = 0;
+  globalState.targetHeading = 0;
   globalState.yawSpeed = 0;
   globalState.pitchSpeed = 0;
   globalState.throttleValue = midThrottle;
