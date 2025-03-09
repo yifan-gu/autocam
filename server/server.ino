@@ -574,8 +574,13 @@ void setUWBSelector(uint16_t newUWBSelector) {
   if (globalState.uwbSelector == newUWBSelector) {
     return;
   }
+
   globalState.uwbSelector = newUWBSelector;
-  updateAutocamRemoteStatus();
+  if (globalState.driveMode != DRIVE_MODE_MANUAL) { // Disable auto pilot when switching the target uwb tag.
+    setDriveMode(DRIVE_MODE_MANUAL);
+  } else {
+    updateAutocamRemoteStatus();
+  }
 }
 
 void calculateSteeringThrottle() {
