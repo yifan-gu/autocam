@@ -29,8 +29,8 @@
 // Remote controller pins
 #define UWB_SELECTOR_SWITCH_PIN 12
 #define ACTIVE_TRACK_BUTTON_PIN 13
-#define MODE_BUTTON_PIN 35
-#define LOCK_SWITCH_PIN 25
+#define LOCK_SWITCH_PIN 14
+#define MODE_BUTTON_PIN 15
 
 #define BATTERY_LED_RED_PIN 16
 #define BATTERY_LED_GREEN_PIN 5
@@ -50,8 +50,8 @@
 
 #define STEERING_STICK_X_PIN 2
 #define THROTTLE_STICK_Y_PIN 36
-#define GIMBAL_STICK_X_PIN 14
-#define GIMBAL_STICK_Y_PIN 15
+#define GIMBAL_STICK_X_PIN 35
+#define GIMBAL_STICK_Y_PIN 25
 #define BATTERY_ADC_PIN 39  // ADC pin to measure battery voltage.
 
 #define STICK_DEAD_ZONE 200
@@ -135,7 +135,6 @@ void setup() {
     // Wait for Serial or timeout
   }
 
-
   setupLED();
   setupInput();
   setupBLE();
@@ -147,12 +146,12 @@ void setupPinnedTask() {
   // Parameters: task function, name, stack size, parameter, priority, task handle, core id.
   xTaskCreatePinnedToCore(
     nonUWBTask,   // Task function.
-    "nonUWBTask",            // Name of task.
-    4096,                   // Stack size in words.
-    NULL,                   // Task input parameter.
-    1,                      // Task priority.
-    NULL,                   // Task handle.
-    0                       // Core where the task should run (0 or 1).
+    "nonUWBTask", // Name of task.
+    4096,         // Stack size in words.
+    NULL,         // Task input parameter.
+    1,            // Task priority.
+    NULL,         // Task handle.
+    0             // Core where the task should run (0 or 1).
   );
 }
 
@@ -354,6 +353,7 @@ void readControllerData() {
     // Check the lock switch first.
     // If locked then skip reading the inputs.
     // TODO(yifan): maybe reset all inputs??
+    Serial.println("Lock switch in active, skip input reading");
     return;
   }
 
@@ -395,7 +395,7 @@ void readControllerData() {
 
   // Print all values, including gimbal joystick positions
   //Serial.printf("ModeTrigger=%d, Joystick X=%.1f, Y=%.1f | Throttle=%d, Steering=%d | Gimbal X=%.1f, Y=%.1f | Yaw=%.2f, Pitch=%.2f\n",
-  //driveModeTriggerValue, smoothedX, smoothedY, throttleValue, steeringValue, smoothedGX, smoothedGY, yawSpeedValue, pitchSpeedValue);
+  //              driveModeTriggerValue, smoothedX, smoothedY, throttleValue, steeringValue, smoothedGX, smoothedGY, yawSpeedValue, pitchSpeedValue);
 }
 
 bool controllerDataChanged(const ControllerData &oldData, const ControllerData &newData) {

@@ -7,6 +7,7 @@
 #include "html_pages.h"
 #include "BLE_setup.hpp"
 #include "LED_controller.hpp"
+#include "util.h"
 
 #define PI 3.14159265359
 
@@ -29,6 +30,8 @@
 #define REMOTE_CONTROLLER_LED_GREEN_PIN 18 // A1
 #define REMOTE_CONTROLLER_LED_BLUE_PIN -1
 
+#define DRIVE_MODE_LED_RED_PIN -1
+#define DRIVE_MODE_LED_GREEN_PIN -1
 #define DRIVE_MODE_LED_BLUE_PIN 17 // A0
 
 LEDController ledController;

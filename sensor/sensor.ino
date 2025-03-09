@@ -86,12 +86,12 @@ void setupPinnedTask() {
   // Parameters: task function, name, stack size, parameter, priority, task handle, core id.
   xTaskCreatePinnedToCore(
     nonUWBTask,   // Task function.
-    "nonUWBTask",            // Name of task.
-    4096,                   // Stack size in words.
-    NULL,                   // Task input parameter.
-    1,                      // Task priority.
-    NULL,                   // Task handle.
-    0                       // Core where the task should run (0 or 1).
+    "nonUWBTask", // Name of task.
+    4096,         // Stack size in words.
+    NULL,         // Task input parameter.
+    1,            // Task priority.
+    NULL,         // Task handle.
+    0             // Core where the task should run (0 or 1).
   );
 }
 
