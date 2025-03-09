@@ -40,30 +40,30 @@
         border: none;
         cursor: pointer;
       }
-     .back-button:hover {
-         background-color: #e0e0e0; /* Slightly darker on hover */
-     }
-     /* Reset button styled similarly to the back button, positioned at the right */
-     .reset-button {
-         position: absolute;
-         right: 0;
-         top: 50%;
-         transform: translateY(-50%);
-         font-size: 12px; /* Small text */
-         padding: 4px 8px; /* Small padding */
-         border-radius: 5px;
-         background-color: #eeeeee;
-         color: #007bff;
-         border: none;
-         cursor: pointer;
-     }
-     .reset-button:hover {
-         background-color: #e0e0e0; /* Slightly darker on hover */
-     }
-     h2 {
-         font-size: 16px; /* Smaller heading text */
-         margin: 0; /* Remove default margin */
-     }
+      .back-button:hover {
+        background-color: #e0e0e0; /* Slightly darker on hover */
+      }
+      /* Reset button styled similarly to the back button, positioned at the right */
+      .reset-button {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px; /* Small text */
+        padding: 4px 8px; /* Small padding */
+        border-radius: 5px;
+        background-color: #eeeeee;
+        color: #007bff;
+        border: none;
+        cursor: pointer;
+      }
+      .reset-button:hover {
+        background-color: #e0e0e0; /* Slightly darker on hover */
+      }
+      h2 {
+        font-size: 16px; /* Smaller heading text */
+        margin: 0; /* Remove default margin */
+      }
       .slider-container {
         margin: 10px 0; /* Smaller margin between sliders */
         width: 100%;
@@ -93,9 +93,9 @@
         border-radius: 5px;
         margin-top: 10px; /* Smaller top margin */
       }
-     input[type="submit"]:hover {
-         background-color: #0056b3;
-     }
+      input[type="submit"]:hover {
+        background-color: #0056b3;
+      }
       #status {
         font-size: 12px; /* Smaller status text */
         margin-top: 10px;
@@ -153,100 +153,109 @@
         <label>Min Steering: <span id="minMoveSteering-value">-500</span></label>
         <input class="slider" type="range" name="minMoveSteering" min="0" max="500" step="1" value="500" oninput="updateValue('minMoveSteering', this.value)" />
       </div>
+      <!-- New slider container for distanceSmoothAlpha -->
+      <div class="slider-container">
+        <label>Distance Smooth Alpha: <span id="distanceSmoothAlpha-value">0.10</span></label>
+        <input class="slider" type="range" name="distanceSmoothAlpha" min="0" max="1" step="0.01" value="0.10" oninput="updateValue('distanceSmoothAlpha', this.value)" />
+      </div>
       <input type="submit" value="Update" />
     </form>
     <p id="status"></p>
     <script>
-     // Update the display. For the two "min" sliders, show the negative.
-     function updateValue(id, value) {
-         let displayValue = value;
-         if (id === "minMoveThrottle" || id === "minMoveSteering") {
-             displayValue = -value;
-         }
-         document.getElementById(id + "-value").textContent = displayValue;
-         // Clear any successful message when a slider is changed.
-         document.getElementById("status").textContent = "";
-     }
-     // Reset all sliders to their current values as in the form.
-     function resetSliders() {
-         // Reset the form to its initial state.
-         document.getElementById("parameters-form").reset();
-         // Update all slider displays.
-         document.querySelectorAll("input[type='range']").forEach((slider) => {
-             updateValue(slider.name, slider.value);
-         });
-     }
-     // Function to fetch current parameters from the server and update the form inputs.
-     function fetchParameters() {
-         fetch("/get_parameters")
-             .then((response) => response.json())
-             .then((data) => {
-                 document.getElementById("delta-value").textContent = data.delta;
-                 document.querySelector("input[name='delta']").value = data.delta;
+      // Update the display. For the two "min" sliders, show the negative.
+      function updateValue(id, value) {
+        let displayValue = value;
+        if (id === "minMoveThrottle" || id === "minMoveSteering") {
+          displayValue = -value;
+        }
+        document.getElementById(id + "-value").textContent = displayValue;
+        // Clear any successful message when a slider is changed.
+        document.getElementById("status").textContent = "";
+      }
+      // Reset all sliders to their current values as in the form.
+      function resetSliders() {
+        // Reset the form to its initial state.
+        document.getElementById("parameters-form").reset();
+        // Update all slider displays.
+        document.querySelectorAll("input[type='range']").forEach((slider) => {
+          updateValue(slider.name, slider.value);
+        });
+      }
+      // Function to fetch current parameters from the server and update the form inputs.
+      function fetchParameters() {
+        fetch("/get_parameters")
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("delta-value").textContent = data.delta;
+            document.querySelector("input[name='delta']").value = data.delta;
 
-                 document.getElementById("Kp_t-value").textContent = data.Kp_t;
-                 document.querySelector("input[name='Kp_t']").value = data.Kp_t;
+            document.getElementById("Kp_t-value").textContent = data.Kp_t;
+            document.querySelector("input[name='Kp_t']").value = data.Kp_t;
 
-                 document.getElementById("Ki_t-value").textContent = data.Ki_t;
-                 document.querySelector("input[name='Ki_t']").value = data.Ki_t;
+            document.getElementById("Ki_t-value").textContent = data.Ki_t;
+            document.querySelector("input[name='Ki_t']").value = data.Ki_t;
 
-                 document.getElementById("Kd_t-value").textContent = data.Kd_t;
-                 document.querySelector("input[name='Kd_t']").value = data.Kd_t;
+            document.getElementById("Kd_t-value").textContent = data.Kd_t;
+            document.querySelector("input[name='Kd_t']").value = data.Kd_t;
 
-                 document.getElementById("Kp_s-value").textContent = data.Kp_s;
-                 document.querySelector("input[name='Kp_s']").value = data.Kp_s;
+            document.getElementById("Kp_s-value").textContent = data.Kp_s;
+            document.querySelector("input[name='Kp_s']").value = data.Kp_s;
 
-                 document.getElementById("Ki_s-value").textContent = data.Ki_s;
-                 document.querySelector("input[name='Ki_s']").value = data.Ki_s;
+            document.getElementById("Ki_s-value").textContent = data.Ki_s;
+            document.querySelector("input[name='Ki_s']").value = data.Ki_s;
 
-                 document.getElementById("Kd_s-value").textContent = data.Kd_s;
-                 document.querySelector("input[name='Kd_s']").value = data.Kd_s;
+            document.getElementById("Kd_s-value").textContent = data.Kd_s;
+            document.querySelector("input[name='Kd_s']").value = data.Kd_s;
 
-                 document.getElementById("maxMoveThrottle-value").textContent = data.maxMoveThrottle;
-                 document.querySelector("input[name='maxMoveThrottle']").value = data.maxMoveThrottle;
+            document.getElementById("maxMoveThrottle-value").textContent = data.maxMoveThrottle;
+            document.querySelector("input[name='maxMoveThrottle']").value = data.maxMoveThrottle;
 
-                 // For the min sliders, display the negative value but set the slider to the absolute value.
-                 document.getElementById("minMoveThrottle-value").textContent = data.minMoveThrottle;
-                 document.querySelector("input[name='minMoveThrottle']").value = Math.abs(data.minMoveThrottle);
+            // For the min sliders, display the negative value but set the slider to the absolute value.
+            document.getElementById("minMoveThrottle-value").textContent = data.minMoveThrottle;
+            document.querySelector("input[name='minMoveThrottle']").value = Math.abs(data.minMoveThrottle);
 
-                 document.getElementById("maxMoveSteering-value").textContent = data.maxMoveSteering;
-                 document.querySelector("input[name='maxMoveSteering']").value = data.maxMoveSteering;
+            document.getElementById("maxMoveSteering-value").textContent = data.maxMoveSteering;
+            document.querySelector("input[name='maxMoveSteering']").value = data.maxMoveSteering;
 
-                 document.getElementById("minMoveSteering-value").textContent = data.minMoveSteering;
-                 document.querySelector("input[name='minMoveSteering']").value = Math.abs(data.minMoveSteering);
-             })
-             .catch((err) => {
-                 console.error("Error fetching parameters:", err);
-             });
-     }
-     // When the page loads, fetch the current parameter values.
-     window.onload = function () {
-         fetchParameters();
-     };
-     // Form submission to update parameters on the ESP32.
-     document.getElementById("parameters-form").onsubmit = async (e) => {
-         e.preventDefault();
-         let formData = new FormData(e.target);
-         // For the min sliders, convert the positive value to negative before sending.
-         if (formData.has("minMoveThrottle")) {
-             let val = Number(formData.get("minMoveThrottle"));
-             formData.set("minMoveThrottle", -val);
-         }
-         if (formData.has("minMoveSteering")) {
-             let val = Number(formData.get("minMoveSteering"));
-             formData.set("minMoveSteering", -val);
-         }
-         fetch("/update_parameters", { method: "POST", body: formData })
-             .then((response) => response.text())
-             .then((data) => {
-                 document.getElementById("status").textContent = "Parameters updated successfully";
-                 // Optionally, re-fetch parameters to update the UI.
-                 fetchParameters();
-             })
-             .catch((err) => {
-                 console.error("Error updating parameters:", err);
-             });
-     };
+            document.getElementById("minMoveSteering-value").textContent = data.minMoveSteering;
+            document.querySelector("input[name='minMoveSteering']").value = Math.abs(data.minMoveSteering);
+
+            // Update the new distanceSmoothAlpha slider
+            document.getElementById("distanceSmoothAlpha-value").textContent = data.distanceSmoothAlpha;
+            document.querySelector("input[name='distanceSmoothAlpha']").value = data.distanceSmoothAlpha;
+          })
+          .catch((err) => {
+            console.error("Error fetching parameters:", err);
+          });
+      }
+      // When the page loads, fetch the current parameter values.
+      window.onload = function () {
+        fetchParameters();
+      };
+      // Form submission to update parameters on the ESP32.
+      document.getElementById("parameters-form").onsubmit = async (e) => {
+        e.preventDefault();
+        let formData = new FormData(e.target);
+        // For the min sliders, convert the positive value to negative before sending.
+        if (formData.has("minMoveThrottle")) {
+          let val = Number(formData.get("minMoveThrottle"));
+          formData.set("minMoveThrottle", -val);
+        }
+        if (formData.has("minMoveSteering")) {
+          let val = Number(formData.get("minMoveSteering"));
+          formData.set("minMoveSteering", -val);
+        }
+        fetch("/update_parameters", { method: "POST", body: formData })
+          .then((response) => response.text())
+          .then((data) => {
+            document.getElementById("status").textContent = "Parameters updated successfully";
+            // Optionally, re-fetch parameters to update the UI.
+            fetchParameters();
+          })
+          .catch((err) => {
+            console.error("Error updating parameters:", err);
+          });
+      };
     </script>
   </body>
 </html>

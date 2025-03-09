@@ -11,12 +11,15 @@
 
 #define PI 3.14159265359
 
+#define DATA_RATE 10  // 100 Hz
+#define LOOP_PERIOD_MS (1000 / DATA_RATE)  // 10 ms period
+
 #define STATE_NOT_READY 0
 #define STATE_SENSOR_READY 1
 #define STATE_REMOTE_CONTROLLER_READY 2
 
 #define DRIVE_MODE_MANUAL 0
-#define DRIVE_MODE_AUTO_FOLLOW 1
+#define DRIVE_MODE_AUTO_PILOT 1
 
 // Pin configuration
 #define STEERING_PIN 23  //  A6 for steering
@@ -37,8 +40,8 @@
 LEDController ledController;
 
 // Access Point credentials
-const char* ssid = "RC-Controller";
-const char* password = "12345678"; // Minimum 8 characters
+const char* ssid = "Autocam Server";
+const char* password = "AbsoluteCinema!"; // Minimum 8 characters
 const char* hostname = "autocam"; // mDNS hostname
 
 // Async WebSocket server
@@ -57,28 +60,55 @@ const int minSteering = 1000, maxSteering = 2000, midSteering = 1500;
 unsigned long lastPingTime = 0;           // Time of last received ping
 const unsigned long heartbeatTimeout = 1000; // 1 second timeout
 
-// Variables to store values
-int throttleValue = midThrottle, steeringValue = midSteering;
 
-// Variable for store the state.
-int state = STATE_NOT_READY;
+struct GlobalState {
+  int throttleValue;       // e.g., servo pulse width for throttle
+  int steeringValue;       // e.g., servo pulse width for steering
+  int state;               // overall state (e.g., STATE_NOT_READY, etc.)
+  int driveMode;           // e.g., DRIVE_MODE_MANUAL, DRIVE_MODE_AUTO_PILOT
+  float distance;          // distance from the Tag/Remote to the Sensor
+  float targetDistance;    // desired distance
+  float heading;           // measured heading in degrees [0, 360)  N = 0/360, W = 90, S = 180, E = 270
+  float targetHeading;     // desired heading in degrees
+  float yawSpeed;          // Yaw speed
+  float pitchSpeed;        // Pitch speed
+  bool activeTrackToggled; // Flag to indicate active track toggle
+  uint16_t uwbSelector;    // UWB selector value
+};
 
-// Variable for the drive mode.
-int driveMode = DRIVE_MODE_MANUAL;
-// The reported distances and angle.
+GlobalState globalState = {
+  midThrottle,           // throttleValue
+  midSteering,           // steeringValue
+  STATE_NOT_READY,       // state
+  DRIVE_MODE_MANUAL,     // driveMode
+  0.0,                   // distance
+  0.0,                   // targetDistance
+  0.0,                   // heading
+  0.0,                   // targetHeading
+  0.0,                   // yawSpeed
+  0.0,                   // pitchSpeed
+  false,                 // activeTrackToggled
+  0                      // uwbSelector
+};
 
-// Distance of the tag to the front anchors.
-float distance = 0;
-float targetDistance = 0;
+void printGlobalState() {
+  LOGF("Throttle:%d, Steering:%d, State:%d, Drive Mode:%d, Dist:%.2f, TargDist:%.2f, Head:%.2f, TargHead:%.2f, Yaw:%.2f, Pitch:%.2f, Active Track Toggled:%d, UWB Selector:%d\n",
+    globalState.throttleValue,
+    globalState.steeringValue,
+    globalState.state,
+    globalState.driveMode,
+    globalState.distance,
+    globalState.targetDistance,
+    globalState.heading,
+    globalState.targetHeading,
+    globalState.yawSpeed,
+    globalState.pitchSpeed,
+    globalState.activeTrackToggled,
+    globalState.uwbSelector
+  );
+}
 
-// Heading of the anchor.
-float heading = 0; // [0, 360)  N = 0/360, W = 90, S = 180, E = 270
-float targetHeading = 0;
 
-float yawSpeed = 0;
-float pitchSpeed = 0;
-bool activeTrackToggled = false;
-uint16_t uwbSelector = 0;
 
 bool gimbalControllerValueChanged = false;
 
@@ -118,6 +148,7 @@ float minMoveSteering = -maxMoveSteering; // Minimum steering value in practice.
 
 float lastDeltaTimeMillis = 0; // Used to calculate ki, and Kd in the PID system.
 float minDeltaTimeMillis = 10; // Control the rate of PID update.
+float distanceSmoothFactor = 0.1; // Smoothing factor for distance readings (0 < alpha <= 1; lower values are smoother).
 //
 //
 //////////////////////////////////////////////////////////////////////////////////
@@ -144,13 +175,27 @@ void setup() {
 }
 
 void loop() {
+  // Initialize the periodic timing. These static variables keep their value between iterations.
+  static TickType_t xLastWakeTime = xTaskGetTickCount();
+  static TickType_t previousIteration = xLastWakeTime;
+
+  // Calculate and print the interval between iterations.
+  TickType_t currentIteration = xTaskGetTickCount();
+  uint32_t intervalMs = (currentIteration - previousIteration) * portTICK_PERIOD_MS;
+  previousIteration = currentIteration;
+  //LOGF("Interval since last iteration: %u ms\n", intervalMs);
+
   getAutocamSensorData();
   getAutocamRemoteDataBidirection();
+  printGlobalState();
   sendGimbalControllerData();
   calculateCoordinates();
   calculateSteeringThrottle();
   runESCController();
   runHealthCheck();
+
+  // Delay until the next period; this call ensures a steady 10 ms loop period.
+  vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(LOOP_PERIOD_MS));
 }
 
 void setupLED() {
@@ -158,8 +203,8 @@ void setupLED() {
   ledController.initRemoteLED(REMOTE_CONTROLLER_LED_RED_PIN, REMOTE_CONTROLLER_LED_GREEN_PIN, REMOTE_CONTROLLER_LED_BLUE_PIN);
   ledController.initDriveLED(DRIVE_MODE_LED_RED_PIN, DRIVE_MODE_LED_GREEN_PIN, DRIVE_MODE_LED_BLUE_PIN);
 
-  ledController.updateStateLED(state);
-  ledController.updateDriveModeLED(driveMode);
+  ledController.updateStateLED(globalState.state);
+  ledController.updateDriveModeLED(globalState.driveMode);
 }
 
 void setupESC() {
@@ -223,7 +268,8 @@ void setupServer() {
     json += "\"maxMoveThrottle\":" + String(maxMoveThrottle, 0) + ",";
     json += "\"minMoveThrottle\":" + String(minMoveThrottle, 0) + ",";
     json += "\"maxMoveSteering\":" + String(maxMoveSteering, 0) + ",";
-    json += "\"minMoveSteering\":" + String(minMoveSteering, 0);
+    json += "\"minMoveSteering\":" + String(minMoveSteering, 0) + ",";
+    json += "\"distanceSmoothFactor\":" + String(distanceSmoothFactor, 2);
     json += "}";
     request->send(200, "application/json", json);
   });
@@ -274,6 +320,10 @@ void setupServer() {
       minMoveSteering = request->getParam("minMoveSteering", true)->value().toFloat();
       LOGF("minMoveSteering: %f\n", minMoveSteering);
     }
+    if (request->hasParam("distanceSmoothFactor", true)) {
+      distanceSmoothFactor = request->getParam("distanceSmoothFactor", true)->value().toFloat();
+      LOGF("distanceSmoothFactor: %f\n", distanceSmoothFactor);
+    }
 
     request->send(200, "text/plain", "Parameters updated");
   });
@@ -293,8 +343,8 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
     case WS_EVT_DISCONNECT:
       LOGLN("WebSocket disconnected");
       setDriveMode(DRIVE_MODE_MANUAL);
-      throttleValue = midThrottle;
-      steeringValue = midSteering;
+      globalState.throttleValue = midThrottle;
+      globalState.steeringValue = midSteering;
       LOGLN("Throttle and Steering reset to middle positions");
       break;
 
@@ -305,15 +355,15 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
       if (message == "REQUEST_DATA") {
         // Respond with the current state as a JSON string
         String response = "{";
-        response += "\"throttle\":" + String(throttleValue) + ",";
-        response += "\"steering\":" + String(steeringValue) + ",";
-        response += "\"distance\":" + String(distance, 2) + ",";
-        response += "\"heading\":" + String(heading, 2) + ",";
+        response += "\"throttle\":" + String(globalState.throttleValue) + ",";
+        response += "\"steering\":" + String(globalState.steeringValue) + ",";
+        response += "\"distance\":" + String(globalState.distance, 2) + ",";
+        response += "\"heading\":" + String(globalState.heading, 2) + ",";
         response += "\"currentX\":" + String(currentX, 2) + ",";
         response += "\"currentY\":" + String(currentY, 2 ) + ",";
         response += "\"targetX\":" + String(targetX, 2) + ",";
         response += "\"targetY\":" + String(targetY, 2) + ",";
-        response += "\"state\":" + String(state);
+        response += "\"state\":" + String(globalState.state);
         response += "}";
 
         client->text(response); // Send the JSON response to the client
@@ -322,14 +372,14 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
         if (message == "mode=manual") {
           setDriveMode(DRIVE_MODE_MANUAL);
         } else if (message == "mode=auto") {
-          setDriveMode(DRIVE_MODE_AUTO_FOLLOW);
-          throttleValue = midThrottle;
-          steeringValue = midSteering;
+          setDriveMode(DRIVE_MODE_AUTO_PILOT);
+          globalState.throttleValue = midThrottle;
+          globalState.steeringValue = midSteering;
         }
       } else if (message.startsWith("throttle=")) {
-        throttleValue = map(message.substring(9).toInt(), 1000, 2000, minThrottle, maxThrottle);
+        globalState.throttleValue = map(message.substring(9).toInt(), 1000, 2000, minThrottle, maxThrottle);
       } else if (message.startsWith("steering=")) {
-        steeringValue = map(message.substring(9).toInt(), 1000, 2000, minSteering, maxSteering);
+        globalState.steeringValue = map(message.substring(9).toInt(), 1000, 2000, minSteering, maxSteering);
       }
       break;
     }
@@ -345,21 +395,21 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 }
 
 void runESCController() {
-  steeringServo.writeMicroseconds(steeringValue);
-  throttleServo.writeMicroseconds(throttleValue);
+  steeringServo.writeMicroseconds(globalState.steeringValue);
+  throttleServo.writeMicroseconds(globalState.throttleValue);
 
    /*LOG("Throttle: ");
-   LOG(throttleValue);
+   LOG(globalState.throttleValue);
    LOG(" | ");
    LOG("Steering: ");
-   LOGLN(steeringValue);*/
+   LOGLN(globalState.steeringValue);*/
 }
 
 void runHealthCheck() {
   if (!AutocamSensor.connected()) {
     LOGLN("AutocamSensor not connected, will reconnect...");
     emergencyStop();
-    updateState(state & ~STATE_SENSOR_READY); // Clear the sensor ready indicator bit.
+    updateState(globalState.state & ~STATE_SENSOR_READY); // Clear the sensor ready indicator bit.
     establishAutocamSensorBLEConnection();
   }
 
@@ -367,7 +417,7 @@ void runHealthCheck() {
     LOGLN("AutocamRemote not connected, will reconnect...");
     emergencyStop();
     sendGimbalControllerData();
-    updateState(state & ~STATE_REMOTE_CONTROLLER_READY); // Clear the remote controller ready indicator bit.
+    updateState(globalState.state & ~STATE_REMOTE_CONTROLLER_READY); // Clear the remote controller ready indicator bit.
     establishAutocamRemoteBLEConnection();
   }
 
@@ -383,7 +433,7 @@ void establishAutocamRemoteBLEConnection() {
   while (!scanForPeripheral(AutocamRemote, AutocamRemoteService, AutocamRemoteDataBidirection, AutocamRemoteServiceUUID, AutocamRemoteDataBidirectionCharacteristicUUID)) {
     delay(1000);
   }
-  updateState(state | STATE_REMOTE_CONTROLLER_READY);
+  updateState(globalState.state | STATE_REMOTE_CONTROLLER_READY);
 }
 
 void establishAutocamSensorBLEConnection() {
@@ -405,23 +455,23 @@ void sendGimbalControllerData() {
     return;
   }
 
-  SensorDataRecv data = {.yawSpeed = yawSpeed, .pitchSpeed = pitchSpeed, .activeTrackToggled = activeTrackToggled, .uwbSelector = uwbSelector};
+  SensorDataRecv data = {.yawSpeed = globalState.yawSpeed, .pitchSpeed = globalState.pitchSpeed, .activeTrackToggled = globalState.activeTrackToggled, .uwbSelector = globalState.uwbSelector};
   AutocamSensorDataRecv.writeValue((uint8_t *)&data, sizeof(SensorDataRecv));
-  activeTrackToggled = false; // Reset active track toggle after triggering it.
+  globalState.activeTrackToggled = false; // Reset active track toggle after triggering it.
   gimbalControllerValueChanged = false;
 
-  LOGF("Sent via BLE: yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
+  //LOGF("Sent via BLE: yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
 }
 
 // Get data from the UWB Anchor via BLE.
 void getAutocamSensorData() {
   if (!AutocamSensor.connected()) {
-    if (driveMode != DRIVE_MODE_MANUAL) {
+    if (globalState.driveMode != DRIVE_MODE_MANUAL) {
       emergencyStop();
     }
 
-    updateState(state & ~STATE_SENSOR_READY); // Clear the sensor ready indicator bit.
+    updateState(globalState.state & ~STATE_SENSOR_READY); // Clear the sensor ready indicator bit.
     return;
   }
 
@@ -436,16 +486,21 @@ void getAutocamSensorData() {
   SensorDataSend data;
 
   AutocamSensorDataSend.readValue((uint8_t *)&data, sizeof(SensorDataSend));
-  LOGF("Received distance=%f, heading=%f, state=%d\n", data.distance, data.heading, data.state);
-  distance = data.distance;
-  heading = data.heading;
+  //LOGF("Received distance=%f, heading=%f, state=%d\n", data.distance, data.heading, data.state);
+
+  // Smooth the distance reading using an exponential moving average.
+  // New smoothed distance = alpha * (new reading) + (1 - alpha) * (previous smoothed value)
+  globalState.distance = distanceSmoothFactor * data.distance +
+                         (1.0 - distanceSmoothFactor) * globalState.distance;
+
+  globalState.heading = data.heading;
   if (data.state != SENSOR_STATE_READY) {
-    if (driveMode != DRIVE_MODE_MANUAL) {
+    if (globalState.driveMode != DRIVE_MODE_MANUAL) {
       emergencyStop();
     }
-    updateState(state & ~STATE_SENSOR_READY);
+    updateState(globalState.state & ~STATE_SENSOR_READY);
   } else {
-    updateState(state | STATE_SENSOR_READY);
+    updateState(globalState.state | STATE_SENSOR_READY);
   }
 
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
@@ -455,7 +510,7 @@ void getAutocamSensorData() {
 void getAutocamRemoteDataBidirection() {
   if (!AutocamRemote.connected()) {
     emergencyStop();
-    updateState(state & ~STATE_REMOTE_CONTROLLER_READY); // Clear the remote controller ready indicator bit.
+    updateState(globalState.state & ~STATE_REMOTE_CONTROLLER_READY); // Clear the remote controller ready indicator bit.
     return;
   }
 
@@ -469,28 +524,28 @@ void getAutocamRemoteDataBidirection() {
 
   RemoteDataBidirection data;
   AutocamRemoteDataBidirection.readValue((uint8_t *)&data, sizeof(RemoteDataBidirection));
-  LOGF("Received throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
+  //LOGF("Received throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 
-  gimbalControllerValueChanged = yawSpeed != data.yawSpeed || pitchSpeed != data.pitchSpeed || activeTrackToggled != data.activeTrackToggled || uwbSelector != data.uwbSelector;
+  gimbalControllerValueChanged = globalState.yawSpeed != data.yawSpeed || globalState.pitchSpeed != data.pitchSpeed || globalState.activeTrackToggled != data.activeTrackToggled || globalState.uwbSelector != data.uwbSelector;
 
-  throttleValue = data.throttleValue;
-  steeringValue = data.steeringValue;
-  yawSpeed = data.yawSpeed;
-  pitchSpeed = data.pitchSpeed;
-  activeTrackToggled = data.activeTrackToggled;
+  globalState.throttleValue = data.throttleValue;
+  globalState.steeringValue = data.steeringValue;
+  globalState.yawSpeed = data.yawSpeed;
+  globalState.pitchSpeed = data.pitchSpeed;
+  globalState.activeTrackToggled = data.activeTrackToggled;
 
   setDriveMode(data.driveMode);
   setUWBSelector(data.uwbSelector);
 }
 
 void updateState(int newState) {
-  if (state == newState) {
+  if (globalState.state == newState) {
     return;
   }
-  state = newState;
-  ledController.updateStateLED(state);
+  globalState.state = newState;
+  ledController.updateStateLED(globalState.state);
   updateAutocamRemoteStatus();
 }
 void updateAutocamRemoteStatus() {
@@ -499,31 +554,31 @@ void updateAutocamRemoteStatus() {
     return;
   }
 
-  RemoteDataBidirection data = {.driveMode = driveMode, .activeTrackToggled = activeTrackToggled, .uwbSelector = uwbSelector, .state = state};
+  RemoteDataBidirection data = {.driveMode = globalState.driveMode, .activeTrackToggled = globalState.activeTrackToggled, .uwbSelector = globalState.uwbSelector, .state = globalState.state};
   AutocamRemoteDataBidirection.writeValue((uint8_t *)&data, sizeof(RemoteDataBidirection));
-  LOGF("Sent status to remote via BLE: driveMode = %d, state=%d\n", driveMode, state);
+  LOGF("Sent status to remote via BLE: driveMode = %d, state=%d\n", globalState.driveMode, globalState.state);
   return;
 }
 
 void setDriveMode(int newDriveMode) {
-  if (driveMode == newDriveMode) {
+  if (globalState.driveMode == newDriveMode) {
     return;
   }
-  driveMode = newDriveMode;
-  ledController.updateDriveModeLED(driveMode);
+  globalState.driveMode = newDriveMode;
+  ledController.updateDriveModeLED(globalState.driveMode);
   updateAutocamRemoteStatus();
 }
 
 void setUWBSelector(uint16_t newUWBSelector) {
-  if (uwbSelector == newUWBSelector) {
+  if (globalState.uwbSelector == newUWBSelector) {
     return;
   }
-  uwbSelector = newUWBSelector;
+  globalState.uwbSelector = newUWBSelector;
   updateAutocamRemoteStatus();
 }
 
 void calculateSteeringThrottle() {
-  if (driveMode != DRIVE_MODE_AUTO_FOLLOW) {
+  if (globalState.driveMode != DRIVE_MODE_AUTO_PILOT) {
     return;
   }
 
@@ -533,11 +588,11 @@ void calculateSteeringThrottle() {
   }
   lastDeltaTimeMillis = deltaTimeMillis;
 
-  float distanceDiff = abs(distance - targetDistance);
+  float distanceDiff = abs(globalState.distance - globalState.targetDistance);
 
   if (distanceDiff <= delta) { // No distance change.
-    throttleValue = midThrottle;
-    steeringValue = midSteering;
+    globalState.throttleValue = midThrottle;
+    globalState.steeringValue = midSteering;
     return;
   }
 
@@ -561,12 +616,12 @@ void calculateSteeringThrottle() {
   }
 
   if (abs(currentX - targetX) <= delta) {
-    steeringValue = midSteering;
+    globalState.steeringValue = midSteering;
     return;
   }
 
   // Calculate steering.
-  float headingDiff = heading - targetHeading; // headingDiff < 0 means the target is turning clockwise; headingDiff > 0 means the target is turning counterclockwise.
+  float headingDiff = globalState.heading - globalState.targetHeading; // headingDiff < 0 means the target is turning clockwise; headingDiff > 0 means the target is turning counterclockwise.
   if (headingDiff > 180) {
     headingDiff -= 360;
   } else if (headingDiff < -180) {
@@ -624,11 +679,11 @@ float calculateSteeringDiff(float error_s, float deltaTimeMillis) {
 
 void calculateCoordinates() {
   // Calculate the heading angle in radians
-  float headingRadians = radians(heading + 90); // +90 since we are always facing towards +Y axis.
+  float headingRadians = radians(globalState.heading + 90); // +90 since we are always facing towards +Y axis.
 
   // Use trigonometry to calculate the coordinates
-  currentX = distance * cos(headingRadians);
-  currentY = distance * sin(headingRadians);
+  currentX = globalState.distance * cos(headingRadians);
+  currentY = globalState.distance * sin(headingRadians);
 
   // Serial output for debugging
   //LOG("Calculated coordinates (currentX, currentY): ");
@@ -636,11 +691,11 @@ void calculateCoordinates() {
   //LOG(", ");
   //LOGLN(currentY)
 
-  if (driveMode == DRIVE_MODE_MANUAL) { // Update the real time target coordinates if in manual mode.
+  if (globalState.driveMode == DRIVE_MODE_MANUAL) { // Update the real time target coordinates if in manual mode.
     targetX = currentX;
     targetY = currentY;
-    targetDistance = distance;
-    targetHeading = heading;
+    globalState.targetDistance = globalState.distance;
+    globalState.targetHeading = globalState.heading;
     //LOG("Updated target coordinates (targetX, targetY): ");
     //LOG(targetX);
     //LOG(", ");
@@ -651,24 +706,24 @@ void calculateCoordinates() {
 }
 
 void setSteering(float steeringDiff) {
-  steeringValue = midSteering + (int)steeringDiff;
+  globalState.steeringValue = midSteering + (int)steeringDiff;
 }
 
 void setMoveForward(float throttleDiff) {
-  throttleValue = midThrottle + (int)throttleDiff;
+  globalState.throttleValue = midThrottle + (int)throttleDiff;
 }
 
 void setMoveBackward(float throttleDiff) {
-  throttleValue = midThrottle - (int)throttleDiff;
+  globalState.throttleValue = midThrottle - (int)throttleDiff;
 }
 
 void emergencyStop() { //TODO(yifan): Refactor out this with a state machine.
   setDriveMode(DRIVE_MODE_MANUAL);
-  distance = 0;
-  heading = 0;
-  yawSpeed = 0;
-  pitchSpeed = 0;
-  throttleValue = midThrottle;
-  steeringValue = midSteering;
+  globalState.distance = 0;
+  globalState.heading = 0;
+  globalState.yawSpeed = 0;
+  globalState.pitchSpeed = 0;
+  globalState.throttleValue = midThrottle;
+  globalState.steeringValue = midSteering;
   gimbalControllerValueChanged = true; // Force gimbal to stop.
 }

@@ -23,10 +23,10 @@ Arduino files for my auto-following camera car!
   - [x] Tag
   - [x] Server
   - [x] Remote
+- [x] Smooth the distance measurement.
 - [ ] Assemble together
 - [ ] Calibrate the UWB tag and anchor
 - [ ] Measure battery voltage.
-- [ ] Smooth the distance measurement.
 - [ ] (optimize) Store settings in external storage (SD card)
 - [ ] (optimize) Refactor the server code with a state machine
 - [ ] (optimize) Refactor the sensor LED control with LED controller

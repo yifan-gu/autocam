@@ -8,7 +8,7 @@
 #define STATE_REMOTE_CONTROLLER_READY 2
 
 #define DRIVE_MODE_MANUAL 0
-#define DRIVE_MODE_AUTO_FOLLOW 1
+#define DRIVE_MODE_AUTO_PILOT 1
 
 // Calculate the divider factor (inverse of the ratio)
 

@@ -7,8 +7,9 @@
 #include "util.h"
 
 #define PI 3.14159265359
+
 #define DATA_RATE 50  // 50 Hz
-#define LOOP_PERIOD_MS (1000 / DATA_RATE)  // 10 ms period
+#define LOOP_PERIOD_MS (1000 / DATA_RATE)  // 20 ms period
 
 // SPI pins
 #define SPI_SCK 18
@@ -78,7 +79,7 @@ void setup() {
 
   setupLED();
   setupUWB();
-  //setupDJIRoninController();
+  setupDJIRoninController();
   setupBLE();
   setupPinnedTask();
 }
@@ -112,11 +113,11 @@ void nonUWBTask(void * parameter) {
     previousIteration = currentIteration;
     //LOGF("Interval since last iteration: %u ms\n", intervalMs);
 
-    //getHeading();
+    getHeading();
     sendSensorData();
     getGimbalControllerData();
     applyUWBSelector();
-    //setGimbalPosition();
+    setGimbalPosition();
     checkActiveTrack();
 
     // Wait until the next period; vTaskDelayUntil ensures a steady 10 ms period.

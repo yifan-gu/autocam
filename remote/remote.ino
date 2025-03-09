@@ -7,7 +7,7 @@
 #include "util.h"
 
 #define DATA_RATE 50  // 50 Hz
-#define LOOP_PERIOD_MS (1000 / DATA_RATE)  // 10 ms period
+#define LOOP_PERIOD_MS (1000 / DATA_RATE)  // 20 ms period
 
 // Available state.
 #define STATE_NOT_READY 0
@@ -15,7 +15,7 @@
 #define STATE_REMOTE_CONTROLLER_READY 2
 
 #define DRIVE_MODE_MANUAL 0
-#define DRIVE_MODE_AUTO_FOLLOW 1
+#define DRIVE_MODE_AUTO_PILOT 1
 
 // SPI pins
 #define SPI_SCK 18
@@ -341,7 +341,7 @@ void checkButtons() {
   if (buttonPressed(modeSwitchDebounce)) {
     // Toggle drive mode.
     driveModeTriggerValue = (driveModeTriggerValue == DRIVE_MODE_MANUAL)
-                              ? DRIVE_MODE_AUTO_FOLLOW
+                              ? DRIVE_MODE_AUTO_PILOT
                               : DRIVE_MODE_MANUAL;
     LOGF("Drive mode toggled: %d\n", driveModeTriggerValue);
   }
