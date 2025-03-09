@@ -187,19 +187,21 @@ void LEDController::updateStateLED(int state) {
 // Update LEDs based on drive mode.
 void LEDController::updateDriveModeLED(int driveMode) {
   if (driveMode == DRIVE_MODE_MANUAL) {
-    Serial.println("drive mode, red");
+    Serial.println("drive mode, off");
     setLEDRed(driveR, driveG, driveB);
   } else {
-    Serial.println("drive mode, green");
-    setLEDGreen(driveR, driveG, driveB);
+    Serial.println("drive mode, blue");
+    setLEDBlue(driveR, driveG, driveB);
   }
 }
 
 // Update LEDs based on UWB Selector
 void LEDController::updateUWBSelectorLED(uint16_t uwbSelector) {
   if (uwbSelector == 1) {
+    Serial.println("UWB selector blue");
     setLEDBlue(uwbSelectorR, uwbSelectorG, uwbSelectorB);
   } else {
+    Serial.println("UWB selector off");
     setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
   }
 }

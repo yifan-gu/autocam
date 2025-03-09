@@ -12,7 +12,8 @@ Arduino files for my auto-following camera car!
 - [x] Add battery state LED (tag, remote)
 - [x] Add LED logic for tag
 - [x] Add lock mode (remote)
-- [x] Add tag selector (sensor, remote)
+- [x] Combine tag and remote
+  - [x] Add tag selector (sensor, remote)
 - [ ] Control the BLE data rate
 - [ ] Fix UWB Anchor naming, fix GimbalController naming
 - [x] Add PCB boards
@@ -32,4 +33,3 @@ Arduino files for my auto-following camera car!
 - [ ] (optimize) Reorganize shared code into libraries, add external dependencies 
 
 - [ ] <s> Nice to have, detect active track failure</s> Turns out there's no API support for that
-- [ ] <s> Combine tag and remote (discarded)</s>

@@ -29,11 +29,11 @@
 // Remote controller pins
 #define UWB_SELECTOR_SWITCH_PIN 12
 #define ACTIVE_TRACK_BUTTON_PIN 13
-#define MODE_BUTTON_PIN 26
-#define LOCK_SWITCH_PIN 32
+#define MODE_BUTTON_PIN 35
+#define LOCK_SWITCH_PIN 25
 
-#define BATTERY_LED_RED_PIN 5
-#define BATTERY_LED_GREEN_PIN 16
+#define BATTERY_LED_RED_PIN 16
+#define BATTERY_LED_GREEN_PIN 5
 #define BATTERY_LED_BLUE_PIN -1
 #define UWB_SELECTOR_LED_RED_PIN -1
 #define UWB_SELECTOR_LED_GREEN_PIN -1
@@ -41,15 +41,15 @@
 #define SENSOR_LED_RED_PIN 21
 #define SENSOR_LED_GREEN_PIN 22
 #define SENSOR_LED_BLUE_PIN -1
-#define REMOTE_CONTROLLER_LED_RED_PIN 25
-#define REMOTE_CONTROLLER_LED_GREEN_PIN 26
+#define REMOTE_CONTROLLER_LED_RED_PIN 26
+#define REMOTE_CONTROLLER_LED_GREEN_PIN 32
 #define REMOTE_CONTROLLER_LED_BLUE_PIN -1
-#define DRIVE_MODE_LED_RED_PIN 33
-#define DRIVE_MODE_LED_GREEN_PIN 33
-#define DRIVE_MODE_LED_BLUE_PIN -1
+#define DRIVE_MODE_LED_RED_PIN -1
+#define DRIVE_MODE_LED_GREEN_PIN -1
+#define DRIVE_MODE_LED_BLUE_PIN 33
 
 #define STEERING_STICK_X_PIN 2
-#define THROTTLE_STICK_Y_PIN 35
+#define THROTTLE_STICK_Y_PIN 36
 #define GIMBAL_STICK_X_PIN 14
 #define GIMBAL_STICK_Y_PIN 15
 #define BATTERY_ADC_PIN 39  // ADC pin to measure battery voltage.
@@ -435,6 +435,7 @@ void sendControllerData() {
     lastSentData = data;
     lastSentData.activeTrackToggled = false; // Do not resend "activeTrackToggled = false" because it's an no-op anyway.
     firstUpdate = false;
+
     //Serial.printf("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d, yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state, data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
   }
   //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);

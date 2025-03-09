@@ -1,4 +1,4 @@
-24758353233141788
+24763577473797503
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -77,6 +77,20 @@ Makersfab ESP32 UWB
 32
 32
 Autocam
+Mini 2-Axis Analog Thumbstick
+
+
+0
+6
+6
+Autocam
+Mini Analog Joystick
+
+
+0
+6
+6
+Autocam
 Simple Resistor
 
 
@@ -104,6 +118,13 @@ Waveshare CAN Transreceiver
 0
 8
 8
+Autocam
+X-Box Style Thumbstick
+
+
+0
+14
+10
 Battery
 BatteryClip_Keystone_54_D16-19mm
 Battery clip for batteries with a diameter between 16-19 mm: https://www.keyelco.com/product.cfm/product_id/826
