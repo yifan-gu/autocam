@@ -163,7 +163,7 @@ void setupLED() {
 }
 
 void setupESC() {
-  Serial.println("Initializing ESC...");
+  LOGLN("Initializing ESC...");
   delay(1000); // Wait 1 seconds to ensure the ESC ready to arm.
 
   // Attach servos
@@ -174,28 +174,28 @@ void setupESC() {
   throttleServo.writeMicroseconds(midThrottle);
   steeringServo.writeMicroseconds(midSteering);
 
-  Serial.println("ESC Initialized!");
+  LOGLN("ESC Initialized!");
 }
 
 // WiFi, WebServer, and WebSocket setup
 void setupServer() {
   // Start Access Point
   WiFi.softAP(ssid, password);
-  Serial.println("Access Point started!");
-  Serial.print("SSID: ");
-  Serial.println(ssid);
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.softAPIP());
+  LOGLN("Access Point started!");
+  LOG("SSID: ");
+  LOGLN(ssid);
+  LOG("IP Address: ");
+  LOGLN(WiFi.softAPIP());
 
   // Start mDNS
   if (!MDNS.begin(hostname)) {
-    Serial.println("Error starting mDNS");
+    LOGLN("Error starting mDNS");
     return;
   }
-  Serial.println("mDNS responder started!");
-  Serial.print("Access the device at http://");
-  Serial.print(hostname);
-  Serial.println(".local");
+  LOGLN("mDNS responder started!");
+  LOG("Access the device at http://");
+  LOG(hostname);
+  LOGLN(".local");
 
   // Configure WebSocket events
   ws.onEvent(onWebSocketEvent);
@@ -232,47 +232,47 @@ void setupServer() {
   server.on("/update_parameters", HTTP_POST, [](AsyncWebServerRequest *request) {
     if (request->hasParam("delta", true)) {
       delta = request->getParam("delta", true)->value().toFloat();
-      Serial.printf("delta: %f\n", delta);
+      LOGF("delta: %f\n", delta);
     }
     if (request->hasParam("Kp_t", true)) {
       Kp_t = request->getParam("Kp_t", true)->value().toFloat();
-      Serial.printf("Kp_t: %f\n", Kp_t);
+      LOGF("Kp_t: %f\n", Kp_t);
     }
     if (request->hasParam("Ki_t", true)) {
       Ki_t = request->getParam("Ki_t", true)->value().toFloat();
-      Serial.printf("Ki_t: %f\n", Ki_t);
+      LOGF("Ki_t: %f\n", Ki_t);
     }
     if (request->hasParam("Kd_t", true)) {
       Kd_t = request->getParam("Kd_t", true)->value().toFloat();
-      Serial.printf("Kd_t: %f\n", Kd_t);
+      LOGF("Kd_t: %f\n", Kd_t);
     }
     if (request->hasParam("Kp_s", true)) {
       Kp_s = request->getParam("Kp_s", true)->value().toFloat();
-      Serial.printf("Kp_s: %f\n", Kp_s);
+      LOGF("Kp_s: %f\n", Kp_s);
     }
     if (request->hasParam("Ki_s", true)) {
       Ki_s = request->getParam("Ki_s", true)->value().toFloat();
-      Serial.printf("Ki_s: %f\n", Ki_s);
+      LOGF("Ki_s: %f\n", Ki_s);
     }
     if (request->hasParam("Kd_s", true)) {
       Kd_s = request->getParam("Kd_s", true)->value().toFloat();
-      Serial.printf("Kd_s: %f\n", Kd_s);
+      LOGF("Kd_s: %f\n", Kd_s);
     }
     if (request->hasParam("maxMoveThrottle", true)) {
       maxMoveThrottle = request->getParam("maxMoveThrottle", true)->value().toFloat();
-      Serial.printf("maxMoveThrottle: %f\n", maxMoveThrottle);
+      LOGF("maxMoveThrottle: %f\n", maxMoveThrottle);
     }
     if (request->hasParam("minMoveThrottle", true)) {
       minMoveThrottle = request->getParam("minMoveThrottle", true)->value().toFloat();
-      Serial.printf("minMoveThrottle: %f\n", minMoveThrottle);
+      LOGF("minMoveThrottle: %f\n", minMoveThrottle);
     }
     if (request->hasParam("maxMoveSteering", true)) {
       maxMoveSteering = request->getParam("maxMoveSteering", true)->value().toFloat();
-      Serial.printf("maxMoveSteering: %f\n", maxMoveSteering);
+      LOGF("maxMoveSteering: %f\n", maxMoveSteering);
     }
     if (request->hasParam("minMoveSteering", true)) {
       minMoveSteering = request->getParam("minMoveSteering", true)->value().toFloat();
-      Serial.printf("minMoveSteering: %f\n", minMoveSteering);
+      LOGF("minMoveSteering: %f\n", minMoveSteering);
     }
 
     request->send(200, "text/plain", "Parameters updated");
@@ -287,15 +287,15 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                       AwsEventType type, void *arg, uint8_t *data, size_t len) {
   switch (type) {
     case WS_EVT_CONNECT:
-      Serial.println("WebSocket connected");
+      LOGLN("WebSocket connected");
       break;
 
     case WS_EVT_DISCONNECT:
-      Serial.println("WebSocket disconnected");
+      LOGLN("WebSocket disconnected");
       setDriveMode(DRIVE_MODE_MANUAL);
       throttleValue = midThrottle;
       steeringValue = midSteering;
-      Serial.println("Throttle and Steering reset to middle positions");
+      LOGLN("Throttle and Steering reset to middle positions");
       break;
 
     case WS_EVT_DATA: {
@@ -317,7 +317,7 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
         response += "}";
 
         client->text(response); // Send the JSON response to the client
-        //Serial.println("Sent data: " + response);
+        //LOGLN("Sent data: " + response);
       } else if (message.startsWith("mode=")) {
         if (message == "mode=manual") {
           setDriveMode(DRIVE_MODE_MANUAL);
@@ -335,11 +335,11 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
     }
 
     case WS_EVT_ERROR:
-      Serial.println("WebSocket error");
+      LOGLN("WebSocket error");
       break;
 
     default:
-      Serial.println("Unknown WebSocket event");
+      LOGLN("Unknown WebSocket event");
       break;
   }
 }
@@ -348,23 +348,23 @@ void runESCController() {
   steeringServo.writeMicroseconds(steeringValue);
   throttleServo.writeMicroseconds(throttleValue);
 
-   /*Serial.print("Throttle: ");
-   Serial.print(throttleValue);
-   Serial.print(" | ");
-   Serial.print("Steering: ");
-   Serial.println(steeringValue);*/
+   /*LOG("Throttle: ");
+   LOG(throttleValue);
+   LOG(" | ");
+   LOG("Steering: ");
+   LOGLN(steeringValue);*/
 }
 
 void runHealthCheck() {
   if (!UWBAnchor.connected()) {
-    Serial.println("UWBAnchor not connected, will reconnect...");
+    LOGLN("UWBAnchor not connected, will reconnect...");
     emergencyStop();
     updateState(state & ~STATE_SENSOR_READY); // Clear the sensor ready indicator bit.
     establishUWBAnchorBLEConnection();
   }
 
   if (!AutocamController.connected()) {
-    Serial.println("AutocamController not connected, will reconnect...");
+    LOGLN("AutocamController not connected, will reconnect...");
     emergencyStop();
     sendGimbalControllerData();
     updateState(state & ~STATE_REMOTE_CONTROLLER_READY); // Clear the remote controller ready indicator bit.
@@ -373,7 +373,7 @@ void runHealthCheck() {
 
   unsigned long currentMillis = millis();
   if (currentMillis > lastPingTime && currentMillis - lastPingTime > heartbeatTimeout) {
-    Serial.printf("Heartbeat timeout, current: %lu, last: %lu, reset\n", currentMillis, lastPingTime);
+    LOGF("Heartbeat timeout, current: %lu, last: %lu, reset\n", currentMillis, lastPingTime);
     emergencyStop();
     lastPingTime = millis(); // Reset timer to avoid repeated timeouts
   }
@@ -401,7 +401,7 @@ void sendGimbalControllerData() {
   }
 
   if (!UWBAnchor.connected()) {
-    Serial.println("UWB Anchor is not connected, will not update gimbal");
+    LOGLN("UWB Anchor is not connected, will not update gimbal");
     return;
   }
 
@@ -410,8 +410,8 @@ void sendGimbalControllerData() {
   activeTrackToggled = false; // Reset active track toggle after triggering it.
   gimbalControllerValueChanged = false;
 
-  Serial.printf("Sent via BLE: yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
-  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  LOGF("Sent via BLE: yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
+  //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
 }
 
 // Get data from the UWB Anchor via BLE.
@@ -436,7 +436,7 @@ void getUWBAnchorData() {
   SensorDataSend data;
 
   UWBAnchorSensorDataSend.readValue((uint8_t *)&data, sizeof(SensorDataSend));
-  Serial.printf("Received distance=%f, heading=%f, state=%d\n", data.distance, data.heading, data.state);
+  LOGF("Received distance=%f, heading=%f, state=%d\n", data.distance, data.heading, data.state);
   distance = data.distance;
   heading = data.heading;
   if (data.state != SENSOR_STATE_READY) {
@@ -448,7 +448,7 @@ void getUWBAnchorData() {
     updateState(state | STATE_SENSOR_READY);
   }
 
-  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 }
 
@@ -469,8 +469,8 @@ void getAutocamControllerData() {
 
   ControllerData data;
   AutocamControllerData.readValue((uint8_t *)&data, sizeof(ControllerData));
-  Serial.printf("Received throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
-  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  LOGF("Received throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
+  //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 
   gimbalControllerValueChanged = yawSpeed != data.yawSpeed || pitchSpeed != data.pitchSpeed || activeTrackToggled != data.activeTrackToggled || uwbSelector != data.uwbSelector;
@@ -495,13 +495,13 @@ void updateState(int newState) {
 }
 void updateAutocamControllerStatus() {
   if (!AutocamController.connected()) {
-    Serial.println("Autocam controller is not connected, will not update status!");
+    LOGLN("Autocam controller is not connected, will not update status!");
     return;
   }
 
   ControllerData data = {.driveMode = driveMode, .activeTrackToggled = activeTrackToggled, .uwbSelector = uwbSelector, .state = state};
   AutocamControllerData.writeValue((uint8_t *)&data, sizeof(ControllerData));
-  Serial.printf("Sent status to remote via BLE: driveMode = %d, state=%d\n", driveMode, state);
+  LOGF("Sent status to remote via BLE: driveMode = %d, state=%d\n", driveMode, state);
   return;
 }
 
@@ -631,20 +631,20 @@ void calculateCoordinates() {
   currentY = distance * sin(headingRadians);
 
   // Serial output for debugging
-  //Serial.print("Calculated coordinates (currentX, currentY): ");
-  //Serial.print(currentX);
-  //Serial.print(", ");
-  //Serial.println(currentY)
+  //LOG("Calculated coordinates (currentX, currentY): ");
+  //LOG(currentX);
+  //LOG(", ");
+  //LOGLN(currentY)
 
   if (driveMode == DRIVE_MODE_MANUAL) { // Update the real time target coordinates if in manual mode.
     targetX = currentX;
     targetY = currentY;
     targetDistance = distance;
     targetHeading = heading;
-    //Serial.print("Updated target coordinates (targetX, targetY): ");
-    //Serial.print(targetX);
-    //Serial.print(", ");
-    //Serial.println(targetY);
+    //LOG("Updated target coordinates (targetX, targetY): ");
+    //LOG(targetX);
+    //LOG(", ");
+    //LOGLN(targetY);
   }
 
   return;

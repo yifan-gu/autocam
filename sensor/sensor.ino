@@ -4,6 +4,7 @@
 #include "DW1000.h"
 #include "DJI_ronin_controller.hpp"
 #include "BLE_setup.hpp"
+#include "util.h"
 
 #define PI 3.14159265359
 #define DATA_RATE 100 // 100 Hz
@@ -170,13 +171,13 @@ void getGimbalControllerData() {
   // TODO(yifan): Maybe verify the input.
   SensorDataRecv data;
   UWBAnchorSensorDataRecv.readValue((uint8_t *)&data, sizeof(SensorDataRecv));
-  //Serial.printf("Received yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
+  //LOGF("Received yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
   yawSpeed = data.yawSpeed;
   pitchSpeed = data.pitchSpeed;
   activeTrackToggled = data.activeTrackToggled;
   uwbSelector = data.uwbSelector;
 
-  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 }
 
@@ -184,14 +185,14 @@ void setGimbalPosition() {
   float yaw = convert_gimbal_speed(yawSpeed);
   float pitch = convert_gimbal_speed(pitchSpeed);
   if (!djiRoninController.set_position(yaw, 0, pitch, 0, 100)) {
-    Serial.println("Failed to set DJI Ronin position");
+    LOGLN("Failed to set DJI Ronin position");
   }
 }
 
 void checkActiveTrack() {
   if (activeTrackToggled) {
     if (!djiRoninController.gimbal_active_track()) {
-      Serial.println("Failed to trigger DJI Ronin active track");
+      LOGLN("Failed to trigger DJI Ronin active track");
     }
     activeTrackToggled = false;
   }
@@ -214,16 +215,16 @@ void setupDJIRoninController() {
   uint8_t SDK_version[4];
 
   while (!djiRoninController.begin()) {
-    Serial.println("Waiting for DJI Ronin to start...");
+    LOGLN("Waiting for DJI Ronin to start...");
     delay(1000);
   }
 
   while (!djiRoninController.get_version(SDK_version)) {
-    Serial.println("Reading DJI Ronin SDK version...");
+    LOGLN("Reading DJI Ronin SDK version...");
     delay(1000);
   }
 
-  Serial.printf("DJI R SDK Version=%d.%d.%d.%d\n", SDK_version[0], SDK_version[1], SDK_version[2], SDK_version[3]);
+  LOGF("DJI R SDK Version=%d.%d.%d.%d\n", SDK_version[0], SDK_version[1], SDK_version[2], SDK_version[3]);
 }
 
 void getDistance() {
@@ -233,7 +234,7 @@ void getDistance() {
 void getHeading() {
   float yaw, roll, pitch;
   if (!djiRoninController.get_position(&yaw, &roll, &pitch)) {
-    Serial.println("Failed to get DJI Ronin position");
+    LOGLN("Failed to get DJI Ronin position");
     return;
   }
   heading = -yaw;
@@ -254,8 +255,8 @@ void sendSensorData() {
   SensorDataSend data = {.distance = distance, .heading = heading, .state = state};
   UWBAnchorSensorDataSend.writeValue((uint8_t *)&data, sizeof(SensorDataSend));
 
-  //Serial.printf("Sent via BLE: distance=%f, heading=%f, state=%d\n", distance, heading, state);
-  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  //LOGF("Sent via BLE: distance=%f, heading=%f, state=%d\n", distance, heading, state);
+  //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
   //lastPingTime = millis();
 }
 
@@ -263,14 +264,14 @@ void newRange() {
   DW1000Device *device = DW1000Ranging.getDistantDevice();
   if (device->getShortAddress() == uwbSelector) {
     distance = device->getRange();
-    Serial.printf("Anchor address=%X, distance=%f(m)\n", uwbSelector, distance);
+    LOGF("Anchor address=%X, distance=%f(m)\n", uwbSelector, distance);
   }
 }
 
 void newDevice(DW1000Device *device) {
   uint16_t address = device->getShortAddress();
   uwbAnchors[address].connected = true;
-  Serial.printf("Anchor connected, address=%X\n", address);
+  LOGF("Anchor connected, address=%X\n", address);
   if (address == uwbSelector) {
     updateState(state | STATE_TAG_CONNECTED);
   }
@@ -279,7 +280,7 @@ void newDevice(DW1000Device *device) {
 void inactiveDevice(DW1000Device *device) {
   uint16_t address = device->getShortAddress();
   uwbAnchors[address].connected = false;
-  Serial.printf("Anchor disconnected, address=%X\n", address);
+  LOGF("Anchor disconnected, address=%X\n", address);
   if (address == uwbSelector) {
     updateState(state & ~STATE_TAG_CONNECTED);
   }
@@ -295,21 +296,21 @@ void applyUWBSelector() {
 
 void updateLED(int state) {
   if (state & STATE_TAG_CONNECTED) {
-    Serial.println("tag, green");
+    LOGLN("tag, green");
     digitalWrite(TAG_LED_RED_PIN, HIGH);
     digitalWrite(TAG_LED_GREEN_PIN, LOW);
   } else {
-    Serial.println("tag, red");
+    LOGLN("tag, red");
     digitalWrite(TAG_LED_RED_PIN, LOW);
     digitalWrite(TAG_LED_GREEN_PIN, HIGH);
   }
 
   if (state & STATE_SERVER_CONNECTED) {
-    Serial.println("server, green");
+    LOGLN("server, green");
     digitalWrite(SERVER_LED_RED_PIN, HIGH);
     digitalWrite(SERVER_LED_GREEN_PIN, LOW);
   } else {
-    Serial.println("server, red");
+    LOGLN("server, red");
     digitalWrite(SERVER_LED_RED_PIN, LOW);
     digitalWrite(SERVER_LED_GREEN_PIN, HIGH);
   }
@@ -389,7 +390,7 @@ void sendSensorDataWayPoints(const float waypoints[][2], int waypointCount) {
   sendSensorData();
 
   // Print debugging information
-  //Serial.println("Position: (" + String(posX, 2) + ", " + String(posY, 2) +
+  //LOGLN("Position: (" + String(posX, 2) + ", " + String(posY, 2) +
   //               ") | Distance: " + String(distance, 2) +
   //               " | Heading: " + String(heading, 2) +
   //               " | Target: (" + String(targetX, 2) + ", " + String(targetY, 2) + ")");

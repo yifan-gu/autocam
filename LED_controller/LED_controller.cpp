@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include "LED_controller.hpp"
+#include "util.h"
 
 #define STATE_NOT_READY 0
 #define STATE_SENSOR_READY 1
@@ -91,7 +92,7 @@ int LEDController::readBatteryPercentage() {
   // Scale measured voltage back up to actual battery voltage
   float voltage = measuredMilliVoltage * batteryDividerFactor / 1000;
   // Debug: print the measured voltage
-  Serial.printf("Measured battery voltage: %f\n", voltage);
+  LOGF("Measured battery voltage: %f\n", voltage);
 
   // Map voltage to battery percentage.
   if (voltage >= batteryMaxVoltage) return 100;
@@ -167,19 +168,19 @@ void LEDController::initBatteryLED(int batteryRed, int batteryGreen, int battery
 void LEDController::updateStateLED(int state) {
   // Sensor LED update
   if (state & STATE_SENSOR_READY) {
-    Serial.println("sensor, green");
+    LOGLN("sensor, green");
     setLEDGreen(sensorR, sensorG, sensorB);
   } else {
-    Serial.println("sensor, red");
+    LOGLN("sensor, red");
     setLEDRed(sensorR, sensorG, sensorB);
   }
 
   // Remote Controller LED update
   if (state & STATE_REMOTE_CONTROLLER_READY) {
-    Serial.println("remote, green");
+    LOGLN("remote, green");
     setLEDGreen(remoteR, remoteG, remoteB);
   } else {
-    Serial.println("remote, red");
+    LOGLN("remote, red");
     setLEDRed(remoteR, remoteG, remoteB);
   }
 }
@@ -187,10 +188,10 @@ void LEDController::updateStateLED(int state) {
 // Update LEDs based on drive mode.
 void LEDController::updateDriveModeLED(int driveMode) {
   if (driveMode == DRIVE_MODE_MANUAL) {
-    Serial.println("drive mode, off");
+    LOGLN("drive mode, off");
     setLEDRed(driveR, driveG, driveB);
   } else {
-    Serial.println("drive mode, blue");
+    LOGLN("drive mode, blue");
     setLEDBlue(driveR, driveG, driveB);
   }
 }
@@ -198,10 +199,10 @@ void LEDController::updateDriveModeLED(int driveMode) {
 // Update LEDs based on UWB Selector
 void LEDController::updateUWBSelectorLED(uint16_t uwbSelector) {
   if (uwbSelector == 1) {
-    Serial.println("UWB selector blue");
+    LOGLN("UWB selector blue");
     setLEDBlue(uwbSelectorR, uwbSelectorG, uwbSelectorB);
   } else {
-    Serial.println("UWB selector off");
+    LOGLN("UWB selector off");
     setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
   }
 }
@@ -209,19 +210,18 @@ void LEDController::updateUWBSelectorLED(uint16_t uwbSelector) {
 // Update battery LED based on battery percentage thresholds.
 void LEDController::updateBatteryLED() {
   int batteryPercentage = readBatteryPercentage();
-  Serial.print("Battery percentage: ");
-  Serial.println(batteryPercentage);
+  LOGF("Battery percentage: %d\n", batteryPercentage);
 
   if (batteryPercentage >= 50) {
-    Serial.println("battery, green");
+    LOGLN("battery, green");
     setLEDGreen(batteryR, batteryG, batteryB);
   }
   else if (batteryPercentage >= 10) {  // 10% to 24%
-    Serial.println("battery, yellow");
+    LOGLN("battery, yellow");
     setLEDYellow(batteryR, batteryG, batteryB);
   }
   else {  // Less than 10%
-    Serial.println("battery, red");
+    LOGLN("battery, red");
     setLEDRed(batteryR, batteryG, batteryB);
   }
 }

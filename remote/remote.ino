@@ -4,6 +4,7 @@
 #include "DW1000.h"
 #include "BLE_setup.hpp"
 #include "LED_controller.hpp"
+#include "util.h"
 
 #define DATA_RATE 100 // 100 Hz
 
@@ -247,7 +248,7 @@ void updateState(int newState) {
 
   state = newState;
   ledController.updateStateLED(state);
-  Serial.printf("Update state=%d\n", state);
+  LOGF("Update state=%d\n", state);
 }
 
 void updateDriveMode(int newDriveMode) {
@@ -256,7 +257,7 @@ void updateDriveMode(int newDriveMode) {
   }
   driveMode = newDriveMode;
   ledController.updateDriveModeLED(driveMode);
-  Serial.printf("Update drive mode=%d\n", driveMode);
+  LOGF("Update drive mode=%d\n", driveMode);
 }
 
 void updateUWBSelector(uint16_t newUWBSelector) {
@@ -279,12 +280,12 @@ void readStatusData() {
 
   if (AutocamControllerData.written()) {
     AutocamControllerData.readValue((uint8_t *)&receivedData, sizeof(ControllerData));
-    Serial.printf("Received state=%d, driveMode=%d, activeTrackToggled=%d, uwbSelector=%d\n", receivedData.state, receivedData.driveMode, receivedData.activeTrackToggled, receivedData.uwbSelector);
+    LOGF("Received state=%d, driveMode=%d, activeTrackToggled=%d, uwbSelector=%d\n", receivedData.state, receivedData.driveMode, receivedData.activeTrackToggled, receivedData.uwbSelector);
     updateState(receivedData.state);
     updateDriveMode(receivedData.driveMode);
     updateUWBSelector(receivedData.uwbSelector);
 
-    //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+    //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
     //lastPingTime = millis();
   }
 }
@@ -329,14 +330,14 @@ void checkButtons() {
     driveModeTriggerValue = (driveModeTriggerValue == DRIVE_MODE_MANUAL)
                               ? DRIVE_MODE_AUTO_FOLLOW
                               : DRIVE_MODE_MANUAL;
-    Serial.printf("Drive mode toggled: %d\n", driveModeTriggerValue);
+    LOGF("Drive mode toggled: %d\n", driveModeTriggerValue);
   }
 
   activeTrackToggledValue = false;
   if (buttonPressed(activeTrackDebounce)) {
     // Toggle active track.
     activeTrackToggledValue = true;
-    Serial.printf("Active track toggled: %d\n", activeTrackToggledValue);
+    LOGF("Active track toggled: %d\n", activeTrackToggledValue);
   }
 }
 
@@ -353,7 +354,7 @@ void readControllerData() {
     // Check the lock switch first.
     // If locked then skip reading the inputs.
     // TODO(yifan): maybe reset all inputs??
-    Serial.println("Lock switch in active, skip input reading");
+    LOGLN("Lock switch in active, skip input reading");
     return;
   }
 
@@ -394,7 +395,7 @@ void readControllerData() {
   if (rawGY == ADC_MID) pitchSpeedValue = midYaw;
 
   // Print all values, including gimbal joystick positions
-  //Serial.printf("ModeTrigger=%d, Joystick X=%.1f, Y=%.1f | Throttle=%d, Steering=%d | Gimbal X=%.1f, Y=%.1f | Yaw=%.2f, Pitch=%.2f\n",
+  //LOGF("ModeTrigger=%d, Joystick X=%.1f, Y=%.1f | Throttle=%d, Steering=%d | Gimbal X=%.1f, Y=%.1f | Yaw=%.2f, Pitch=%.2f\n",
   //              driveModeTriggerValue, smoothedX, smoothedY, throttleValue, steeringValue, smoothedGX, smoothedGY, yawSpeedValue, pitchSpeedValue);
 }
 
@@ -436,9 +437,9 @@ void sendControllerData() {
     lastSentData.activeTrackToggled = false; // Do not resend "activeTrackToggled = false" because it's an no-op anyway.
     firstUpdate = false;
 
-    //Serial.printf("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d, yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state, data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
+    //LOGF("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d, yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state, data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
   }
-  //Serial.printf("Data interval: %d(ms)\n", millis() - lastPingTime);
+  //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
 }
 
@@ -451,13 +452,13 @@ void checkBattery() {
 }
 
 void newRange() {
-  Serial.printf("UWB Sensor address=%X, distance=%f(m)\n", DW1000Ranging.getDistantDevice()->getShortAddress(), DW1000Ranging.getDistantDevice()->getRange());
+  LOGF("UWB Sensor address=%X, distance=%f(m)\n", DW1000Ranging.getDistantDevice()->getShortAddress(), DW1000Ranging.getDistantDevice()->getRange());
 }
 
 void newDevice(DW1000Device *device) {
-  Serial.printf("UWB Sensor connected, address=%X\n", device->getShortAddress());
+  LOGF("UWB Sensor connected, address=%X\n", device->getShortAddress());
 }
 
 void inactiveDevice(DW1000Device *device) {
-  Serial.printf("UWB Sensor disconnected, address=%X\n", device->getShortAddress());
+  LOGF("UWB Sensor disconnected, address=%X\n", device->getShortAddress());
 }

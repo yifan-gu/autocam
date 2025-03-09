@@ -9,6 +9,7 @@
 #include "DW1000Ranging.h"
 #include "DW1000.h"
 #include "LED_controller.hpp"
+#include "util.h"
 
 // SPI pins
 #define SPI_SCK 18
@@ -116,16 +117,16 @@ void setupUWBTag() {
 }
 
 void newRange() {
-  Serial.printf("UWB Sensor address=%X, distance=%f(m)\n", DW1000Ranging.getDistantDevice()->getShortAddress(), DW1000Ranging.getDistantDevice()->getRange());
+  LOGF("UWB Sensor address=%X, distance=%f(m)\n", DW1000Ranging.getDistantDevice()->getShortAddress(), DW1000Ranging.getDistantDevice()->getRange());
 }
 
 void newDevice(DW1000Device *device) {
-  Serial.printf("UWB Sensor connected, address=%X\n", device->getShortAddress());
+  LOGF("UWB Sensor connected, address=%X\n", device->getShortAddress());
   ledController.setLEDGreen(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN);
 }
 
 void inactiveDevice(DW1000Device *device) {
-  Serial.printf("UWB Sensor disconnected, address=%X\n", device->getShortAddress());
+  LOGF("UWB Sensor disconnected, address=%X\n", device->getShortAddress());
   ledController.setLEDRed(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN);
 }
 

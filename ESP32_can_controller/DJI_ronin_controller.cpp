@@ -1,4 +1,5 @@
 #include "DJI_ronin_controller.hpp"
+#include "util.h"
 
 // CRC16 Lookup Table
 unsigned short CRC16_Table[256] = {
@@ -282,7 +283,7 @@ bool DJIRoninController::_recv_data(uint8_t *data) {
 
     while (true) {
         if (!esp32Can.readFrame(frame)) {
-            Serial.printf("No frame received\n");
+            LOGF("No frame received\n");
             break;
         }
         DEBUGF("Received frame: %02X, length=%d\n", frame.identifier, frame.data_length_code);
@@ -465,14 +466,14 @@ void DJIRoninController::dump_frame() {
         if (!esp32Can.readFrame(frame)) {
             break;
         }
-        Serial.printf("Received frame: %02X, length=%d\n", frame.identifier, frame.data_length_code);
+        LOGF("Received frame: %02X, length=%d\n", frame.identifier, frame.data_length_code);
 
         for(int i = 0; i < frame.data_length_code; i++) {
-            Serial.printf("%02X ", frame.data[i]);
+            LOGF("%02X ", frame.data[i]);
             if (i + 1 % 8 == 0) {
-                Serial.println("");
+                LOGLN("");
             }
         }
-        Serial.println("");
+        LOGLN("");
     }
 }
