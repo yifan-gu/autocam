@@ -80,7 +80,7 @@
 			(mirror no)
 			(drillshape 0)
 			(scaleselection 1)
-			(outputdirectory "")
+			(outputdirectory "plot_output/")
 		)
 	)
 	(net 0 "")
