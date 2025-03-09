@@ -7,7 +7,8 @@
 #include "util.h"
 
 #define PI 3.14159265359
-#define DATA_RATE 100 // 100 Hz
+#define DATA_RATE 50  // 50 Hz
+#define LOOP_PERIOD_MS (1000 / DATA_RATE)  // 10 ms period
 
 // SPI pins
 #define SPI_SCK 18
@@ -98,7 +99,19 @@ void setupPinnedTask() {
 
 // Task function for non UWB computation that's not time critical.
 void nonUWBTask(void * parameter) {
+  // Set up the periodic timing
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+  // Store previous iteration time
+  TickType_t previousIteration = xLastWakeTime;
+
   while (true) {
+    // Get the current tick count at the beginning of the iteration
+    TickType_t currentIteration = xTaskGetTickCount();
+    // Calculate the elapsed time in ticks and convert to milliseconds
+    uint32_t intervalMs = (currentIteration - previousIteration) * portTICK_PERIOD_MS;
+    previousIteration = currentIteration;
+    //LOGF("Interval since last iteration: %u ms\n", intervalMs);
+
     //getHeading();
     sendSensorData();
     getGimbalControllerData();
@@ -106,8 +119,8 @@ void nonUWBTask(void * parameter) {
     //setGimbalPosition();
     checkActiveTrack();
 
-    // Short delay to yield to other tasks; adjust as necessary.
-    vTaskDelay(10 / portTICK_PERIOD_MS);
+    // Wait until the next period; vTaskDelayUntil ensures a steady 10 ms period.
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(LOOP_PERIOD_MS));
   }
 }
 
