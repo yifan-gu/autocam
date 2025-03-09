@@ -76,7 +76,7 @@ void setup() {
   }
 
   setupLED();
-  setupUWBAnchor();
+  setupUWB();
   //setupDJIRoninController();
   setupBLE();
   setupPinnedTask();
@@ -129,12 +129,12 @@ void setupLED() {
 }
 
 void setupBLE() {
-  UWBAnchorService.addCharacteristic(UWBAnchorSensorDataSend);
-  UWBAnchorService.addCharacteristic(UWBAnchorSensorDataRecv);
-  setupBLEPeripheral("Autocam Sensor", "autocam-sensor", UWBAnchorService);
+  AutocamSensorService.addCharacteristic(AutocamSensorDataSend);
+  AutocamSensorService.addCharacteristic(AutocamSensorDataRecv);
+  setupBLEPeripheral("Autocam Sensor", "autocam-sensor", AutocamSensorService);
 }
 
-void setupUWBAnchor() {
+void setupUWB() {
   //init the configuration
   SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
   DW1000Ranging.initCommunication(PIN_RST, PIN_SS, PIN_IRQ); //Reset, CS, IRQ pin
@@ -164,13 +164,13 @@ void getGimbalControllerData() {
   }
   updateState(state | STATE_SERVER_CONNECTED);
 
-  if (!UWBAnchorSensorDataRecv.written()) {
+  if (!AutocamSensorDataRecv.written()) {
     return;
   }
 
   // TODO(yifan): Maybe verify the input.
   SensorDataRecv data;
-  UWBAnchorSensorDataRecv.readValue((uint8_t *)&data, sizeof(SensorDataRecv));
+  AutocamSensorDataRecv.readValue((uint8_t *)&data, sizeof(SensorDataRecv));
   //LOGF("Received yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
   yawSpeed = data.yawSpeed;
   pitchSpeed = data.pitchSpeed;
@@ -253,7 +253,7 @@ void sendSensorData() {
   updateState(state | STATE_SERVER_CONNECTED);
 
   SensorDataSend data = {.distance = distance, .heading = heading, .state = state};
-  UWBAnchorSensorDataSend.writeValue((uint8_t *)&data, sizeof(SensorDataSend));
+  AutocamSensorDataSend.writeValue((uint8_t *)&data, sizeof(SensorDataSend));
 
   //LOGF("Sent via BLE: distance=%f, heading=%f, state=%d\n", distance, heading, state);
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
@@ -264,14 +264,14 @@ void newRange() {
   DW1000Device *device = DW1000Ranging.getDistantDevice();
   if (device->getShortAddress() == uwbSelector) {
     distance = device->getRange();
-    LOGF("Anchor address=%X, distance=%f(m)\n", uwbSelector, distance);
+    LOGF("UWB device address=%X, distance=%f(m)\n", uwbSelector, distance);
   }
 }
 
 void newDevice(DW1000Device *device) {
   uint16_t address = device->getShortAddress();
   uwbAnchors[address].connected = true;
-  LOGF("Anchor connected, address=%X\n", address);
+  LOGF("UWB device connected, address=%X\n", address);
   if (address == uwbSelector) {
     updateState(state | STATE_TAG_CONNECTED);
   }
@@ -280,7 +280,7 @@ void newDevice(DW1000Device *device) {
 void inactiveDevice(DW1000Device *device) {
   uint16_t address = device->getShortAddress();
   uwbAnchors[address].connected = false;
-  LOGF("Anchor disconnected, address=%X\n", address);
+  LOGF("UWB device disconnected, address=%X\n", address);
   if (address == uwbSelector) {
     updateState(state & ~STATE_TAG_CONNECTED);
   }

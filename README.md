@@ -15,7 +15,7 @@ Arduino files for my auto-following camera car!
 - [x] Combine tag and remote
   - [x] Add tag selector (sensor, remote)
 - [ ] Control the BLE data rate
-- [ ] Fix UWB Anchor naming, fix GimbalController naming
+- [x] Fix UWB Anchor naming, fix AutocamController naming
 - [x] Add PCB boards
   - [x] Sensor
   - [x] Verify LED resistor values

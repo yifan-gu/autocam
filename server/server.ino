@@ -139,13 +139,13 @@ void setup() {
   setupESC();
   setupServer();
   setupBLECentral();
-  establishUWBAnchorBLEConnection();
-  establishAutocamControllerBLEConnection();
+  establishAutocamSensorBLEConnection();
+  establishAutocamRemoteBLEConnection();
 }
 
 void loop() {
-  getUWBAnchorData();
-  getAutocamControllerData();
+  getAutocamSensorData();
+  getAutocamRemoteDataBidirection();
   sendGimbalControllerData();
   calculateCoordinates();
   calculateSteeringThrottle();
@@ -356,19 +356,19 @@ void runESCController() {
 }
 
 void runHealthCheck() {
-  if (!UWBAnchor.connected()) {
-    LOGLN("UWBAnchor not connected, will reconnect...");
+  if (!AutocamSensor.connected()) {
+    LOGLN("AutocamSensor not connected, will reconnect...");
     emergencyStop();
     updateState(state & ~STATE_SENSOR_READY); // Clear the sensor ready indicator bit.
-    establishUWBAnchorBLEConnection();
+    establishAutocamSensorBLEConnection();
   }
 
-  if (!AutocamController.connected()) {
-    LOGLN("AutocamController not connected, will reconnect...");
+  if (!AutocamRemote.connected()) {
+    LOGLN("AutocamRemote not connected, will reconnect...");
     emergencyStop();
     sendGimbalControllerData();
     updateState(state & ~STATE_REMOTE_CONTROLLER_READY); // Clear the remote controller ready indicator bit.
-    establishAutocamControllerBLEConnection();
+    establishAutocamRemoteBLEConnection();
   }
 
   unsigned long currentMillis = millis();
@@ -379,18 +379,18 @@ void runHealthCheck() {
   }
 }
 
-void establishAutocamControllerBLEConnection() {
-  while (!scanForPeripheral(AutocamController, AutocamControllerService, AutocamControllerData, AutocamControllerServiceUUID, AutocamControllerControllerDataCharacteristicUUID)) {
+void establishAutocamRemoteBLEConnection() {
+  while (!scanForPeripheral(AutocamRemote, AutocamRemoteService, AutocamRemoteDataBidirection, AutocamRemoteServiceUUID, AutocamRemoteDataBidirectionCharacteristicUUID)) {
     delay(1000);
   }
   updateState(state | STATE_REMOTE_CONTROLLER_READY);
 }
 
-void establishUWBAnchorBLEConnection() {
-  while (!scanForPeripheral(UWBAnchor, UWBAnchorService, UWBAnchorSensorDataSend, UWBAnchorServiceUUID, UWBAnchorSensorDataSendCharacteristicUUID)) {
+void establishAutocamSensorBLEConnection() {
+  while (!scanForPeripheral(AutocamSensor, AutocamSensorService, AutocamSensorDataSend, AutocamSensorServiceUUID, AutocamSensorDataSendCharacteristicUUID)) {
     delay(1000);
   };
-  while (!scanForPeripheral(UWBAnchor, UWBAnchorService, UWBAnchorSensorDataRecv, UWBAnchorServiceUUID, UWBAnchorSensorDataRecvCharacteristicUUID)) {
+  while (!scanForPeripheral(AutocamSensor, AutocamSensorService, AutocamSensorDataRecv, AutocamSensorServiceUUID, AutocamSensorDataRecvCharacteristicUUID)) {
     delay(1000);
   };
 }
@@ -400,13 +400,13 @@ void sendGimbalControllerData() {
     return;
   }
 
-  if (!UWBAnchor.connected()) {
+  if (!AutocamSensor.connected()) {
     LOGLN("UWB Anchor is not connected, will not update gimbal");
     return;
   }
 
   SensorDataRecv data = {.yawSpeed = yawSpeed, .pitchSpeed = pitchSpeed, .activeTrackToggled = activeTrackToggled, .uwbSelector = uwbSelector};
-  UWBAnchorSensorDataRecv.writeValue((uint8_t *)&data, sizeof(SensorDataRecv));
+  AutocamSensorDataRecv.writeValue((uint8_t *)&data, sizeof(SensorDataRecv));
   activeTrackToggled = false; // Reset active track toggle after triggering it.
   gimbalControllerValueChanged = false;
 
@@ -415,8 +415,8 @@ void sendGimbalControllerData() {
 }
 
 // Get data from the UWB Anchor via BLE.
-void getUWBAnchorData() {
-  if (!UWBAnchor.connected()) {
+void getAutocamSensorData() {
+  if (!AutocamSensor.connected()) {
     if (driveMode != DRIVE_MODE_MANUAL) {
       emergencyStop();
     }
@@ -425,17 +425,17 @@ void getUWBAnchorData() {
     return;
   }
 
-  if (!UWBAnchorSensorDataSend.valueUpdated()) { // No available data.
+  if (!AutocamSensorDataSend.valueUpdated()) { // No available data.
     return;
   }
 
-  if (UWBAnchorSensorDataSend.valueLength() != sizeof(SensorDataSend)) { // Appearantly if read too fast, the valueLength() is invalid.
+  if (AutocamSensorDataSend.valueLength() != sizeof(SensorDataSend)) { // Appearantly if read too fast, the valueLength() is invalid.
     return;
   }
 
   SensorDataSend data;
 
-  UWBAnchorSensorDataSend.readValue((uint8_t *)&data, sizeof(SensorDataSend));
+  AutocamSensorDataSend.readValue((uint8_t *)&data, sizeof(SensorDataSend));
   LOGF("Received distance=%f, heading=%f, state=%d\n", data.distance, data.heading, data.state);
   distance = data.distance;
   heading = data.heading;
@@ -452,23 +452,23 @@ void getUWBAnchorData() {
   lastPingTime = millis();
 }
 
-void getAutocamControllerData() {
-  if (!AutocamController.connected()) {
+void getAutocamRemoteDataBidirection() {
+  if (!AutocamRemote.connected()) {
     emergencyStop();
     updateState(state & ~STATE_REMOTE_CONTROLLER_READY); // Clear the remote controller ready indicator bit.
     return;
   }
 
-  if (!AutocamControllerData.valueUpdated()) { // No available data.
+  if (!AutocamRemoteDataBidirection.valueUpdated()) { // No available data.
     return;
   }
 
-  if (AutocamControllerData.valueLength() != sizeof(ControllerData)) { // Appearantly if read too fast, the valueLength() is invalid.
+  if (AutocamRemoteDataBidirection.valueLength() != sizeof(RemoteDataBidirection)) { // Appearantly if read too fast, the valueLength() is invalid.
     return;
   }
 
-  ControllerData data;
-  AutocamControllerData.readValue((uint8_t *)&data, sizeof(ControllerData));
+  RemoteDataBidirection data;
+  AutocamRemoteDataBidirection.readValue((uint8_t *)&data, sizeof(RemoteDataBidirection));
   LOGF("Received throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, activeTrackToggled=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.activeTrackToggled, data.uwbSelector);
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
@@ -491,16 +491,16 @@ void updateState(int newState) {
   }
   state = newState;
   ledController.updateStateLED(state);
-  updateAutocamControllerStatus();
+  updateAutocamRemoteStatus();
 }
-void updateAutocamControllerStatus() {
-  if (!AutocamController.connected()) {
+void updateAutocamRemoteStatus() {
+  if (!AutocamRemote.connected()) {
     LOGLN("Autocam controller is not connected, will not update status!");
     return;
   }
 
-  ControllerData data = {.driveMode = driveMode, .activeTrackToggled = activeTrackToggled, .uwbSelector = uwbSelector, .state = state};
-  AutocamControllerData.writeValue((uint8_t *)&data, sizeof(ControllerData));
+  RemoteDataBidirection data = {.driveMode = driveMode, .activeTrackToggled = activeTrackToggled, .uwbSelector = uwbSelector, .state = state};
+  AutocamRemoteDataBidirection.writeValue((uint8_t *)&data, sizeof(RemoteDataBidirection));
   LOGF("Sent status to remote via BLE: driveMode = %d, state=%d\n", driveMode, state);
   return;
 }
@@ -511,7 +511,7 @@ void setDriveMode(int newDriveMode) {
   }
   driveMode = newDriveMode;
   ledController.updateDriveModeLED(driveMode);
-  updateAutocamControllerStatus();
+  updateAutocamRemoteStatus();
 }
 
 void setUWBSelector(uint16_t newUWBSelector) {
@@ -519,7 +519,7 @@ void setUWBSelector(uint16_t newUWBSelector) {
     return;
   }
   uwbSelector = newUWBSelector;
-  updateAutocamControllerStatus();
+  updateAutocamRemoteStatus();
 }
 
 void calculateSteeringThrottle() {

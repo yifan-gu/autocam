@@ -92,11 +92,11 @@ float yawSpeedValue = 0.0;
 float pitchSpeedValue = 0.0;
 bool activeTrackToggledValue = false;
 
-ControllerData receivedData;
+RemoteDataBidirection receivedData;
 
 // Global variable to hold last sent data.
 // (Initialize with known defaults.)
-ControllerData lastSentData = { midThrottle, midSteering, DRIVE_MODE_MANUAL, midPitch, midYaw, false, uwbSelector };
+RemoteDataBidirection lastSentData = { midThrottle, midSteering, DRIVE_MODE_MANUAL, midPitch, midYaw, false, uwbSelector };
 
 unsigned int lastPingTime = 0;
 
@@ -160,8 +160,8 @@ void setupPinnedTask() {
 void nonUWBTask(void * parameter) {
   while (true) {
     readStatusData();
-    readControllerData();
-    sendControllerData();
+    readRemoteDataBidirection();
+    sendRemoteDataBidirection();
     checkBattery();
 
     // Short delay to yield to other tasks; adjust as necessary.
@@ -237,8 +237,8 @@ void checkUWB() {
 }
 
 void setupBLE() {
-  AutocamControllerService.addCharacteristic(AutocamControllerData);
-  setupBLEPeripheral("Autocam Remote", "autocam-remote", AutocamControllerService);
+  AutocamRemoteService.addCharacteristic(AutocamRemoteDataBidirection);
+  setupBLEPeripheral("Autocam Remote", "autocam-remote", AutocamRemoteService);
 }
 
 void updateState(int newState) {
@@ -278,8 +278,8 @@ void readStatusData() {
     updateState(state | STATE_REMOTE_CONTROLLER_READY);
   }
 
-  if (AutocamControllerData.written()) {
-    AutocamControllerData.readValue((uint8_t *)&receivedData, sizeof(ControllerData));
+  if (AutocamRemoteDataBidirection.written()) {
+    AutocamRemoteDataBidirection.readValue((uint8_t *)&receivedData, sizeof(RemoteDataBidirection));
     LOGF("Received state=%d, driveMode=%d, activeTrackToggled=%d, uwbSelector=%d\n", receivedData.state, receivedData.driveMode, receivedData.activeTrackToggled, receivedData.uwbSelector);
     updateState(receivedData.state);
     updateDriveMode(receivedData.driveMode);
@@ -349,7 +349,7 @@ uint16_t readUWBSelector() {
   return digitalRead(UWB_SELECTOR_SWITCH_PIN) == LOW ? 1 : 0;
 }
 
-void readControllerData() {
+void readRemoteDataBidirection() {
   if (lockSwitchLocked()) {
     // Check the lock switch first.
     // If locked then skip reading the inputs.
@@ -399,7 +399,7 @@ void readControllerData() {
   //              driveModeTriggerValue, smoothedX, smoothedY, throttleValue, steeringValue, smoothedGX, smoothedGY, yawSpeedValue, pitchSpeedValue);
 }
 
-bool controllerDataChanged(const ControllerData &oldData, const ControllerData &newData) {
+bool dataChanged(const RemoteDataBidirection &oldData, const RemoteDataBidirection &newData) {
   if (oldData.throttleValue != newData.throttleValue) return true;
   if (oldData.steeringValue != newData.steeringValue) return true;
   if (oldData.driveMode != newData.driveMode) return true;
@@ -410,7 +410,7 @@ bool controllerDataChanged(const ControllerData &oldData, const ControllerData &
   return false;
 }
 
-void sendControllerData() {
+void sendRemoteDataBidirection() {
   if (!(BLECentral && BLECentral.connected())) {
     updateState(state & ~STATE_REMOTE_CONTROLLER_READY);
     if (!connectToCentral()) {
@@ -419,7 +419,7 @@ void sendControllerData() {
     updateState(state | STATE_REMOTE_CONTROLLER_READY);
   }
 
-  ControllerData data = {
+  RemoteDataBidirection data = {
     .throttleValue = throttleValue,
     .steeringValue = steeringValue,
     .driveMode = driveModeTriggerValue,
@@ -431,8 +431,8 @@ void sendControllerData() {
 
   // Send update only if there is a change.
   static bool firstUpdate = true;
-  if (firstUpdate || controllerDataChanged(lastSentData, data)) {
-    AutocamControllerData.writeValue((uint8_t *)&data, sizeof(ControllerData));
+  if (firstUpdate || dataChanged(lastSentData, data)) {
+    AutocamRemoteDataBidirection.writeValue((uint8_t *)&data, sizeof(RemoteDataBidirection));
     lastSentData = data;
     lastSentData.activeTrackToggled = false; // Do not resend "activeTrackToggled = false" because it's an no-op anyway.
     firstUpdate = false;
@@ -452,13 +452,13 @@ void checkBattery() {
 }
 
 void newRange() {
-  LOGF("UWB Sensor address=%X, distance=%f(m)\n", DW1000Ranging.getDistantDevice()->getShortAddress(), DW1000Ranging.getDistantDevice()->getRange());
+  LOGF("Autocam Sensor address=%X, distance=%f(m)\n", DW1000Ranging.getDistantDevice()->getShortAddress(), DW1000Ranging.getDistantDevice()->getRange());
 }
 
 void newDevice(DW1000Device *device) {
-  LOGF("UWB Sensor connected, address=%X\n", device->getShortAddress());
+  LOGF("Autocam Sensor connected, address=%X\n", device->getShortAddress());
 }
 
 void inactiveDevice(DW1000Device *device) {
-  LOGF("UWB Sensor disconnected, address=%X\n", device->getShortAddress());
+  LOGF("Autocam Sensor disconnected, address=%X\n", device->getShortAddress());
 }

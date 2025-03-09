@@ -4,16 +4,16 @@
 #include <ArduinoBLE.h>
 
 extern BLEDevice BLECentral;
-extern BLEDevice UWBAnchor, AutocamController;
-extern BLEService UWBAnchorService, AutocamControllerService;
-extern BLECharacteristic UWBAnchorSensorDataSend, UWBAnchorSensorDataRecv, AutocamControllerData;
+extern BLEDevice AutocamSensor, AutocamRemote;
+extern BLEService AutocamSensorService, AutocamRemoteService;
+extern BLECharacteristic AutocamSensorDataSend, AutocamSensorDataRecv, AutocamRemoteDataBidirection;
 
-extern const char *UWBAnchorServiceUUID;
-extern const char *AutocamControllerServiceUUID;
+extern const char *AutocamSensorServiceUUID;
+extern const char *AutocamRemoteServiceUUID;
 
-extern const char *UWBAnchorSensorDataSendCharacteristicUUID;
-extern const char *UWBAnchorSensorDataRecvCharacteristicUUID;
-extern const char *AutocamControllerControllerDataCharacteristicUUID;
+extern const char *AutocamSensorDataSendCharacteristicUUID;
+extern const char *AutocamSensorDataRecvCharacteristicUUID;
+extern const char *AutocamRemoteDataBidirectionCharacteristicUUID;
 
 struct SensorDataSend {
   float distance;
@@ -29,7 +29,7 @@ struct SensorDataRecv {
   uint16_t uwbSelector;
 };
 
-struct ControllerData {
+struct RemoteDataBidirection {
   int throttleValue;
   int steeringValue;
   int driveMode;

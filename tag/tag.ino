@@ -55,7 +55,7 @@ void setup() {
   }
 
   setupLED();
-  setupUWBTag();
+  setupUWB();
   setupPinnedTask();
 }
 
@@ -82,7 +82,6 @@ void nonUWBTask(void * parameter) {
   }
 }
 
-
 void loop() {
   DW1000Ranging.loop();
 
@@ -95,7 +94,7 @@ void setupLED() {
   ledController.updateBatteryLED();
 }
 
-void setupUWBTag() {
+void setupUWB() {
   //init the configuration
   SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
   DW1000Ranging.initCommunication(PIN_RST, PIN_SS, PIN_IRQ); //Reset, CS, IRQ pin
@@ -117,16 +116,16 @@ void setupUWBTag() {
 }
 
 void newRange() {
-  LOGF("UWB Sensor address=%X, distance=%f(m)\n", DW1000Ranging.getDistantDevice()->getShortAddress(), DW1000Ranging.getDistantDevice()->getRange());
+  LOGF("Autocam Sensor address=%X, distance=%f(m)\n", DW1000Ranging.getDistantDevice()->getShortAddress(), DW1000Ranging.getDistantDevice()->getRange());
 }
 
 void newDevice(DW1000Device *device) {
-  LOGF("UWB Sensor connected, address=%X\n", device->getShortAddress());
+  LOGF("Autocam Sensor connected, address=%X\n", device->getShortAddress());
   ledController.setLEDGreen(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN);
 }
 
 void inactiveDevice(DW1000Device *device) {
-  LOGF("UWB Sensor disconnected, address=%X\n", device->getShortAddress());
+  LOGF("Autocam Sensor disconnected, address=%X\n", device->getShortAddress());
   ledController.setLEDRed(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN);
 }
 

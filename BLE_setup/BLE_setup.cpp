@@ -3,21 +3,21 @@
 
 BLEDevice BLECentral;
 
-BLEDevice UWBAnchor, AutocamController;
+BLEDevice AutocamSensor, AutocamRemote;
 
-const char *UWBAnchorServiceUUID = "e2b221c6-7a26-49f4-80cc-0cd58a53041d";
-const char *AutocamControllerServiceUUID = "f49f531a-9cba-4ada-905c-68699d400122";
+const char *AutocamSensorServiceUUID = "e2b221c6-7a26-49f4-80cc-0cd58a53041d";
+const char *AutocamRemoteServiceUUID = "f49f531a-9cba-4ada-905c-68699d400122";
 
-const char *UWBAnchorSensorDataSendCharacteristicUUID = "B328";
-const char *UWBAnchorSensorDataRecvCharacteristicUUID = "B329";
-const char *AutocamControllerControllerDataCharacteristicUUID = "B330";
+const char *AutocamSensorDataSendCharacteristicUUID = "B328";
+const char *AutocamSensorDataRecvCharacteristicUUID = "B329";
+const char *AutocamRemoteDataBidirectionCharacteristicUUID = "B330";
 
-BLEService UWBAnchorService(UWBAnchorServiceUUID);
-BLEService AutocamControllerService(AutocamControllerServiceUUID);
+BLEService AutocamSensorService(AutocamSensorServiceUUID);
+BLEService AutocamRemoteService(AutocamRemoteServiceUUID);
 
-BLECharacteristic UWBAnchorSensorDataSend(UWBAnchorSensorDataSendCharacteristicUUID, BLERead | BLENotify, sizeof(SensorDataSend));
-BLECharacteristic UWBAnchorSensorDataRecv(UWBAnchorSensorDataRecvCharacteristicUUID, BLEWrite, sizeof(SensorDataRecv));
-BLECharacteristic AutocamControllerData(AutocamControllerControllerDataCharacteristicUUID, BLERead | BLEWrite | BLENotify, sizeof(ControllerData));
+BLECharacteristic AutocamSensorDataSend(AutocamSensorDataSendCharacteristicUUID, BLERead | BLENotify, sizeof(SensorDataSend));
+BLECharacteristic AutocamSensorDataRecv(AutocamSensorDataRecvCharacteristicUUID, BLEWrite, sizeof(SensorDataRecv));
+BLECharacteristic AutocamRemoteDataBidirection(AutocamRemoteDataBidirectionCharacteristicUUID, BLERead | BLEWrite | BLENotify, sizeof(RemoteDataBidirection));
 
 unsigned long scanIntervalMillis = 1000;
 
