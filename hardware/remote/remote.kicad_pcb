@@ -3114,7 +3114,7 @@
 				)
 			)
 		)
-		(property "Value" "ACTIVE_TRACK_SWITCH"
+		(property "Value" "GIMBAL_FN"
 			(at 0.03 7.868942 0)
 			(unlocked yes)
 			(layer "F.SilkS")

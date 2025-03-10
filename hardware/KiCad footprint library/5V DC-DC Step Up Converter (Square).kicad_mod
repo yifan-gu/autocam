@@ -4,7 +4,7 @@
 	(generator_version "9.0")
 	(layer "F.Cu")
 	(property "Reference" "REF**"
-		(at 2.54 -3.94 0)
+		(at 0 0 0)
 		(unlocked yes)
 		(layer "F.SilkS")
 		(uuid "9c33b6c9-c7ee-419d-880e-2d19e57fbc75")
@@ -16,7 +16,7 @@
 		)
 	)
 	(property "Value" "5V DC-DC Step Up Converter (Square)"
-		(at 2.54 -6.206679 0)
+		(at 0 -2.266679 0)
 		(unlocked yes)
 		(layer "F.Fab")
 		(uuid "c7690441-9f78-4f8c-b976-440874349d59")
@@ -28,7 +28,7 @@
 		)
 	)
 	(property "Datasheet" ""
-		(at -3.16 -9.44 0)
+		(at -5.7 -5.5 0)
 		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
@@ -41,7 +41,7 @@
 		)
 	)
 	(property "Description" ""
-		(at -3.16 -9.44 0)
+		(at -5.7 -5.5 0)
 		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
@@ -54,8 +54,8 @@
 		)
 	)
 	(fp_rect
-		(start -2.96 -9.44)
-		(end 8.04 1.56)
+		(start -5.9 -5.8)
+		(end 5.9 5.8)
 		(stroke
 			(width 0.1)
 			(type solid)
@@ -65,7 +65,7 @@
 		(uuid "e51b2ef9-c612-4efc-892b-349da98fcd4b")
 	)
 	(fp_text user "IN"
-		(at 0 -2.54 0)
+		(at -2.54 1.4 0)
 		(unlocked yes)
 		(layer "F.SilkS")
 		(uuid "0e5bf12b-4261-47c2-94c0-fd9df6a5f32f")
@@ -78,7 +78,7 @@
 		)
 	)
 	(fp_text user "OUT"
-		(at 5.08 -2.54 0)
+		(at 2.54 1.4 0)
 		(unlocked yes)
 		(layer "F.SilkS")
 		(uuid "1b182ae8-da5c-4bd1-8e5e-05f40468aacb")
@@ -91,7 +91,7 @@
 		)
 	)
 	(fp_text user "GND"
-		(at 2.54 -2.54 0)
+		(at 0 1.4 0)
 		(unlocked yes)
 		(layer "F.SilkS")
 		(uuid "e1608b5b-e6ec-41ef-9bbe-94a02a6e8812")
@@ -104,7 +104,7 @@
 		)
 	)
 	(fp_text user "${REFERENCE}"
-		(at 2.54 -5.08 0)
+		(at 0 -1.14 0)
 		(unlocked yes)
 		(layer "F.Fab")
 		(uuid "caed9a8b-03e0-494a-93f7-2021d65c4bc8")
@@ -116,7 +116,7 @@
 		)
 	)
 	(pad "1" thru_hole rect
-		(at 0 0)
+		(at -2.54 3.94)
 		(size 1.8 1.8)
 		(drill 0.8)
 		(layers "*.Cu" "*.Mask")
@@ -124,7 +124,7 @@
 		(uuid "d79b8da0-95df-4a76-9343-77b6dfce85aa")
 	)
 	(pad "2" thru_hole circle
-		(at 2.54 0)
+		(at 0 3.94)
 		(size 1.8 1.8)
 		(drill 0.8)
 		(layers "*.Cu" "*.Mask")
@@ -132,7 +132,7 @@
 		(uuid "415021d1-9948-4156-a084-ea7a3996b26a")
 	)
 	(pad "3" thru_hole circle
-		(at 5.08 0)
+		(at 2.54 3.94)
 		(size 1.8 1.8)
 		(drill 0.8)
 		(layers "*.Cu" "*.Mask")

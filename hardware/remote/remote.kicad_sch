@@ -4669,7 +4669,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "ACTIVE_TRACK_SWITCH"
+		(property "Value" "GIMBAL_FN"
 			(at 76.2 28.5749 90)
 			(effects
 				(font
