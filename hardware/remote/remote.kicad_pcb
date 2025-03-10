@@ -6143,7 +6143,7 @@
 				(justify top)
 			)
 		)
-		(property "Value" "AUTO_PILOT"
+		(property "Value" "DRIVE_MODE"
 			(at 0 -4.831058 0)
 			(unlocked yes)
 			(layer "F.SilkS")

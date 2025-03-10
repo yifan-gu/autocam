@@ -2069,7 +2069,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "AUTO_PILOT"
+		(property "Value" "DRIVE_MODE"
 			(at 198.374 96.1391 0)
 			(effects
 				(font

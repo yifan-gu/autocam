@@ -4213,8 +4213,8 @@
 				(justify right)
 			)
 		)
-		(property "Value" "AUTO_PILOT"
-			(at 234.696 129.794 0)
+		(property "Value" "DRIVE_MODE"
+			(at 234.696 129.032 0)
 			(effects
 				(font
 					(size 1.27 1.27)
