@@ -1,0 +1,106 @@
+16:51:37.414 -> Run_active_track!!!!: 1
+16:51:38.419 -> Frame data:
+16:51:38.419 -> AA 1C 00 20 00 00 00 00
+16:51:38.419 -> Frame data:
+16:51:38.419 -> FA 23 40 F5 0E 0B 00 00
+16:51:38.419 -> Frame data:
+16:51:38.419 -> 01 00 22 01 00 23 01 00
+16:51:38.419 -> Frame data:
+16:51:38.419 -> 45 BF F9 D1
+16:51:38.419 -> Invalid response SEQ, expect 0x01, got 0x23FA
+16:51:38.419 -> Failed to execute command
+16:51:38.453 -> Failed to gimbal_active_track()
+16:51:39.440 -> Run_active_track!!!!: 0
+16:51:39.440 -> Frame data:
+16:51:39.440 -> AA 14 00 20 00 00 00 00
+16:51:39.440 -> Frame data:
+16:51:39.440 -> 71 10 01 D0 0D 01 00 00
+16:51:40.426 -> Frame data:
+16:51:40.426 -> AA 1C 00 20 00 00 00 00
+16:51:40.426 -> Invalid CRC32 checksum, expecting 0xBD967016, got 0x20001CAA
+16:51:40.426 -> Data:
+16:51:40.426 -> AA 14 00 20 00 00 00 00
+16:51:40.426 -> 71 10 01 D0 0D 01 00 00
+16:51:40.426 -> AA 1C 00 20
+16:51:40.426 -> Failed to execute command
+16:51:40.460 -> Failed to gimbal_active_track()
+16:51:41.445 -> Run_active_track!!!!: 1
+16:51:41.445 -> Frame data:
+16:51:41.445 -> 00 24 43 97 0E 0B 00 00
+16:51:41.445 -> Unexpected SOF header 00, skipping...
+16:51:41.445 -> Frame data:
+16:51:41.445 -> 01 00 22 01 00 23 01 00
+16:51:41.445 -> Unexpected SOF header 01, skipping...
+16:51:41.445 -> Frame data:
+16:51:41.445 -> 50 1E 1E 2F
+16:51:41.445 -> Unexpected SOF header 50, skipping...
+16:51:42.430 -> Frame data:
+16:51:42.430 -> AA 1C 00 20 00 00 00 00
+16:51:42.430 -> Frame data:
+16:51:42.430 -> 06 24 40 37 0E 0B 00 00
+16:51:42.430 -> Frame data:
+16:51:42.430 -> 01 00 22 01 00 23 01 00
+16:51:42.430 -> Frame data:
+16:51:42.430 -> 8D 3C FA 13
+16:51:42.464 -> Invalid response SEQ, expect 0x03, got 0x2406
+16:51:42.464 -> Failed to execute command
+16:51:42.464 -> Failed to gimbal_active_track()
+16:51:43.457 -> Run_active_track!!!!: 0
+16:51:43.457 -> Frame data:
+16:51:43.457 -> AA 14 00 20 00 00 00 00
+16:51:43.457 -> Frame data:
+16:51:43.457 -> 77 10 02 70 0D 01 00 00
+16:51:44.438 -> Frame data:
+16:51:44.438 -> AA 1C 00 20 00 00 00 00
+16:51:44.438 -> Invalid CRC32 checksum, expecting 0x8D4A94A9, got 0x20001CAA
+16:51:44.439 -> Data:
+16:51:44.439 -> AA 14 00 20 00 00 00 00
+16:51:44.470 -> 77 10 02 70 0D 01 00 00
+16:51:44.470 -> AA 1C 00 20
+16:51:44.470 -> Failed to execute command
+16:51:44.470 -> Failed to gimbal_active_track()
+16:51:45.455 -> Run_active_track!!!!: 1
+16:51:45.455 -> Frame data:
+16:51:45.455 -> 0C 24 46 97 0E 0B 00 00
+16:51:45.455 -> Unexpected SOF header 0C, skipping...
+16:51:45.455 -> Frame data:
+16:51:45.455 -> 01 00 22 01 00 23 01 00
+16:51:45.455 -> Unexpected SOF header 01, skipping...
+16:51:45.455 -> Frame data:
+16:51:45.455 -> F5 A3 9F 0C
+16:51:45.487 -> Unexpected SOF header F5, skipping...
+16:51:46.470 -> Frame data:
+16:51:46.470 -> AA 1C 00 20 00 00 00 00
+16:51:46.470 -> Frame data:
+16:51:46.470 -> 12 24 4F 37 0E 0B 00 00
+16:51:46.470 -> Frame data:
+16:51:46.470 -> 01 00 22 01 00 23 01 00
+16:51:46.470 -> Frame data:
+16:51:46.470 -> 62 FA 78 77
+16:51:46.470 -> Invalid response SEQ, expect 0x05, got 0x2412
+16:51:46.470 -> Failed to execute command
+16:51:46.470 -> Failed to gimbal_active_track()
+16:51:47.489 -> Run_active_track!!!!: 0
+16:51:47.490 -> Frame data:
+16:51:47.490 -> AA 14 00 20 00 00 00 00
+16:51:47.490 -> Frame data:
+16:51:47.490 -> 7D 10 04 D0 0D 01 00 00
+16:51:48.481 -> Frame data:
+16:51:48.481 -> AA 1C 00 20 00 00 00 00
+16:51:48.481 -> Invalid CRC32 checksum, expecting 0xBAF4F4EA, got 0x20001CAA
+16:51:48.481 -> Data:
+16:51:48.481 -> AA 14 00 20 00 00 00 00
+16:51:48.481 -> 7D 10 04 D0 0D 01 00 00
+16:51:48.481 -> AA 1C 00 20
+16:51:48.481 -> Failed to execute command
+16:51:48.481 -> Failed to gimbal_active_track()
+16:51:49.468 -> Run_active_track!!!!: 1
+16:51:49.468 -> Frame data:
+16:51:49.468 -> 18 24 49 97 0E 0B 00 00
+16:51:49.468 -> Unexpected SOF header 18, skipping...
+16:51:49.501 -> Frame data:
+16:51:49.501 -> 01 00 22 01 00 23 01 00
+16:51:49.501 -> Unexpected SOF header 01, skipping...
+16:51:49.501 -> Frame data:
+16:51:49.501 -> 1A 65 1D 68
+16:51:49.501 -> Unexpected SOF header 1A, skipping...
