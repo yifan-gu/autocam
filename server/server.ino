@@ -19,10 +19,8 @@
 #define STATE_REMOTE_READY 2
 
 #define DRIVE_MODE_MANUAL 0
-#define DRIVE_MODE_AUTO_PILOT 1
-
-#define AUTO_PILOT_MODE_FOLLOW 0
-#define AUTO_PILOT_MODE_CINEMA 1
+#define DRIVE_MODE_FOLLOW 1
+#define DRIVE_MODE_CINEMA 2
 
 // Pin configuration
 #define STEERING_PIN 23  //  A6 for steering
@@ -68,8 +66,7 @@ struct GlobalState {
   int throttleValue;       // e.g., servo pulse width for throttle
   int steeringValue;       // e.g., servo pulse width for steering
   int state;               // overall state (e.g., STATE_NOT_READY, etc.)
-  int driveMode;           // e.g., DRIVE_MODE_MANUAL, DRIVE_MODE_AUTO_PILOT
-  int autoPilotSubMode;    // e.g., AUTO_PILOT_FOLLOW(default) or AUTO_PILOT_CINEMA
+  int driveMode;           // e.g., DRIVE_MODE_MANUAL, DRIVE_MODE_FOLLOW, DRIVE_MODE_CINEMA
   float distance;          // distance from the Tag/Remote to the Sensor
   float targetDistance;    // desired distance
   float heading;           // measured heading in degrees [0, 360)  Front = 0/360, Left = 90, Back = 180, Right = 270
@@ -85,7 +82,6 @@ GlobalState globalState = {
   midSteering,           // steeringValue
   STATE_NOT_READY,       // state
   DRIVE_MODE_MANUAL,     // driveMode
-  AUTO_PILOT_MODE_FOLLOW,     // autoPilotSubMode
   0.0,                   // distance
   0.0,                   // targetDistance
   0.0,                   // heading
@@ -374,24 +370,36 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
         response += "\"currentY\":" + String(currentY, 2 ) + ",";
         response += "\"targetX\":" + String(targetX, 2) + ",";
         response += "\"targetY\":" + String(targetY, 2) + ",";
-        response += "\"state\":" + String(globalState.state);
+        response += "\"state\":" + String(globalState.state) + ",";
+        response += "\"driveMode\":" + String(globalState.driveMode);
         response += "}";
 
         client->text(response); // Send the JSON response to the client
         //LOGLN("Sent data: " + response);
-      } else if (message.startsWith("mode=")) {
-        if (message == "mode=manual") {
-          setDriveMode(DRIVE_MODE_MANUAL);
-        } else if (message == "mode=auto") {
-          setDriveMode(DRIVE_MODE_AUTO_PILOT);
-          globalState.throttleValue = midThrottle;
-          globalState.steeringValue = midSteering;
-        }
-      } else if (message.startsWith("throttle=")) {
-        globalState.throttleValue = map(message.substring(9).toInt(), 1000, 2000, minThrottle, maxThrottle);
-      } else if (message.startsWith("steering=")) {
-        globalState.steeringValue = map(message.substring(9).toInt(), 1000, 2000, minSteering, maxSteering);
+        break;
       }
+
+      if (message == "driveMode=0") {
+        setDriveMode(DRIVE_MODE_MANUAL);
+        break;
+      }
+      if (message == "driveMode=1") {
+        setDriveMode(DRIVE_MODE_FOLLOW);
+        break;
+      }
+      if (message == "driveMode=2") {
+        setDriveMode(DRIVE_MODE_CINEMA);
+        break;
+      }
+      if (message.startsWith("throttle=")) {
+        globalState.throttleValue = map(message.substring(9).toInt(), 1000, 2000, minThrottle, maxThrottle);
+        break;
+      }
+      if (message.startsWith("steering=")) {
+        globalState.steeringValue = map(message.substring(9).toInt(), 1000, 2000, minSteering, maxSteering);
+        break;
+      }
+      LOGF("Unknown Websocket message: %s\n", message);
       break;
     }
 
@@ -595,26 +603,26 @@ void setUWBSelector(uint16_t newUWBSelector) {
 }
 
 void calculateSteeringThrottle() {
-  if (globalState.driveMode != DRIVE_MODE_AUTO_PILOT) {
-    return;
+  switch (globalState.driveMode) {
+    case DRIVE_MODE_FOLLOW:
+      calculateSteeringThrottleFollow();
+      break;
+    case DRIVE_MODE_CINEMA:
+      calculateSteeringThrottleCinema();
+      break;
+    default: // DRIVE_MODE_MANUAL
+      return;
   }
+  return;
+}
 
+void calculateSteeringThrottleFollow() {
   float deltaTimeMillis = millis() - lastDeltaTimeMillis;
   if (deltaTimeMillis < minDeltaTimeMillis) {
     return; // No change.
   }
   lastDeltaTimeMillis = deltaTimeMillis;
 
-  switch (globalState.autoPilotSubMode) {
-    case AUTO_PILOT_MODE_CINEMA:
-      calculateSteeringThrottleCinema(deltaTimeMillis);
-      break;
-    default:
-      calculateSteeringThrottleFollow(deltaTimeMillis);
-  }
-}
-
-void calculateSteeringThrottleFollow(float deltaTimeMillis) {
   float distanceDiff = globalState.distance - globalState.targetDistance;
   if (distanceDiff <= distanceDelta) { // Stay still if the target is moving closer.
     globalState.throttleValue = midThrottle;
@@ -646,7 +654,6 @@ void calculateSteeringThrottleFollow(float deltaTimeMillis) {
     setMoveBackward(throttleDiff);
     moveBackward = true;
   }
-
 
   // Convert headingDiff from [0, 360) to  (-180, 180].
   // So now Positive value means it's currently heading left.
@@ -680,7 +687,13 @@ void calculateSteeringThrottleFollow(float deltaTimeMillis) {
   }
 }
 
-void calculateSteeringThrottleCinema(float deltaTimeMillis) {
+void calculateSteeringThrottleCinema() {
+  float deltaTimeMillis = millis() - lastDeltaTimeMillis;
+  if (deltaTimeMillis < minDeltaTimeMillis) {
+    return; // No change.
+  }
+
+  lastDeltaTimeMillis = deltaTimeMillis;
   float distanceDiff = globalState.distance - globalState.targetDistance;
   if (abs(distanceDiff) <= distanceDelta) { // No distance change.
     globalState.throttleValue = midThrottle;
@@ -809,7 +822,6 @@ void calculateCoordinates() {
     //LOG(", ");
     //LOGLN(targetY);
   }
-
   return;
 }
 

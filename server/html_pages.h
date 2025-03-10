@@ -63,7 +63,7 @@ char const* index_html = R"rawliteral(
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         display: flex;
         flex-direction: column;
-        width: 86px;
+        width: 120px;
       }
 
       .location-panel .label {
@@ -118,13 +118,44 @@ char const* index_html = R"rawliteral(
       .toggle-container.active .toggle-knob {
         left: calc(100% - 28px);
       }
-      .mode-label {
-        margin-top: 5px;
-        color: white;
-        text-align: center;
+      .threeway-toggle {
+        display: flex;
+        position: relative; /* establishes positioning context */
+        border: 1px solid #7f8c8d;
+        border-radius: 10px;
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        margin: 5px auto;
+        width: 120px;
+        height: 20px;
+        background-color: #efefef;
+      }
+
+      /* Slider indicator that slides behind the options */
+      .slider-indicator {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 40px; /* 120px/3 options */
+        height: 20px;
+        background-color: #3498db;
+        transition: left 0.3s ease;
+        z-index: 0;
+      }
+      .toggle-option {
+        flex: 1;
+        text-align: center;
+        line-height: 20px;
+        cursor: pointer;
+        background-color: transparent;
+        color: #3498db;
+        transition: color 0.3s ease;
+        font-size: 10px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .toggle-option.active {
+        color: white;
       }
 
       .info-panel {
@@ -339,10 +370,13 @@ char const* index_html = R"rawliteral(
           <span class="paren">)</span>
         </div>
       </div>
-      <div class="toggle-container" id="toggle-button">
-        <div class="toggle-knob"></div>
+      <div class="label">drive mode:</div>
+      <div class="threeway-toggle" id="driveMode-toggle">
+        <div class="slider-indicator"></div>
+        <div class="toggle-option active" data-driveMode="0">Manual</div>
+        <div class="toggle-option" data-driveMode="1">Follow</div>
+        <div class="toggle-option" data-driveMode="2">Cinema</div>
       </div>
-      <div class="mode-label" id="mode-label">Manual Mode</div>
     </div>
 
     <div class="info-panel" id="info-panel">
@@ -413,9 +447,8 @@ char const* index_html = R"rawliteral(
         steering: 0,
         throttle: 0,
         state: 0,
+        driveMode: 0,
       };
-
-      let driveMode = 0;
 
       function updateInfoPanel() {
         document.getElementById("distance").textContent = `${data.distance}`;
@@ -426,7 +459,7 @@ char const* index_html = R"rawliteral(
         document.getElementById("current-x").textContent = `${data.currentX}`;
         document.getElementById("current-y").textContent = `${data.currentY}`;
 
-        if (driveMode == 0) {
+        if (data.driveMode == 0) {
           document.getElementById("target-x").textContent = `${data.targetX}`;
           document.getElementById("target-y").textContent = `${data.targetY}`;
         }
@@ -438,45 +471,36 @@ char const* index_html = R"rawliteral(
       }
 
       function updateSliders() {
-        if (driveMode == 1) {
+        if (data.driveMode != 0) {
           document.getElementById("steering-slider").value = data.steering;
           document.getElementById("throttle-slider").value = data.throttle;
         }
       }
 
-      const toggleButton = document.getElementById("toggle-button");
-      const modeLabel = document.getElementById("mode-label");
+      // New 3‑way toggle for drive mode selection
+      const driveModeToggle = document.getElementById("driveMode-toggle");
+      const toggleOptions = driveModeToggle.querySelectorAll(".toggle-option");
 
-      toggleButton.addEventListener("click", () => {
-        driveMode = driveMode == 0 ? 1 : 0;
-        toggleButton.classList.toggle("active");
-        modeLabel.textContent = driveMode == 1 ? "Auto Mode" : "Manual Mode";
-
-        // Send mode and coordinates to the server
-        if (ws.readyState === WebSocket.OPEN) {
-          const modeMessage = driveMode == 1 ? "mode=auto" : "mode=manual";
-          ws.send(modeMessage);
-
-          if (driveMode == 1) {
-            // Send current x and y as target coordinates
-            const coordinatesMessage = `x=${data.currentX}&y=${data.currentY}`;
-            ws.send(coordinatesMessage);
-          } else {
-            // Reset the slider.
-            steeringSlider.value = midSliderValue;
-            throttleSlider.value = midSliderValue;
+      toggleOptions.forEach((option, idx) => {
+        option.addEventListener("click", () => {
+          // Remove active class from all options
+          toggleOptions.forEach((opt) => opt.classList.remove("active"));
+          // Add active class to clicked option
+          option.classList.add("active");
+          document.querySelector("#driveMode-toggle .slider-indicator").style.left = idx * 40 + "px";
+          let driveMode = parseInt(option.getAttribute("data-driveMode"), 10);
+          // Send drive mode change to the server
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send("driveMode=" + driveMode.toString());
           }
-        }
-
-        // Update UI
-        document.getElementById("target-location").style.color = driveMode == 1 ? "#7f8c8d" : "white";
-
-        drawCoordinateSystem();
-
-        // Enable or disable sliders based on mode
-        const sliders = document.querySelectorAll("#steering-slider, #throttle-slider");
-        sliders.forEach((slider) => {
-          slider.disabled = driveMode == 1; // Disable input when auto mode is on
+          // Optionally, update UI (e.g. enable/disable sliders)
+          if (driveMode === 0) {
+            document.getElementById("steering-slider").disabled = false;
+            document.getElementById("throttle-slider").disabled = false;
+          } else {
+            document.getElementById("steering-slider").disabled = true;
+            document.getElementById("throttle-slider").disabled = true;
+          }
         });
       });
 
@@ -593,7 +617,7 @@ char const* index_html = R"rawliteral(
           ctx.fillText(label, centerX - 10, y + 5);
         }
 
-        if (driveMode == 1) {
+        if (data.driveMode != 0) {
           const targetX = centerX + data.targetX * meterToPixel;
           const targetY = centerY - data.targetY * meterToPixel;
           drawTarget(targetX, targetY);

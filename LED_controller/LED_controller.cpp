@@ -8,7 +8,8 @@
 #define STATE_REMOTE_READY 2
 
 #define DRIVE_MODE_MANUAL 0
-#define DRIVE_MODE_AUTO_PILOT 1
+#define DRIVE_MODE_FOLLOW 1
+#define DRIVE_MODE_CINEMA 2
 
 // Calculate the divider factor (inverse of the ratio)
 
@@ -185,14 +186,134 @@ void LEDController::updateStateLED(int state) {
   }
 }
 
-// Update LEDs based on drive mode.
+// This needs to be called in every loop to have the "blinking" effect.
 void LEDController::updateDriveModeLED(int driveMode) {
-  if (driveMode == DRIVE_MODE_MANUAL) {
-    LOGLN("drive mode, off");
-    setLEDRed(driveR, driveG, driveB);
-  } else {
-    LOGLN("drive mode, blue");
-    setLEDBlue(driveR, driveG, driveB);
+  static unsigned long lastToggleTime = millis();
+  static int stateIndex = 0;  // state machine index for blinking pattern
+  static int prevDriveMode = -1;  // to detect mode changes
+  unsigned long now = millis();
+
+  // Reset the state machine if the drive mode changes.
+  if (driveMode != prevDriveMode) {
+    stateIndex = 0;
+    lastToggleTime = now;
+    prevDriveMode = driveMode;
+  }
+
+  switch (driveMode) {
+    case DRIVE_MODE_MANUAL: {
+      // Steady blink: cycle is 1000ms ON, 1000ms OFF.
+      const unsigned long onDuration = 1000;
+      const unsigned long offDuration = 1000;
+      if (stateIndex == 0) { // LED ON state
+        setLEDBlue(driveR, driveG, driveB);
+        if (now - lastToggleTime >= onDuration) {
+          stateIndex = 1;
+          lastToggleTime = now;
+        }
+      } else { // stateIndex == 1: LED OFF state
+        setLEDOff(driveR, driveG, driveB);
+        if (now - lastToggleTime >= offDuration) {
+          stateIndex = 0;
+          lastToggleTime = now;
+        }
+      }
+      break;
+    }
+
+    case DRIVE_MODE_FOLLOW: {
+      // 2 short blinks pattern:
+      // State 0: LED ON for 500ms
+      // State 1: LED OFF for 500ms
+      // State 2: LED ON for 500ms
+      // State 3: LED OFF for 1000ms (pause)
+      const unsigned long shortOn = 500;
+      const unsigned long shortOff = 500;
+      const unsigned long pause = 1500;
+      if (stateIndex == 0) {
+        setLEDBlue(driveR, driveG, driveB);
+        if (now - lastToggleTime >= shortOn) {
+          stateIndex = 1;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 1) {
+        setLEDOff(driveR, driveG, driveB);
+        if (now - lastToggleTime >= shortOff) {
+          stateIndex = 2;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 2) {
+        setLEDBlue(driveR, driveG, driveB);
+        if (now - lastToggleTime >= shortOn) {
+          stateIndex = 3;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 3) {
+        setLEDOff(driveR, driveG, driveB);
+        if (now - lastToggleTime >= pause) {
+          stateIndex = 0;
+          lastToggleTime = now;
+        }
+      }
+      break;
+    }
+
+    case DRIVE_MODE_CINEMA: {
+      // 3 short blinks pattern:
+      // State 0: LED ON for 500ms
+      // State 1: LED OFF for 500ms
+      // State 2: LED ON for 500ms
+      // State 3: LED OFF for 500ms
+      // State 4: LED ON for 500ms
+      // State 5: LED OFF for 1000ms (pause)
+      const unsigned long shortOn = 500;
+      const unsigned long shortOff = 500;
+      const unsigned long pause = 1500;
+      if (stateIndex == 0) {
+        setLEDBlue(driveR, driveG, driveB);
+        if (now - lastToggleTime >= shortOn) {
+          stateIndex = 1;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 1) {
+        setLEDOff(driveR, driveG, driveB);
+        if (now - lastToggleTime >= shortOff) {
+          stateIndex = 2;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 2) {
+        setLEDBlue(driveR, driveG, driveB);
+        if (now - lastToggleTime >= shortOn) {
+          stateIndex = 3;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 3) {
+        setLEDOff(driveR, driveG, driveB);
+        if (now - lastToggleTime >= shortOff) {
+          stateIndex = 4;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 4) {
+        setLEDBlue(driveR, driveG, driveB);
+        if (now - lastToggleTime >= shortOn) {
+          stateIndex = 5;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 5) {
+        setLEDOff(driveR, driveG, driveB);
+        if (now - lastToggleTime >= pause) {
+          stateIndex = 0;
+          lastToggleTime = now;
+        }
+      }
+      break;
+    }
+
+    default:
+      // For any unrecognized drive mode, turn off the LED.
+      setLEDOff(driveR, driveG, driveB);
+      stateIndex = 0;
+      break;
   }
 }
 

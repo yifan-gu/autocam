@@ -15,7 +15,8 @@
 #define STATE_REMOTE_READY 2
 
 #define DRIVE_MODE_MANUAL 0
-#define DRIVE_MODE_AUTO_PILOT 1
+#define DRIVE_MODE_FOLLOW 1
+#define DRIVE_MODE_CINEMA 2
 
 // SPI pins
 #define SPI_SCK 18
@@ -173,8 +174,9 @@ void nonUWBTask(void * parameter) {
     //LOGF("Interval since last iteration: %u ms\n", intervalMs);
 
     readStatusData();
-    readRemoteDataBidirection();
-    sendRemoteDataBidirection();
+    readInput();
+    sendInput();
+    checkDriveModeLED();
     checkBattery();
 
     vTaskDelay(pdMS_TO_TICKS(LOOP_PERIOD_MS));
@@ -335,22 +337,55 @@ bool buttonPressed(ButtonDebounce &button) {
   return previousState != button.stableState && button.stableState == LOW;
 }
 
-// Check both buttons using the shared debounce function.
-void checkButtons() {
-  if (buttonPressed(modeSwitchDebounce)) {
-    // Toggle drive mode.
-    driveModeTriggerValue = (driveModeTriggerValue == DRIVE_MODE_MANUAL)
-                              ? DRIVE_MODE_AUTO_PILOT
-                              : DRIVE_MODE_MANUAL;
-    LOGF("Drive mode toggled: %d\n", driveModeTriggerValue);
-  }
-
+void checkActiveTrackButton() {
   activeTrackToggledValue = false;
   if (buttonPressed(activeTrackDebounce)) {
     // Toggle active track.
     activeTrackToggledValue = true;
     LOGF("Active track toggled: %d\n", activeTrackToggledValue);
   }
+}
+
+void checkDriveModeButton() {
+  // Use a static variable to track clicks and time.
+  static unsigned long lastClickTime = 0;
+  static int clickCount = 0;
+  const unsigned long clickTimeout = 500; // Time window in ms for multi-click recognition
+
+  // If the button is pressed (debounced)
+  if (buttonPressed(modeSwitchDebounce)) {
+    unsigned long now = millis();
+    // If within the timeout window, increment the click counter,
+    // otherwise start a new series.
+    if (now - lastClickTime < clickTimeout) {
+      clickCount++;
+    } else {
+      clickCount = 1;
+    }
+    lastClickTime = now;
+  }
+
+  // If the timeout has passed since the last detected click, process the clicks.
+  if (clickCount > 0 && (millis() - lastClickTime > clickTimeout)) {
+    if (clickCount == 1) {
+      driveModeTriggerValue = DRIVE_MODE_MANUAL;
+    } else if (clickCount == 2) {
+      driveModeTriggerValue = DRIVE_MODE_FOLLOW;
+    } else if (clickCount >= 3) {
+      driveModeTriggerValue = DRIVE_MODE_CINEMA;
+    }
+    //LOGF("Drive mode set to: %d after %d click(s)\n", driveModeTriggerValue, clickCount);
+    // Optionally update the global drive mode immediately:
+    updateDriveMode(driveModeTriggerValue);
+    // Reset the click counter for the next sequence.
+    clickCount = 0;
+  }
+}
+
+// Check both buttons using the shared debounce function.
+void checkButtons() {
+  checkActiveTrackButton();
+  checkDriveModeButton();
 }
 
 bool lockSwitchLocked() {
@@ -361,7 +396,7 @@ uint16_t readUWBSelector() {
   return digitalRead(UWB_SELECTOR_SWITCH_PIN) == LOW ? 1 : 0;
 }
 
-void readRemoteDataBidirection() {
+void readInput() {
   if (lockSwitchLocked()) {
     // Check the lock switch first.
     // If locked then skip reading the inputs.
@@ -422,7 +457,7 @@ bool dataChanged(const RemoteDataBidirection &oldData, const RemoteDataBidirecti
   return false;
 }
 
-void sendRemoteDataBidirection() {
+void sendInput() {
   if (!(BLECentral && BLECentral.connected())) {
     updateState(state & ~STATE_REMOTE_READY);
     if (!connectToCentral()) {
@@ -453,6 +488,10 @@ void sendRemoteDataBidirection() {
   }
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();
+}
+
+void checkDriveModeLED() {
+  ledController.updateDriveModeLED(driveMode);
 }
 
 void checkBattery() {
