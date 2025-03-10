@@ -21,6 +21,9 @@
 #define DRIVE_MODE_MANUAL 0
 #define DRIVE_MODE_AUTO_PILOT 1
 
+#define AUTO_PILOT_MODE_FOLLOW 0
+#define AUTO_PILOT_MODE_CINEMA 1
+
 // Pin configuration
 #define STEERING_PIN 23  //  A6 for steering
 #define THROTTLE_PIN 22  //  A5 for throttle
@@ -66,9 +69,10 @@ struct GlobalState {
   int steeringValue;       // e.g., servo pulse width for steering
   int state;               // overall state (e.g., STATE_NOT_READY, etc.)
   int driveMode;           // e.g., DRIVE_MODE_MANUAL, DRIVE_MODE_AUTO_PILOT
+  int autoPilotSubMode;    // e.g., AUTO_PILOT_FOLLOW(default) or AUTO_PILOT_CINEMA
   float distance;          // distance from the Tag/Remote to the Sensor
   float targetDistance;    // desired distance
-  float heading;           // measured heading in degrees [0, 360)  N = 0/360, W = 90, S = 180, E = 270
+  float heading;           // measured heading in degrees [0, 360)  Front = 0/360, Left = 90, Back = 180, Right = 270
   float targetHeading;     // desired heading in degrees
   float yawSpeed;          // Yaw speed
   float pitchSpeed;        // Pitch speed
@@ -81,6 +85,7 @@ GlobalState globalState = {
   midSteering,           // steeringValue
   STATE_NOT_READY,       // state
   DRIVE_MODE_MANUAL,     // driveMode
+  AUTO_PILOT_MODE_FOLLOW,     // autoPilotSubMode
   0.0,                   // distance
   0.0,                   // targetDistance
   0.0,                   // heading
@@ -123,7 +128,8 @@ float targetX = 0, targetY = 0;
 //
 // PID Controller variables for throttle. Tunable.
 //
-float delta = 0.5; // The "play" margin.
+float distanceDelta = 0.5; // The distance tolerance.
+float headingDelta = 30; // The heading tolerance.
 
 float Kp_t = 100.0;  // Proportional gain. Diff = Kp_t * distance
 float Ki_t = 0.0;  // Integral gain. Diff = Ki_t * distance * 1000 * second.
@@ -258,7 +264,8 @@ void setupServer() {
 
   server.on("/get_parameters", HTTP_GET, [](AsyncWebServerRequest *request) {
     String json = "{";
-    json += "\"delta\":" + String(delta, 2) + ",";
+    json += "\"distanceDelta\":" + String(distanceDelta, 2) + ",";
+    json += "\"headingDelta\":" + String(headingDelta, 0) + ",";
     json += "\"Kp_t\":" + String(Kp_t, 1) + ",";
     json += "\"Ki_t\":" + String(Ki_t, 1) + ",";
     json += "\"Kd_t\":" + String(Kd_t, 1) + ",";
@@ -276,9 +283,13 @@ void setupServer() {
 
   // Add a handler to process the parameters update
   server.on("/update_parameters", HTTP_POST, [](AsyncWebServerRequest *request) {
-    if (request->hasParam("delta", true)) {
-      delta = request->getParam("delta", true)->value().toFloat();
-      LOGF("delta: %f\n", delta);
+    if (request->hasParam("distanceDelta", true)) {
+      distanceDelta = request->getParam("distanceDelta", true)->value().toFloat();
+      LOGF("distanceDelta: %f\n", distanceDelta);
+    }
+    if (request->hasParam("headingDelta", true)) {
+      headingDelta = request->getParam("headingDelta", true)->value().toFloat();
+      LOGF("headingDelta: %f\n", headingDelta);
     }
     if (request->hasParam("Kp_t", true)) {
       Kp_t = request->getParam("Kp_t", true)->value().toFloat();
@@ -594,23 +605,38 @@ void calculateSteeringThrottle() {
   }
   lastDeltaTimeMillis = deltaTimeMillis;
 
-  float distanceDiff = abs(globalState.distance - globalState.targetDistance);
+  switch (globalState.autoPilotSubMode) {
+    case AUTO_PILOT_MODE_CINEMA:
+      calculateSteeringThrottleCinema(deltaTimeMillis);
+      break;
+    default:
+      calculateSteeringThrottleFollow(deltaTimeMillis);
+  }
+}
 
-  if (distanceDiff <= delta) { // No distance change.
+void calculateSteeringThrottleFollow(float deltaTimeMillis) {
+  float distanceDiff = globalState.distance - globalState.targetDistance;
+  if (distanceDiff <= distanceDelta) { // Stay still if the target is moving closer.
     globalState.throttleValue = midThrottle;
     globalState.steeringValue = midSteering;
     return;
   }
 
   // Calculate throttle.
-  float throttleDiff = calculateThrottleDiff(distanceDiff, deltaTimeMillis);
+  float distanceDiffError = 0;
+  if (distanceDiff > 0) {
+    distanceDiffError = distanceDiff - distanceDelta; // Compensate the tolerance.
+  } else {
+    distanceDiffError = distanceDiff + distanceDelta;
+  }
+  float throttleDiff = calculateThrottleDiff(distanceDiffError, deltaTimeMillis);
 
   boolean moveForward = false;
   boolean moveBackward = false;
-  if (currentY - targetY > delta) {
+  if (currentY - targetY > distanceDelta) {
     setMoveForward(throttleDiff);
     moveForward = true;
-  } else if (targetY - currentY > delta) {
+  } else if (targetY - currentY > distanceDelta) {
     setMoveBackward(throttleDiff);
     moveBackward = true;
   } else if (currentY > 0) { // Parallel moving.
@@ -621,19 +647,95 @@ void calculateSteeringThrottle() {
     moveBackward = true;
   }
 
-  if (abs(currentX - targetX) <= delta) {
-    globalState.steeringValue = midSteering;
+
+  // Convert headingDiff from [0, 360) to  (-180, 180].
+  // So now Positive value means it's currently heading left.
+  // Negative value means it's heading right.
+  float headingDiff = globalState.heading;
+  if (moveForward) {
+    if (headingDiff > 180) {
+      headingDiff = headingDiff - 360;
+    }
+  } else { // moveBackward
+    headingDiff = headingDiff - 180;
+  }
+
+  if (abs(headingDiff) < headingDelta) {
+    globalState.steeringValue = midSteering; // Within tolerance, no steering.
     return;
   }
 
   // Calculate steering.
-  float headingDiff = globalState.heading - globalState.targetHeading; // headingDiff < 0 means the target is turning clockwise; headingDiff > 0 means the target is turning counterclockwise.
+  float headingDiffError = 0;
+  if (headingDiff > 0) {
+    headingDiffError = headingDiff - headingDelta; // Compensate the tolerance.
+  } else {
+    headingDiffError = headingDiff + headingDelta;
+  }
+  float steeringDiff = calculateSteeringDiff(headingDiffError, deltaTimeMillis);
+  if (moveForward) {
+    setSteering(steeringDiff);
+  } else if (moveBackward) {
+    setSteering(-steeringDiff); // In reverse, we need to turn the other way around.
+  }
+}
+
+void calculateSteeringThrottleCinema(float deltaTimeMillis) {
+  float distanceDiff = globalState.distance - globalState.targetDistance;
+  if (abs(distanceDiff) <= distanceDelta) { // No distance change.
+    globalState.throttleValue = midThrottle;
+    globalState.steeringValue = midSteering;
+    return;
+  }
+
+  // Calculate throttle.
+  float distanceDiffError = 0;
+  if (distanceDiff > 0) {
+    distanceDiffError = distanceDiff - distanceDelta; // Compensate the tolerance.
+  } else {
+    distanceDiffError = distanceDiff + distanceDelta;
+  }
+  float throttleDiff = calculateThrottleDiff(distanceDiffError, deltaTimeMillis);
+
+  boolean moveForward = false;
+  boolean moveBackward = false;
+  if (currentY - targetY > distanceDelta) {
+    setMoveForward(throttleDiff);
+    moveForward = true;
+  } else if (targetY - currentY > distanceDelta) {
+    setMoveBackward(throttleDiff);
+    moveBackward = true;
+  } else if (currentY > 0) { // Parallel moving.
+    setMoveForward(throttleDiff);
+    moveForward = true;
+  } else if (currentY < 0) {
+    setMoveBackward(throttleDiff);
+    moveBackward = true;
+  }
+
+  if (abs(currentX - targetX) <= distanceDelta) {
+    globalState.steeringValue = midSteering; // Parallel moving, do not steer.
+    return;
+  }
+
+  // headingDiff (-180, 180].
+  // Positive value means the target is turning counterclockwise, or need to turn left.
+  // Negative value means the target is turning clockwise, or need to turn right.
+  float headingDiff = globalState.heading - globalState.targetHeading;
   if (headingDiff > 180) {
     headingDiff -= 360;
-  } else if (headingDiff < -180) {
+  } else if (headingDiff <= -180) {
     headingDiff += 360;
   }
-  float steeringDiff = calculateSteeringDiff(headingDiff, deltaTimeMillis);
+
+  // Calculate steering.
+  float headingDiffError = 0;
+  if (headingDiff > 0) {
+    headingDiffError = headingDiff - headingDelta; // Compensate the tolerance.
+  } else {
+    headingDiffError = headingDiff + headingDelta;
+  }
+  float steeringDiff = calculateSteeringDiff(headingDiffError, deltaTimeMillis);
   if (moveForward) {
     setSteering(steeringDiff);
   } else if (moveBackward) {

@@ -805,14 +805,14 @@ char const* parameters_page_html = R"rawliteral(
       }
       body {
         font-family: Arial, sans-serif;
-        padding: 10px; /* Reduced overall padding */
+        padding: 8px; /* Reduced overall padding */
         touch-action: none; /* Prevent default pinch-zoom on the webpage */
       }
       /* Header container for the back button, title, and reset button */
       .header {
         position: relative;
         text-align: center;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
       }
       /* Small back button positioned at the left of the header */
       .back-button {
@@ -853,7 +853,7 @@ char const* parameters_page_html = R"rawliteral(
         margin: 0; /* Remove default margin */
       }
       .slider-container {
-        margin: 5px 0; /* Reduced vertical margin between sliders */
+        margin: 2px 0; /* Reduced vertical margin between sliders */
         width: 100%;
       }
       .slider-container label {
@@ -898,8 +898,13 @@ char const* parameters_page_html = R"rawliteral(
     </div>
     <form id="parameters-form">
       <div class="slider-container">
-        <label>Delta: <span id="delta-value">0.5</span></label>
-        <input class="slider" type="range" name="delta" min="0" max="2" step="0.01" value="0.5" oninput="updateValue('delta', this.value)" />
+        <label>DistanceDelta: <span id="distanceDelta-value">0.5</span></label>
+        <input class="slider" type="range" name="distanceDelta" min="0" max="2" step="0.01" value="0.5" oninput="updateValue('distanceDelta', this.value)" />
+      </div>
+      <!-- New slider for headingDelta added right after distanceDelta -->
+      <div class="slider-container">
+        <label>HeadingDelta: <span id="headingDelta-value">0.0</span></label>
+        <input class="slider" type="range" name="headingDelta" min="0" max="90" step="1" value="30" oninput="updateValue('headingDelta', this.value)" />
       </div>
       <div class="slider-container">
         <label>Kp_t: <span id="Kp_t-value">100</span></label>
@@ -974,8 +979,12 @@ char const* parameters_page_html = R"rawliteral(
         fetch("/get_parameters")
           .then((response) => response.json())
           .then((data) => {
-            document.getElementById("delta-value").textContent = data.delta;
-            document.querySelector("input[name='delta']").value = data.delta;
+            document.getElementById("distanceDelta-value").textContent = data.distanceDelta;
+            document.querySelector("input[name='distanceDelta']").value = data.distanceDelta;
+
+            // Update the new headingDelta slider
+            document.getElementById("headingDelta-value").textContent = data.headingDelta;
+            document.querySelector("input[name='headingDelta']").value = data.headingDelta;
 
             document.getElementById("Kp_t-value").textContent = data.Kp_t;
             document.querySelector("input[name='Kp_t']").value = data.Kp_t;
@@ -1008,7 +1017,7 @@ char const* parameters_page_html = R"rawliteral(
             document.getElementById("minMoveSteering-value").textContent = data.minMoveSteering;
             document.querySelector("input[name='minMoveSteering']").value = Math.abs(data.minMoveSteering);
 
-            // Update the new distanceSmoothFactor slider
+            // Update the distanceSmoothFactor slider
             document.getElementById("distanceSmoothFactor-value").textContent = data.distanceSmoothFactor;
             document.querySelector("input[name='distanceSmoothFactor']").value = data.distanceSmoothFactor;
           })
