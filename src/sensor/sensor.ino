@@ -71,7 +71,7 @@ void setup() {
 
   setupLED();
   setupUWB();
-  //setupDJIRoninController();
+  setupDJIRoninController();
   setupBLE();
   setupPinnedTask();
 }
@@ -105,11 +105,11 @@ void nonUWBTask(void * parameter) {
     previousIteration = currentIteration;
     //LOGF("Interval since last iteration: %u ms\n", intervalMs);
 
-    //getHeading();
+    getHeading();
     sendSensorDataSend();
     getSensorDataRecv();
     applyUWBSelector();
-    //setGimbalPosition();
+    setGimbalPosition();
     checkActiveTrack();
     checkGimbalRecenter();
     checkCameraRecording();
