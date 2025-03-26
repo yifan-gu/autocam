@@ -3,14 +3,6 @@
 #include "LED_controller.hpp"
 #include "util.h"
 
-#define STATE_NOT_READY 0
-#define STATE_SENSOR_READY 1
-#define STATE_REMOTE_READY 2
-
-#define DRIVE_MODE_MANUAL 0
-#define DRIVE_MODE_FOLLOW 1
-#define DRIVE_MODE_CINEMA 2
-
 // Calculate the divider factor (inverse of the ratio)
 
 // Private helper: setup a single pin
@@ -90,10 +82,11 @@ void LEDController::setLEDOff(int red_pin, int green_pin, int blue_pin) {
 // Private helper: read the battery percentage from the ESP32 ADC
 int LEDController::readBatteryPercentage() {
   int measuredMilliVoltage = analogReadMilliVolts(batteryADCPin);
+  LOGF("Measured Voltage: %d mV\n", measuredMilliVoltage);
   // Scale measured voltage back up to actual battery voltage
   float voltage = measuredMilliVoltage * batteryDividerFactor / 1000;
   // Debug: print the measured voltage
-  //LOGF("Measured battery voltage: %f\n", voltage);
+  LOGF("Calculated Voltage: %f V\n", voltage);
 
   // Map voltage to battery percentage.
   if (voltage >= batteryMaxVoltage) return 100;
@@ -157,7 +150,7 @@ void LEDController::initBatteryLED(int batteryRed, int batteryGreen, int battery
   batteryVoltageDividerR1 = R1;
   batteryVoltageDividerR2 = R2;
   if (R2 != 0 ) {
-    batteryDividerFactor = (float)(R1 + R2) / R2;  // (100k+220k)/100k = 3.2
+    batteryDividerFactor = (float)(R1 + R2) / R2;  // (220k+100k)/100k = 3.2
   }
 
   setupLEDPIN(batteryR);
@@ -168,7 +161,7 @@ void LEDController::initBatteryLED(int batteryRed, int batteryGreen, int battery
 // Update LEDs based on state.
 void LEDController::updateStateLED(int state) {
   // Sensor LED update
-  if (state & STATE_SENSOR_READY) {
+  if (state & SERVER_STATE_SENSOR_READY) {
     LOGLN("sensor, green");
     setLEDGreen(sensorR, sensorG, sensorB);
   } else {
@@ -177,7 +170,7 @@ void LEDController::updateStateLED(int state) {
   }
 
   // Remote Controller LED update
-  if (state & STATE_REMOTE_READY) {
+  if (state & SERVER_STATE_REMOTE_READY) {
     LOGLN("remote, green");
     setLEDGreen(remoteR, remoteG, remoteB);
   } else {
@@ -202,25 +195,10 @@ void LEDController::updateDriveModeLED(int driveMode) {
 
   switch (driveMode) {
     case DRIVE_MODE_MANUAL: {
-      // Steady blink: cycle is 1000ms ON, 1000ms OFF.
-      const unsigned long onDuration = 1000;
-      const unsigned long offDuration = 1000;
-      if (stateIndex == 0) { // LED ON state
-        setLEDBlue(driveR, driveG, driveB);
-        if (now - lastToggleTime >= onDuration) {
-          stateIndex = 1;
-          lastToggleTime = now;
-        }
-      } else { // stateIndex == 1: LED OFF state
-        setLEDOff(driveR, driveG, driveB);
-        if (now - lastToggleTime >= offDuration) {
-          stateIndex = 0;
-          lastToggleTime = now;
-        }
-      }
+      // Steady
+      setLEDBlue(driveR, driveG, driveB);
       break;
     }
-
     case DRIVE_MODE_FOLLOW: {
       // 2 short blinks pattern:
       // State 0: LED ON for 500ms

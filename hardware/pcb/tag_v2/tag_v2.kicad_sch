@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "Autocam Tag")
-		(date "2025-03-18")
-		(rev "v0.4")
+		(date "2025-03-26")
+		(rev "v0.5")
 	)
 	(lib_symbols
 		(symbol "Autocam:3_PIN_Switch"
@@ -2416,7 +2416,7 @@
 				)
 			)
 		)
-		(property "Value" "220KΩ"
+		(property "Value" "100KΩ"
 			(at 180.34 117.602 90)
 			(effects
 				(font

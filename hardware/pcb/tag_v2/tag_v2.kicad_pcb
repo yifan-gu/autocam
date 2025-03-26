@@ -2233,7 +2233,7 @@
 				)
 			)
 		)
-		(property "Value" "220KΩ"
+		(property "Value" "100KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")

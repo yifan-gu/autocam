@@ -178,6 +178,7 @@ void loop() {
   calculateCoordinates();
   calculateSteeringThrottle();
   runESCController();
+  checkDriveModeLED();
   runHealthCheck();
 
   // Delay until the next period; this call ensures a steady 10 ms loop period.
@@ -446,7 +447,7 @@ void establishAutocamSensorBLEConnection() {
   while (!scanForPeripheral(AutocamSensor, AutocamSensorService, AutocamSensorDataRecv, AutocamSensorServiceUUID, AutocamSensorDataRecvCharacteristicUUID)) {
     delay(1000);
   };
-  updateState(globalState.state | SERVER_STATE_SENSOR_READY);
+  //updateState(globalState.state | SERVER_STATE_SENSOR_READY);
 }
 
 void sendGimbalControllerData() {
@@ -833,4 +834,8 @@ void emergencyStop() { //TODO(yifan): Refactor out this with a state machine.
   globalState.throttleValue = midThrottle;
   globalState.steeringValue = midSteering;
   autocamRemoteInputChanged = true; // Force gimbal to stop.
+}
+
+void checkDriveModeLED() {
+  ledController.updateDriveModeLED(globalState.driveMode);
 }
