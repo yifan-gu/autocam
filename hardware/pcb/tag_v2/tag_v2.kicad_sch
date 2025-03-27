@@ -7,7 +7,7 @@
 	(title_block
 		(title "Autocam Tag")
 		(date "2025-03-26")
-		(rev "v0.5")
+		(rev "v0.6")
 	)
 	(lib_symbols
 		(symbol "Autocam:3_PIN_Switch"
@@ -1327,6 +1327,12 @@
 		(uuid "7eb174b7-2e9f-4c91-b3a0-cd9dff98c7ab")
 	)
 	(junction
+		(at 116.84 93.98)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a1ae76f1-fb85-42d8-9f1d-5f563ebc3872")
+	)
+	(junction
 		(at 180.34 78.74)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1337,12 +1343,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "b92ddda0-d5e8-4c13-8f0f-f437c31c13aa")
-	)
-	(junction
-		(at 116.84 88.9)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "f45c392c-185a-4dda-a8bf-3a5e0f27e576")
 	)
 	(wire
 		(pts
@@ -1356,16 +1356,6 @@
 	)
 	(wire
 		(pts
-			(xy 116.84 76.2) (xy 116.84 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "01eac66f-6a30-45e1-9b10-d3027da4ac99")
-	)
-	(wire
-		(pts
 			(xy 180.34 78.74) (xy 180.34 99.06)
 		)
 		(stroke
@@ -1376,7 +1366,7 @@
 	)
 	(wire
 		(pts
-			(xy 93.98 106.68) (xy 101.6 106.68)
+			(xy 93.98 109.22) (xy 101.6 109.22)
 		)
 		(stroke
 			(width 0)
@@ -1386,7 +1376,7 @@
 	)
 	(wire
 		(pts
-			(xy 93.98 91.44) (xy 93.98 82.55)
+			(xy 93.98 96.52) (xy 93.98 87.63)
 		)
 		(stroke
 			(width 0)
@@ -1396,7 +1386,7 @@
 	)
 	(wire
 		(pts
-			(xy 87.63 88.9) (xy 116.84 88.9)
+			(xy 87.63 93.98) (xy 116.84 93.98)
 		)
 		(stroke
 			(width 0)
@@ -1413,6 +1403,16 @@
 			(type default)
 		)
 		(uuid "1988c9ff-efe4-43d0-9398-8ad29ea2e09b")
+	)
+	(wire
+		(pts
+			(xy 116.84 93.98) (xy 116.84 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "19d05354-b0d4-4b9d-b9ac-819778235644")
 	)
 	(wire
 		(pts
@@ -1436,7 +1436,7 @@
 	)
 	(wire
 		(pts
-			(xy 93.98 91.44) (xy 101.6 91.44)
+			(xy 93.98 96.52) (xy 101.6 96.52)
 		)
 		(stroke
 			(width 0)
@@ -1456,17 +1456,7 @@
 	)
 	(wire
 		(pts
-			(xy 119.38 91.44) (xy 109.22 91.44)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "20cf6f9f-a14d-4cd7-b718-93c7472df21a")
-	)
-	(wire
-		(pts
-			(xy 91.44 86.36) (xy 101.6 86.36)
+			(xy 91.44 91.44) (xy 101.6 91.44)
 		)
 		(stroke
 			(width 0)
@@ -1476,7 +1466,7 @@
 	)
 	(wire
 		(pts
-			(xy 93.98 106.68) (xy 93.98 100.33)
+			(xy 93.98 109.22) (xy 93.98 102.87)
 		)
 		(stroke
 			(width 0)
@@ -1496,7 +1486,7 @@
 	)
 	(wire
 		(pts
-			(xy 73.66 91.44) (xy 80.01 91.44)
+			(xy 73.66 96.52) (xy 80.01 96.52)
 		)
 		(stroke
 			(width 0)
@@ -1506,13 +1496,23 @@
 	)
 	(wire
 		(pts
-			(xy 93.98 100.33) (xy 73.66 100.33)
+			(xy 93.98 102.87) (xy 73.66 102.87)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "3467ea87-ab70-4fb6-bcae-2f297c6408ea")
+	)
+	(wire
+		(pts
+			(xy 121.92 111.76) (xy 133.35 111.76)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3f4d9688-87a2-4c5c-8b8a-f9f927c46c6d")
 	)
 	(wire
 		(pts
@@ -1526,6 +1526,16 @@
 	)
 	(wire
 		(pts
+			(xy 121.92 93.98) (xy 133.35 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "45fb6db0-580f-41da-979f-2b8296725c4f")
+	)
+	(wire
+		(pts
 			(xy 201.93 91.44) (xy 210.82 91.44)
 		)
 		(stroke
@@ -1536,17 +1546,17 @@
 	)
 	(wire
 		(pts
-			(xy 121.92 91.44) (xy 121.92 101.6)
+			(xy 124.46 104.14) (xy 133.35 104.14)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "47750265-0c63-4856-b37f-f702edfe8864")
+		(uuid "497266e1-143c-47fa-8311-10d55c7ae317")
 	)
 	(wire
 		(pts
-			(xy 109.22 101.6) (xy 121.92 101.6)
+			(xy 109.22 104.14) (xy 121.92 104.14)
 		)
 		(stroke
 			(width 0)
@@ -1576,13 +1586,23 @@
 	)
 	(wire
 		(pts
-			(xy 93.98 82.55) (xy 73.66 82.55)
+			(xy 93.98 87.63) (xy 73.66 87.63)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "52592615-e254-46e9-a2e5-4006232c1441")
+	)
+	(wire
+		(pts
+			(xy 109.22 91.44) (xy 121.92 91.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6fae8fc2-22cd-42d6-8fb2-28855c661c74")
 	)
 	(wire
 		(pts
@@ -1596,13 +1616,13 @@
 	)
 	(wire
 		(pts
-			(xy 116.84 88.9) (xy 116.84 104.14)
+			(xy 116.84 76.2) (xy 116.84 93.98)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "7a8f5db3-a21c-4cdf-8e4f-da530d5677b1")
+		(uuid "7a60482a-7a7d-4593-9e01-c66f68c15273")
 	)
 	(wire
 		(pts
@@ -1616,7 +1636,7 @@
 	)
 	(wire
 		(pts
-			(xy 91.44 106.68) (xy 87.63 106.68)
+			(xy 91.44 109.22) (xy 87.63 109.22)
 		)
 		(stroke
 			(width 0)
@@ -1656,7 +1676,7 @@
 	)
 	(wire
 		(pts
-			(xy 87.63 104.14) (xy 116.84 104.14)
+			(xy 87.63 106.68) (xy 116.84 106.68)
 		)
 		(stroke
 			(width 0)
@@ -1666,23 +1686,13 @@
 	)
 	(wire
 		(pts
-			(xy 124.46 93.98) (xy 124.46 106.68)
+			(xy 109.22 96.52) (xy 124.46 96.52)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "9f93c54e-d149-470c-b475-067c6abca43e")
-	)
-	(wire
-		(pts
-			(xy 119.38 88.9) (xy 119.38 91.44)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9fbbcee3-9029-471b-acda-3dbfa5b38fd2")
+		(uuid "93ed15a7-b610-4a2e-ac7a-5784cac9c523")
 	)
 	(wire
 		(pts
@@ -1693,26 +1703,6 @@
 			(type default)
 		)
 		(uuid "9fc4d385-6398-480b-896e-c0889d5e66a3")
-	)
-	(wire
-		(pts
-			(xy 109.22 86.36) (xy 133.35 86.36)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a28aea59-b075-49bd-8922-2253132407e0")
-	)
-	(wire
-		(pts
-			(xy 133.35 93.98) (xy 124.46 93.98)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a9bbeada-b81b-4d2e-96e2-08bee4c21fc4")
 	)
 	(wire
 		(pts
@@ -1736,16 +1726,6 @@
 	)
 	(wire
 		(pts
-			(xy 133.35 88.9) (xy 119.38 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c1597c6d-7253-4383-8eeb-e289261c4499")
-	)
-	(wire
-		(pts
 			(xy 196.85 78.74) (xy 196.85 93.98)
 		)
 		(stroke
@@ -1756,7 +1736,7 @@
 	)
 	(wire
 		(pts
-			(xy 73.66 82.55) (xy 73.66 91.44)
+			(xy 73.66 87.63) (xy 73.66 96.52)
 		)
 		(stroke
 			(width 0)
@@ -1776,6 +1756,16 @@
 	)
 	(wire
 		(pts
+			(xy 133.35 106.68) (xy 121.92 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cc9244d4-8f97-4aa5-a6d8-81b3fb894a89")
+	)
+	(wire
+		(pts
 			(xy 127 124.46) (xy 127 132.08)
 		)
 		(stroke
@@ -1786,7 +1776,37 @@
 	)
 	(wire
 		(pts
-			(xy 91.44 91.44) (xy 87.63 91.44)
+			(xy 121.92 91.44) (xy 121.92 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d095b708-507c-4047-83d2-33bc7264a871")
+	)
+	(wire
+		(pts
+			(xy 121.92 109.22) (xy 121.92 111.76)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d12e35c9-402c-4996-9293-7142b68923dc")
+	)
+	(wire
+		(pts
+			(xy 124.46 96.52) (xy 124.46 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d348d45e-ccc0-42b4-91d8-a79973d6b220")
+	)
+	(wire
+		(pts
+			(xy 91.44 96.52) (xy 87.63 96.52)
 		)
 		(stroke
 			(width 0)
@@ -1796,13 +1816,23 @@
 	)
 	(wire
 		(pts
-			(xy 73.66 106.68) (xy 80.01 106.68)
+			(xy 73.66 109.22) (xy 80.01 109.22)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "d55c38db-4ca0-4fd8-9a74-481846ed7003")
+	)
+	(wire
+		(pts
+			(xy 121.92 106.68) (xy 121.92 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d6537af2-ff8c-48d2-98c0-5fb6ad615715")
 	)
 	(wire
 		(pts
@@ -1816,6 +1846,16 @@
 	)
 	(wire
 		(pts
+			(xy 109.22 109.22) (xy 121.92 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dd23e0c6-3d06-43bc-8851-0d3eb81104cf")
+	)
+	(wire
+		(pts
 			(xy 180.34 121.92) (xy 180.34 125.73)
 		)
 		(stroke
@@ -1826,7 +1866,7 @@
 	)
 	(wire
 		(pts
-			(xy 91.44 101.6) (xy 91.44 106.68)
+			(xy 91.44 104.14) (xy 91.44 109.22)
 		)
 		(stroke
 			(width 0)
@@ -1836,7 +1876,7 @@
 	)
 	(wire
 		(pts
-			(xy 91.44 101.6) (xy 101.6 101.6)
+			(xy 91.44 104.14) (xy 101.6 104.14)
 		)
 		(stroke
 			(width 0)
@@ -1856,17 +1896,7 @@
 	)
 	(wire
 		(pts
-			(xy 121.92 91.44) (xy 133.35 91.44)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e8356c90-4691-4eee-8f42-abf71babefbb")
-	)
-	(wire
-		(pts
-			(xy 91.44 86.36) (xy 91.44 91.44)
+			(xy 91.44 91.44) (xy 91.44 96.52)
 		)
 		(stroke
 			(width 0)
@@ -1876,17 +1906,7 @@
 	)
 	(wire
 		(pts
-			(xy 109.22 106.68) (xy 124.46 106.68)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "efeb7c06-6968-4b65-b4d1-644fdc60f6a1")
-	)
-	(wire
-		(pts
-			(xy 73.66 100.33) (xy 73.66 106.68)
+			(xy 73.66 102.87) (xy 73.66 109.22)
 		)
 		(stroke
 			(width 0)
@@ -1896,7 +1916,7 @@
 	)
 	(symbol
 		(lib_id "Autocam:Simple Resistor")
-		(at 105.41 106.68 90)
+		(at 105.41 109.22 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -1904,7 +1924,7 @@
 		(dnp no)
 		(uuid "003a148b-862f-4dda-aa28-b8c265bdc1b3")
 		(property "Reference" "R4"
-			(at 105.664 103.886 90)
+			(at 105.664 106.426 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1912,7 +1932,7 @@
 			)
 		)
 		(property "Value" "4.7KΩ"
-			(at 105.918 106.68 90)
+			(at 105.918 109.22 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1920,7 +1940,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Simple Resistor"
-			(at 105.41 108.458 90)
+			(at 105.41 110.998 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1929,7 +1949,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 105.41 106.68 0)
+			(at 105.41 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1938,7 +1958,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 105.41 106.68 0)
+			(at 105.41 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2030,7 +2050,7 @@
 	)
 	(symbol
 		(lib_id "Autocam:Simple Resistor")
-		(at 105.41 101.6 90)
+		(at 105.41 104.14 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2038,7 +2058,7 @@
 		(dnp no)
 		(uuid "0513814d-97b3-444d-a6c3-54eea938b949")
 		(property "Reference" "R3"
-			(at 105.664 98.806 90)
+			(at 105.664 101.346 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2046,7 +2066,7 @@
 			)
 		)
 		(property "Value" "2.2KΩ"
-			(at 105.918 101.6 90)
+			(at 105.918 104.14 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2054,7 +2074,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Simple Resistor"
-			(at 105.41 103.378 90)
+			(at 105.41 105.918 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2063,7 +2083,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 105.41 101.6 0)
+			(at 105.41 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2072,7 +2092,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 105.41 101.6 0)
+			(at 105.41 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2255,7 +2275,7 @@
 	)
 	(symbol
 		(lib_id "Autocam:ANODE_RGB_LED_Sqaure")
-		(at 83.82 90.17 180)
+		(at 83.82 95.25 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2263,7 +2283,7 @@
 		(dnp no)
 		(uuid "10e2093b-f59a-4ae4-80aa-09e6c177372a")
 		(property "Reference" "RGB_LED_SQUARE1"
-			(at 83.566 95.25 0)
+			(at 83.566 102.87 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2271,7 +2291,7 @@
 			)
 		)
 		(property "Value" "BATTERY"
-			(at 83.566 90.17 0)
+			(at 83.566 95.25 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2279,7 +2299,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Anode RGB LED (Square)"
-			(at 83.82 90.17 0)
+			(at 83.82 95.25 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2288,7 +2308,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 83.82 90.17 0)
+			(at 83.82 95.25 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2297,7 +2317,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 83.82 90.17 0)
+			(at 83.82 95.25 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2328,7 +2348,7 @@
 	)
 	(symbol
 		(lib_id "Autocam:ANODE_RGB_LED_Sqaure")
-		(at 83.82 105.41 180)
+		(at 83.82 107.95 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2336,7 +2356,7 @@
 		(dnp no)
 		(uuid "2d906513-d670-4469-a8f7-a798c47b8c77")
 		(property "Reference" "RGB_LED_SQUARE2"
-			(at 83.82 110.49 0)
+			(at 83.82 113.03 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2344,7 +2364,7 @@
 			)
 		)
 		(property "Value" "SENSOR"
-			(at 83.82 105.156 0)
+			(at 83.82 107.696 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2352,7 +2372,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Anode RGB LED (Square)"
-			(at 83.82 105.41 0)
+			(at 83.82 107.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2361,7 +2381,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 83.82 105.41 0)
+			(at 83.82 107.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2370,7 +2390,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 83.82 105.41 0)
+			(at 83.82 107.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2468,7 +2488,7 @@
 	)
 	(symbol
 		(lib_id "Autocam:Simple Resistor")
-		(at 105.41 86.36 90)
+		(at 105.41 91.44 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2476,7 +2496,7 @@
 		(dnp no)
 		(uuid "551120cd-2188-4c05-86ad-ecc931499f0b")
 		(property "Reference" "R1"
-			(at 105.664 83.566 90)
+			(at 105.664 88.646 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2484,7 +2504,7 @@
 			)
 		)
 		(property "Value" "2.2KΩ"
-			(at 105.918 86.36 90)
+			(at 105.918 91.44 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2492,7 +2512,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Simple Resistor"
-			(at 105.41 88.138 90)
+			(at 105.41 93.218 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2501,7 +2521,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 105.41 86.36 0)
+			(at 105.41 91.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2510,7 +2530,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 105.41 86.36 0)
+			(at 105.41 91.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2617,7 +2637,7 @@
 	)
 	(symbol
 		(lib_id "Autocam:Simple Resistor")
-		(at 105.41 91.44 90)
+		(at 105.41 96.52 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2625,7 +2645,7 @@
 		(dnp no)
 		(uuid "8dafabe5-456a-4700-81a0-741b075c9688")
 		(property "Reference" "R2"
-			(at 105.664 88.646 90)
+			(at 105.664 93.726 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2633,7 +2653,7 @@
 			)
 		)
 		(property "Value" "4.7KΩ"
-			(at 105.918 91.44 90)
+			(at 105.918 96.52 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2641,7 +2661,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Simple Resistor"
-			(at 105.41 93.218 90)
+			(at 105.41 98.298 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2650,7 +2670,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 105.41 91.44 0)
+			(at 105.41 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2659,7 +2679,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 105.41 91.44 0)
+			(at 105.41 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)

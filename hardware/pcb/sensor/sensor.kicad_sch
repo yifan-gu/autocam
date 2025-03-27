@@ -7,7 +7,7 @@
 	(title_block
 		(title "Autocam Sensor")
 		(date "2025-03-27")
-		(rev "v0.4")
+		(rev "v0.5")
 	)
 	(lib_symbols
 		(symbol "Autocam:2_PIN_Connector"
@@ -1351,16 +1351,36 @@
 		)
 	)
 	(junction
-		(at 105.41 90.17)
+		(at 129.54 90.17)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "4049628d-a54b-4951-a519-154364f64f87")
+		(uuid "00681638-8dce-4255-996a-0857c4d5ffb8")
 	)
 	(junction
 		(at 101.6 120.65)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "efb0db77-4d2f-4fa1-a229-49b195059cb0")
+	)
+	(wire
+		(pts
+			(xy 153.67 66.04) (xy 153.67 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "14557897-d663-4af2-a31f-1c80cb372b5b")
+	)
+	(wire
+		(pts
+			(xy 167.64 78.74) (xy 167.64 107.95)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1534bad8-6eaf-4346-950c-931c2a48d53d")
 	)
 	(wire
 		(pts
@@ -1394,6 +1414,16 @@
 	)
 	(wire
 		(pts
+			(xy 151.13 78.74) (xy 167.64 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2662f31e-c76e-4670-af2e-a46fb539ae92")
+	)
+	(wire
+		(pts
 			(xy 104.14 125.73) (xy 104.14 130.81)
 		)
 		(stroke
@@ -1404,33 +1434,43 @@
 	)
 	(wire
 		(pts
-			(xy 107.95 92.71) (xy 137.16 92.71)
+			(xy 170.18 105.41) (xy 162.56 105.41)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "3727d2bc-8706-460f-9ddb-e93aa24b3c37")
+		(uuid "29f8c8f9-b54a-44c5-b340-5736148d1836")
 	)
 	(wire
 		(pts
-			(xy 105.41 83.82) (xy 105.41 90.17)
+			(xy 148.59 66.04) (xy 148.59 78.74)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "394cfb8f-2453-4c46-b8c0-ccbcddbebfda")
+		(uuid "3af45fa2-e3e9-46d5-a55b-824e1582537f")
 	)
 	(wire
 		(pts
-			(xy 110.49 100.33) (xy 137.16 100.33)
+			(xy 170.18 73.66) (xy 170.18 105.41)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "3de415f0-c1fd-47f4-b6fc-42e4b7835afd")
+		(uuid "48eea0fd-8f78-49c8-96fc-ffe0a8f2d60f")
+	)
+	(wire
+		(pts
+			(xy 133.35 78.74) (xy 133.35 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4f13a1fb-b0d4-4149-aeec-76b63b9106cc")
 	)
 	(wire
 		(pts
@@ -1454,16 +1494,6 @@
 	)
 	(wire
 		(pts
-			(xy 107.95 83.82) (xy 107.95 92.71)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "557664cb-6c17-49fc-81ee-95dde3a2aff9")
-	)
-	(wire
-		(pts
 			(xy 106.68 128.27) (xy 106.68 135.89)
 		)
 		(stroke
@@ -1484,23 +1514,63 @@
 	)
 	(wire
 		(pts
-			(xy 105.41 90.17) (xy 137.16 90.17)
+			(xy 146.05 66.04) (xy 146.05 74.93)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "83c266bf-d0df-4620-ae94-4b00092b1340")
+		(uuid "5fea21a6-6757-4912-9fb6-90fd70f32b0e")
 	)
 	(wire
 		(pts
-			(xy 101.6 90.17) (xy 105.41 90.17)
+			(xy 148.59 78.74) (xy 133.35 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7373ba4b-5eb1-42a0-bcdf-a3e84fff8d6c")
+	)
+	(wire
+		(pts
+			(xy 129.54 90.17) (xy 137.16 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7cc0d3ce-eeee-4a20-bfc5-8e245d57ef8a")
+	)
+	(wire
+		(pts
+			(xy 129.54 74.93) (xy 146.05 74.93)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "87a6c8ba-b6dc-4c29-8295-4856ecdf2a75")
+	)
+	(wire
+		(pts
+			(xy 101.6 90.17) (xy 129.54 90.17)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "9111e0b6-9999-4b11-a29b-f8ff94ae20c9")
+	)
+	(wire
+		(pts
+			(xy 167.64 107.95) (xy 162.56 107.95)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "98e025c8-9b4c-445e-a1ad-eb6ba8a12a5c")
 	)
 	(wire
 		(pts
@@ -1511,6 +1581,16 @@
 			(type default)
 		)
 		(uuid "9ac0c948-6677-4d4b-8459-bd860164faab")
+	)
+	(wire
+		(pts
+			(xy 153.67 73.66) (xy 170.18 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a0f51388-ca0b-40dd-a011-8f899fd10182")
 	)
 	(wire
 		(pts
@@ -1534,6 +1614,16 @@
 	)
 	(wire
 		(pts
+			(xy 151.13 66.04) (xy 151.13 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a6cb1215-76f4-44f8-8e0c-8525411cf49a")
+	)
+	(wire
+		(pts
 			(xy 125.73 125.73) (xy 137.16 125.73)
 		)
 		(stroke
@@ -1551,26 +1641,6 @@
 			(type default)
 		)
 		(uuid "bc2d744d-e9f4-4286-8d68-a5bcc040ec26")
-	)
-	(wire
-		(pts
-			(xy 110.49 83.82) (xy 110.49 100.33)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c2d7af45-b4ee-49b3-9864-9db92586fc9d")
-	)
-	(wire
-		(pts
-			(xy 113.03 102.87) (xy 137.16 102.87)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c583f4f4-9655-4e0e-8200-db1ffb1197f7")
 	)
 	(wire
 		(pts
@@ -1594,16 +1664,6 @@
 	)
 	(wire
 		(pts
-			(xy 113.03 83.82) (xy 113.03 102.87)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d9b4d4b0-622c-47ea-929d-e0595a2ef7e4")
-	)
-	(wire
-		(pts
 			(xy 213.36 101.6) (xy 213.36 92.71)
 		)
 		(stroke
@@ -1611,6 +1671,26 @@
 			(type default)
 		)
 		(uuid "dd4216e6-9f0c-4b25-a207-87938941cb6d")
+	)
+	(wire
+		(pts
+			(xy 133.35 92.71) (xy 137.16 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e84f667b-3cab-4e20-b013-4b52ca3b9baf")
+	)
+	(wire
+		(pts
+			(xy 129.54 74.93) (xy 129.54 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e920f644-943d-4f82-8a83-1971d7f929a5")
 	)
 	(wire
 		(pts
@@ -2053,7 +2133,7 @@
 	)
 	(symbol
 		(lib_id "autocam:Waveshare_CAN_transreceiver")
-		(at 105.41 78.74 90)
+		(at 146.05 60.96 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2061,7 +2141,7 @@
 		(dnp no)
 		(uuid "a6ffe3ac-2ade-46ff-87c0-af90791f52c7")
 		(property "Reference" "CAN_Transreceiver1"
-			(at 99.06 66.4367 0)
+			(at 139.7 48.6567 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2070,7 +2150,7 @@
 			)
 		)
 		(property "Value" "~"
-			(at 101.6 66.4367 0)
+			(at 142.24 48.6567 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2079,7 +2159,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Waveshare CAN Transreceiver"
-			(at 105.41 78.74 0)
+			(at 146.05 60.96 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2088,7 +2168,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 105.41 78.74 0)
+			(at 146.05 60.96 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2097,7 +2177,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 105.41 78.74 0)
+			(at 146.05 60.96 0)
 			(effects
 				(font
 					(size 1.27 1.27)
