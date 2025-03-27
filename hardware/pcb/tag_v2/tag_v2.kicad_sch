@@ -1406,6 +1406,16 @@
 	)
 	(wire
 		(pts
+			(xy 133.35 124.46) (xy 127 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1988c9ff-efe4-43d0-9398-8ad29ea2e09b")
+	)
+	(wire
+		(pts
 			(xy 204.47 143.51) (xy 204.47 135.89)
 		)
 		(stroke
@@ -1576,16 +1586,6 @@
 	)
 	(wire
 		(pts
-			(xy 127 111.76) (xy 127 132.08)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6ff8a632-01ab-494d-a722-d98d94a84a14")
-	)
-	(wire
-		(pts
 			(xy 158.75 78.74) (xy 180.34 78.74)
 		)
 		(stroke
@@ -1653,16 +1653,6 @@
 			(type default)
 		)
 		(uuid "8d4898dc-12b3-4207-9454-abc01b5c280a")
-	)
-	(wire
-		(pts
-			(xy 127 111.76) (xy 133.35 111.76)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "8f49dd10-e8c2-4e5a-8a57-73d1adb189f5")
 	)
 	(wire
 		(pts
@@ -1783,6 +1773,16 @@
 			(type default)
 		)
 		(uuid "ca5a70a5-5dc5-4bc3-909a-ec8aae094156")
+	)
+	(wire
+		(pts
+			(xy 127 124.46) (xy 127 132.08)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d00fbd3e-3df6-418e-a647-72cc4b293f1f")
 	)
 	(wire
 		(pts
@@ -2416,7 +2416,7 @@
 				)
 			)
 		)
-		(property "Value" "100KΩ"
+		(property "Value" "220KΩ"
 			(at 180.34 117.602 90)
 			(effects
 				(font

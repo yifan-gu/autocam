@@ -447,7 +447,6 @@ void establishAutocamSensorBLEConnection() {
   while (!scanForPeripheral(AutocamSensor, AutocamSensorService, AutocamSensorDataRecv, AutocamSensorServiceUUID, AutocamSensorDataRecvCharacteristicUUID)) {
     delay(1000);
   };
-  //updateState(globalState.state | SERVER_STATE_SENSOR_READY);
 }
 
 void sendGimbalControllerData() {
@@ -500,12 +499,12 @@ void getAutocamSensorData() {
 
   globalState.heading = data.heading;
   if (data.state & SENSOR_STATE_TAG_CONNECTED && data.state & SENSOR_STATE_SERVER_CONNECTED) {
+    updateState(globalState.state | SERVER_STATE_SENSOR_READY);
+  } else {
     if (globalState.driveMode != DRIVE_MODE_MANUAL) {
       emergencyStop();
     }
     updateState(globalState.state & ~SERVER_STATE_SENSOR_READY);
-  } else {
-    updateState(globalState.state | SERVER_STATE_SENSOR_READY);
   }
 
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);

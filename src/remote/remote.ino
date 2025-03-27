@@ -21,19 +21,19 @@
 #define UWB_SELECTOR_SWITCH_PIN 12
 #define GIMBAL_FUNCTION_BUTTON_PIN 13
 #define LOCK_SWITCH_PIN 14
-#define DRIVE_MODE_BUTTON_PIN 15
+#define DRIVE_MODE_BUTTON_PIN 25
 
-#define BATTERY_LED_RED_PIN 16
-#define BATTERY_LED_GREEN_PIN 5
+#define BATTERY_LED_RED_PIN 26
+#define BATTERY_LED_GREEN_PIN 32
 #define BATTERY_LED_BLUE_PIN -1
 #define UWB_SELECTOR_LED_RED_PIN -1
 #define UWB_SELECTOR_LED_GREEN_PIN -1
-#define UWB_SELECTOR_LED_BLUE_PIN 17
-#define SENSOR_LED_RED_PIN 21
-#define SENSOR_LED_GREEN_PIN 22
+#define UWB_SELECTOR_LED_BLUE_PIN 22
+#define SENSOR_LED_RED_PIN 5
+#define SENSOR_LED_GREEN_PIN 16
 #define SENSOR_LED_BLUE_PIN -1
-#define REMOTE_LED_RED_PIN 26
-#define REMOTE_LED_GREEN_PIN 32
+#define REMOTE_LED_RED_PIN 21
+#define REMOTE_LED_GREEN_PIN 17
 #define REMOTE_LED_BLUE_PIN -1
 #define DRIVE_MODE_LED_RED_PIN -1
 #define DRIVE_MODE_LED_GREEN_PIN -1
@@ -41,8 +41,8 @@
 
 #define STEERING_STICK_X_PIN 2
 #define THROTTLE_STICK_Y_PIN 36
-#define GIMBAL_STICK_X_PIN 35
-#define GIMBAL_STICK_Y_PIN 25
+#define GIMBAL_STICK_X_PIN 15
+#define GIMBAL_STICK_Y_PIN 35
 #define BATTERY_ADC_PIN 39  // ADC pin to measure battery voltage.
 
 #define STICK_DEAD_ZONE 200
@@ -418,7 +418,7 @@ void readInput() {
 
   // Check buttons.
   checkButtons();
-  uwbSelectorTriggerValue = readUWBSelector();
+  uwbSelectorTriggerValue = 1;//readUWBSelector();
 
   // Read raw joystick values
   int rawX = analogRead(STEERING_STICK_X_PIN);

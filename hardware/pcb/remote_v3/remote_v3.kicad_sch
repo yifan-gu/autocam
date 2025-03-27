@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "Autocam Remote")
-		(date "2025-03-18")
-		(rev "v0.5")
+		(date "2025-03-27")
+		(rev "v0.6")
 	)
 	(lib_symbols
 		(symbol "Autocam:3_PIN_Switch"
@@ -2241,6 +2241,16 @@
 	)
 	(wire
 		(pts
+			(xy 39.37 115.57) (xy 138.43 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3faf6e7b-83b6-4854-acbb-c87751f5fd13")
+	)
+	(wire
+		(pts
 			(xy 67.31 80.01) (xy 86.36 80.01)
 		)
 		(stroke
@@ -2298,16 +2308,6 @@
 			(type default)
 		)
 		(uuid "4842c89b-68fc-43b5-aedd-97b68d32dacd")
-	)
-	(wire
-		(pts
-			(xy 58.42 115.57) (xy 58.42 138.43)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "48b159f0-0320-4efa-8a62-621af6c6a944")
 	)
 	(wire
 		(pts
@@ -2398,6 +2398,16 @@
 			(type default)
 		)
 		(uuid "694dfb94-871b-4590-8f64-ca7ed80b68b4")
+	)
+	(wire
+		(pts
+			(xy 58.42 100.33) (xy 58.42 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6a31d9e9-959c-41ca-bc5c-7287acbea253")
 	)
 	(wire
 		(pts
@@ -2671,16 +2681,6 @@
 	)
 	(wire
 		(pts
-			(xy 138.43 115.57) (xy 58.42 115.57)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9e67a61e-a021-45a2-9c09-f889fd15837a")
-	)
-	(wire
-		(pts
 			(xy 91.44 80.01) (xy 91.44 123.19)
 		)
 		(stroke
@@ -2728,16 +2728,6 @@
 			(type default)
 		)
 		(uuid "b913e7d3-4fd7-4f5a-be61-f678458d1ec7")
-	)
-	(wire
-		(pts
-			(xy 34.29 100.33) (xy 138.43 100.33)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c42475ed-e9a9-46de-9648-0b12ccc2c032")
 	)
 	(wire
 		(pts
@@ -2851,6 +2841,16 @@
 	)
 	(wire
 		(pts
+			(xy 138.43 100.33) (xy 58.42 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d58f33b4-163b-44f6-81aa-f5b7efc39251")
+	)
+	(wire
+		(pts
 			(xy 176.53 130.81) (xy 193.04 130.81)
 		)
 		(stroke
@@ -2888,6 +2888,16 @@
 			(type default)
 		)
 		(uuid "d7917d04-de0e-43da-8b2d-a133b547037e")
+	)
+	(wire
+		(pts
+			(xy 39.37 100.33) (xy 39.37 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d8c6b94f-7a58-446b-8272-058eaa28d1cd")
 	)
 	(wire
 		(pts
@@ -3048,6 +3058,16 @@
 			(type default)
 		)
 		(uuid "f22c1f92-de56-486f-948c-cc656856e806")
+	)
+	(wire
+		(pts
+			(xy 34.29 100.33) (xy 39.37 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f2ee0cf0-a118-448a-8df0-7494ced21f4c")
 	)
 	(wire
 		(pts

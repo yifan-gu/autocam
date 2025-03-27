@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "Autocam Sensor")
-		(date "2025-03-18")
-		(rev "v0.3")
+		(date "2025-03-27")
+		(rev "v0.4")
 	)
 	(lib_symbols
 		(symbol "Autocam:2_PIN_Connector"

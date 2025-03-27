@@ -9,8 +9,8 @@
 	(paper "A4")
 	(title_block
 		(title "Autocam Remote")
-		(date "2025-03-18")
-		(rev "v0.5")
+		(date "2025-03-27")
+		(rev "v0.6")
 	)
 	(layers
 		(0 "F.Cu" signal)
@@ -90,7 +90,7 @@
 	(net 4 "unconnected-(3.7V_BATTERY_CHARGER1---Pad2)")
 	(net 5 "unconnected-(3.7V_BATTERY_CHARGER1-B--Pad5)")
 	(net 6 "Net-(3.7V_BATTERY_CHARGER1-OUT-)")
-	(net 7 "Net-(ESP32_UWB1-IO25)")
+	(net 7 "Net-(ESP32_UWB1-IO35)")
 	(net 8 "unconnected-(BUTTON2-S1_2-Pad2)")
 	(net 9 "Net-(ESP32_UWB1-3V3)")
 	(net 10 "Net-(ESP32_UWB1-IO39)")
@@ -218,7 +218,7 @@
 		)
 		(path "/b60d35ad-9b81-40de-a68a-35eeabd39202")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_circle
 			(center 0 0)
 			(end 2.84 0)
@@ -589,7 +589,7 @@
 		)
 		(path "/acff7e38-cdd6-4b41-91f8-8abddbce252e")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_line
 			(start 12.7 0)
 			(end 12.7 1)
@@ -1179,7 +1179,7 @@
 		)
 		(path "/89067c80-924f-4db3-925f-c6f88c5ad2fd")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start 0 0)
 			(end 72 33.02)
@@ -1828,7 +1828,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 7 "Net-(ESP32_UWB1-IO25)")
+			(net 66 "Net-(BUTTON1-S1_1)")
 			(pinfunction "IO25")
 			(pintype "bidirectional")
 			(uuid "359167c9-a8b4-42e0-993b-59ce1dec83f7")
@@ -1894,7 +1894,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 66 "Net-(BUTTON1-S1_1)")
+			(net 7 "Net-(ESP32_UWB1-IO35)")
 			(pinfunction "IO35")
 			(pintype "bidirectional")
 			(uuid "868e430e-e0f2-4f0d-b065-be30d481cbab")
@@ -2178,7 +2178,7 @@
 		)
 		(path "/3541ff80-c21f-42f1-8d17-e986c082e4fd")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -2.54 -1.905)
 			(end 7.62 1.905)
@@ -2327,7 +2327,7 @@
 		)
 		(path "/b0574e28-0642-44c8-b0df-e13d93751851")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_line
 			(start -6 -6)
 			(end -6 -3.6)
@@ -2607,7 +2607,7 @@
 		)
 		(path "/756bf165-4057-4b63-8b0a-63d736cdac27")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_circle
 			(center 0 0)
 			(end 2.84 0)
@@ -2782,7 +2782,7 @@
 		)
 		(path "/0b18c562-255d-4587-a48c-c1d30e6204f7")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_line
 			(start 12.7 0)
 			(end 12.7 1)
@@ -3568,7 +3568,7 @@
 		)
 		(path "/86d67134-a244-4e8e-b34a-ca6e9aa4a9c3")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_line
 			(start -6 -6)
 			(end -6 -3.6)
@@ -3846,7 +3846,7 @@
 		)
 		(path "/6e14d6c8-822a-411c-9245-c54cca67d69b")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_line
 			(start 9.6 -8.6)
 			(end 9.6 8.6)
@@ -4183,7 +4183,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 7 "Net-(ESP32_UWB1-IO25)")
+			(net 7 "Net-(ESP32_UWB1-IO35)")
 			(pinfunction "Y")
 			(pintype "output")
 			(uuid "4c273a7b-3ce1-40b1-8697-15f6c6add4b7")
@@ -4256,7 +4256,7 @@
 		)
 		(path "/b5b5be9e-fafc-4e1e-9017-f9bca138ae32")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_circle
 			(center 0 0)
 			(end 2.84 0)
@@ -4530,7 +4530,7 @@
 		)
 		(path "/1a2f2fe3-9825-44b4-ae34-6c5c897fc1bd")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_circle
 			(center 0 0)
 			(end 2.84 0)
@@ -4705,7 +4705,7 @@
 		)
 		(path "/a3f4ebeb-d795-48da-9322-4deffe9fafd2")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -2.54 -1.905)
 			(end 7.62 1.905)
@@ -4854,7 +4854,7 @@
 		)
 		(path "/ce65106b-7af1-4fa5-9efb-cc9264955b1d")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -2.54 -1.905)
 			(end 7.62 1.905)
@@ -5102,7 +5102,7 @@
 		)
 		(path "/956abf96-8a63-404b-bb0e-e706dc0bd772")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_circle
 			(center 0 0)
 			(end 2.84 0)
@@ -5281,7 +5281,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/82d3f304-9aab-40d0-bc9e-b9ee10dcefb7")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -1.27 1.27)
 			(end 8.89 -1.27)
@@ -5389,7 +5389,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/67401988-4f21-4cb9-9351-bf4b6cf512ca")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -1.27 1.27)
 			(end 8.89 -1.27)
@@ -5496,7 +5496,7 @@
 		)
 		(path "/5f9e267f-0a3a-422b-9723-30ffd42f07da")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -5.9 5.8)
 			(end 5.9 -5.8)
@@ -5656,7 +5656,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/aac383cd-6544-41a7-8052-e7260489ad34")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -1.27 1.27)
 			(end 8.89 -1.27)
@@ -5764,7 +5764,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/e03cb639-2132-4dff-bad7-82c1dd29ee55")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -1.27 1.27)
 			(end 8.89 -1.27)
@@ -5872,7 +5872,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/f1278861-2219-4508-b067-ba3ba1a220a8")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -1.27 1.27)
 			(end 8.89 -1.27)
@@ -5980,7 +5980,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/bda8ef3d-40bd-4e60-b65e-e1f6e3a42310")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -1.27 1.27)
 			(end 8.89 -1.27)
@@ -6088,7 +6088,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/c75c2100-7ce8-44e5-9da8-853bb5017bb1")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -1.27 1.27)
 			(end 8.89 -1.27)
@@ -6196,7 +6196,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/6ae68bb4-8f29-4daf-8ddd-b6cffa273cfa")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -1.27 1.27)
 			(end 8.89 -1.27)
@@ -6303,7 +6303,7 @@
 		)
 		(path "/1b862d02-1ad7-4965-8186-bdbf950ad085")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start 0 17.4)
 			(end 27.9 0)
@@ -6546,7 +6546,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/60cf2335-842f-43f1-ab42-02236d27dbc7")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -1.27 1.27)
 			(end 8.89 -1.27)
@@ -6654,7 +6654,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/a0e60494-58a6-4855-96e4-7d5bec1388cb")
 		(sheetname "/")
-		(sheetfile "remote_v2.kicad_sch")
+		(sheetfile "remote_v3.kicad_sch")
 		(fp_rect
 			(start -1.27 1.27)
 			(end 8.89 -1.27)
@@ -6785,7 +6785,7 @@
 		(layer "Edge.Cuts")
 		(uuid "f6db2609-6f15-49e8-998d-24185f0f1217")
 	)
-	(gr_text "v0.5"
+	(gr_text "v0.6"
 		(at 177.8 134.62 0)
 		(layer "F.SilkS")
 		(uuid "7da689d3-7594-4a28-897b-6b2896079d98")
@@ -6798,7 +6798,7 @@
 			)
 			(justify right bottom)
 		)
-		(render_cache "v0.5" 0
+		(render_cache "v0.6" 0
 			(polygon
 				(pts
 					(xy 176.149224 133.951072) (xy 176.112282 133.986732) (xy 176.057572 133.926953) (xy 176.081752 133.654501)
@@ -6869,7 +6869,13 @@
 			)
 			(polygon
 				(pts
-					(xy 177.705967 134.45) (xy 177.208322 134.45) (xy 177.311392 134.35621) (xy 177.620665 134.35621)
+					(xy 177.705967 134.45) (xy 177.208322 134.45) (xy 177.311453 134.35621) (xy 177.620726 134.35621)
+				)
+			)
+			(polygon
+				(pts
+					(xy 177.317804 134.082109) (xy 177.296188 134.33661) (xy 177.191774 134.43046) (xy 177.224869 134.059211)
+					(xy 177.263032 134.022391)
 				)
 			)
 			(polygon
@@ -6880,14 +6886,14 @@
 			)
 			(polygon
 				(pts
-					(xy 177.758173 134.059272) (xy 177.725079 134.43046) (xy 177.639777 134.33661) (xy 177.661453 134.082231)
+					(xy 177.758173 134.059272) (xy 177.725079 134.43217) (xy 177.639777 134.336671) (xy 177.661453 134.082231)
 					(xy 177.726361 134.022391)
 				)
 			)
 			(polygon
 				(pts
 					(xy 177.666521 133.957606) (xy 177.711096 134.004501) (xy 177.657606 134.051395) (xy 177.325436 134.051395)
-					(xy 177.283426 134.004501) (xy 177.334351 133.957606)
+					(xy 177.283426 134.004562) (xy 177.334351 133.957789)
 				)
 			)
 		)
@@ -8718,44 +8724,20 @@
 		(uuid "c3d00810-b22f-42d5-aa82-f93644d55f32")
 	)
 	(segment
-		(start 144.78 101.6)
-		(end 142.24 104.14)
+		(start 155.92 105.7)
+		(end 160.02 101.6)
 		(width 0.5)
 		(layer "F.Cu")
 		(net 7)
-		(uuid "3f65e1b0-c1da-4292-a989-74117df7792b")
+		(uuid "35c8ab09-4aef-4b13-8cf6-766cba02b5f5")
 	)
 	(segment
-		(start 155.92 125.44)
-		(end 155.92 134.12)
+		(start 155.92 134.12)
+		(end 155.92 105.7)
 		(width 0.5)
 		(layer "F.Cu")
 		(net 7)
-		(uuid "4e453e67-ecbd-4ec7-803d-f34e778a4b6c")
-	)
-	(segment
-		(start 142.24 111.76)
-		(end 155.92 125.44)
-		(width 0.5)
-		(layer "F.Cu")
-		(net 7)
-		(uuid "4eb87e63-72be-4d09-a70d-831ce9b39763")
-	)
-	(segment
-		(start 142.24 104.14)
-		(end 142.24 111.76)
-		(width 0.5)
-		(layer "F.Cu")
-		(net 7)
-		(uuid "59ac0383-207b-45cf-9e64-f99e8d86bbcf")
-	)
-	(segment
-		(start 144.78 101.6)
-		(end 145.260182 101.6)
-		(width 0.3)
-		(layer "B.Cu")
-		(net 7)
-		(uuid "dda67d54-6f09-49d9-bfa7-e2f9d016c5c4")
+		(uuid "cb8356fb-4dd0-4487-bfbf-6d87538fb152")
 	)
 	(segment
 		(start 99.06 80.01)
@@ -9638,20 +9620,36 @@
 		(uuid "fe0b4019-28a2-4290-a836-7887d64330a9")
 	)
 	(segment
-		(start 160.02 108.960058)
-		(end 160.02 101.6)
+		(start 147.32 104.14)
+		(end 144.78 101.6)
 		(width 0.5)
-		(layer "F.Cu")
+		(layer "B.Cu")
 		(net 66)
-		(uuid "1abf3322-ef86-4316-a5cb-7ebc97894bef")
+		(uuid "04b935a1-aafb-4693-96af-9e09ac6c9237")
+	)
+	(segment
+		(start 152.599942 104.14)
+		(end 147.32 104.14)
+		(width 0.5)
+		(layer "B.Cu")
+		(net 66)
+		(uuid "1b3a12de-c093-4d0f-82c2-fe42f0edfe29")
 	)
 	(segment
 		(start 158.72 110.260058)
-		(end 160.02 108.960058)
+		(end 152.599942 104.14)
 		(width 0.5)
-		(layer "F.Cu")
+		(layer "B.Cu")
 		(net 66)
-		(uuid "4f90f8db-b760-4449-9fb3-627a483e805e")
+		(uuid "66d2210f-0e24-4404-8b99-f44d9cbe6621")
+	)
+	(segment
+		(start 144.78 101.6)
+		(end 145.260182 101.6)
+		(width 0.3)
+		(layer "B.Cu")
+		(net 66)
+		(uuid "dda67d54-6f09-49d9-bfa7-e2f9d016c5c4")
 	)
 	(segment
 		(start 137.16 109.22)

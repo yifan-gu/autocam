@@ -9,8 +9,8 @@
 	(paper "A4")
 	(title_block
 		(title "Autocam Tag")
-		(date "2025-03-18")
-		(rev "v0.4")
+		(date "2025-03-27")
+		(rev "v0.5")
 	)
 	(layers
 		(0 "F.Cu" signal)
@@ -160,8 +160,8 @@
 	(net 35 "Net-(5V_DC_DC_Converter1-IN)")
 	(net 36 "Net-(ESP32_UWB1-IO2)")
 	(net 37 "unconnected-(ESP32_UWB1-IO15-Pad9)")
-	(net 38 "unconnected-(ESP32_UWB1-IO39-Pad20)")
-	(net 39 "Net-(ESP32_UWB1-IO32)")
+	(net 38 "Net-(ESP32_UWB1-IO39)")
+	(net 39 "unconnected-(ESP32_UWB1-IO32-Pad15)")
 	(net 40 "Net-(RGB_LED_SQUARE1-R)")
 	(net 41 "Net-(RGB_LED_SQUARE1-G)")
 	(net 42 "Net-(RGB_LED_SQUARE2-R)")
@@ -907,7 +907,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 39 "Net-(ESP32_UWB1-IO32)")
+			(net 39 "unconnected-(ESP32_UWB1-IO32-Pad15)")
 			(pinfunction "IO32")
 			(pintype "bidirectional")
 			(uuid "e87b8376-f5ff-4867-9419-6f4f918d27d0")
@@ -962,7 +962,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 38 "unconnected-(ESP32_UWB1-IO39-Pad20)")
+			(net 38 "Net-(ESP32_UWB1-IO39)")
 			(pinfunction "IO39")
 			(pintype "bidirectional")
 			(uuid "27ea9579-33e2-4958-9713-972c9d01d8d4")
@@ -1774,7 +1774,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 39 "Net-(ESP32_UWB1-IO32)")
+			(net 38 "Net-(ESP32_UWB1-IO39)")
 			(pintype "passive")
 			(uuid "fe87bb96-59fc-49e9-9a0b-f8168bf1489c")
 		)
@@ -2233,7 +2233,7 @@
 				)
 			)
 		)
-		(property "Value" "100KΩ"
+		(property "Value" "220KΩ"
 			(at 3.81 0 90)
 			(unlocked yes)
 			(layer "F.SilkS")
@@ -2314,7 +2314,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 39 "Net-(ESP32_UWB1-IO32)")
+			(net 38 "Net-(ESP32_UWB1-IO39)")
 			(pintype "passive")
 			(uuid "22ff29c5-cfd3-40b1-a5f6-5d2913749841")
 		)
@@ -3190,7 +3190,7 @@
 		(layer "Edge.Cuts")
 		(uuid "e1062321-62ab-4811-919c-51427bc61f18")
 	)
-	(gr_text "v0.4"
+	(gr_text "v0.5"
 		(at 169.485555 119.942652 0)
 		(layer "F.SilkS")
 		(uuid "07924635-fb3a-4956-9525-3a732948eee9")
@@ -3203,7 +3203,7 @@
 			)
 			(justify right bottom)
 		)
-		(render_cache "v0.4" 0
+		(render_cache "v0.5" 0
 			(polygon
 				(pts
 					(xy 167.834779 119.273724) (xy 167.797837 119.309384) (xy 167.743127 119.249605) (xy 167.767307 118.977153)
@@ -3269,20 +3269,24 @@
 			)
 			(polygon
 				(pts
-					(xy 168.919339 119.273724) (xy 168.952434 118.896308) (xy 169.039018 118.994921) (xy 169.017341 119.249483)
+					(xy 169.469191 118.881654) (xy 169.367341 118.975443) (xy 169.058069 118.975443) (xy 168.971546 118.881654)
+				)
+			)
+			(polygon
+				(pts
+					(xy 169.391522 119.772652) (xy 168.893877 119.772652) (xy 168.996947 119.678862) (xy 169.30622 119.678862)
+				)
+			)
+			(polygon
+				(pts
+					(xy 168.919339 119.273724) (xy 168.952434 118.899544) (xy 169.039018 118.994982) (xy 169.017341 119.249483)
 					(xy 168.952434 119.309384)
 				)
 			)
 			(polygon
 				(pts
-					(xy 169.443728 119.381924) (xy 169.410634 119.757997) (xy 169.325332 119.659323) (xy 169.347008 119.404822)
+					(xy 169.443728 119.381924) (xy 169.410634 119.753112) (xy 169.325332 119.659262) (xy 169.347008 119.404883)
 					(xy 169.411916 119.345043)
-				)
-			)
-			(polygon
-				(pts
-					(xy 169.360991 119.249483) (xy 169.382607 118.995104) (xy 169.485738 118.896308) (xy 169.452643 119.273724)
-					(xy 169.415702 119.309384)
 				)
 			)
 			(polygon
@@ -5172,19 +5176,27 @@
 	)
 	(segment
 		(start 153.67 115.57)
-		(end 151.13 115.57)
+		(end 160.02 115.57)
 		(width 0.5)
-		(layer "B.Cu")
-		(net 39)
-		(uuid "3fdcd63a-57bf-4e45-8d07-4e9e6126f7e7")
+		(layer "F.Cu")
+		(net 38)
+		(uuid "4534c590-a4ef-4504-8eb0-ad7df9242922")
 	)
 	(segment
-		(start 151.13 111.76)
+		(start 160.02 115.57)
+		(end 163.83 111.76)
+		(width 0.5)
+		(layer "F.Cu")
+		(net 38)
+		(uuid "8184a0b9-d52a-4ffd-b61d-8ee716e18e13")
+	)
+	(segment
+		(start 153.67 115.57)
 		(end 151.13 115.57)
 		(width 0.5)
-		(layer "B.Cu")
-		(net 39)
-		(uuid "55ee0c64-e802-4501-815d-705e71e252f2")
+		(layer "F.Cu")
+		(net 38)
+		(uuid "c1c3eb5e-2f5b-4d71-98f6-f498ba16ab13")
 	)
 	(segment
 		(start 125.73 123.19)

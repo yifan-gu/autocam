@@ -5,13 +5,13 @@
       "Application": "Pcbnew",
       "Version": "9.0.0"
     },
-    "CreationDate": "2025-03-19T00:26:52-07:00"
+    "CreationDate": "2025-03-27T03:01:07-07:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
       "Name": "remote_v3",
       "GUID": "72656d6f-7465-45f7-9633-2e6b69636164",
-      "Revision": "v0.5"
+      "Revision": "v0.6"
     },
     "Size": {
       "X": 109.27,

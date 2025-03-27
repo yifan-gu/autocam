@@ -5,13 +5,13 @@
       "Application": "Pcbnew",
       "Version": "9.0.0"
     },
-    "CreationDate": "2025-03-19T00:35:10-07:00"
+    "CreationDate": "2025-03-27T02:42:37-07:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
       "Name": "sensor",
       "GUID": "73656e73-6f72-42e6-9b69-6361645f7063",
-      "Revision": "v0.3"
+      "Revision": "v0.4"
     },
     "Size": {
       "X": 76.25,
