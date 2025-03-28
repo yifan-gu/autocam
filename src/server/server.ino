@@ -42,7 +42,7 @@ Servo steeringServo;
 
 // Define throttle and steering ranges
 const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
-const int minSteering = 1000, maxSteering = 2000, midSteering = 1500;
+const int minSteering = 1000, maxSteering = 2000, midSteering = 1500; // 1000 = max right turn, 2000 = max left turn.
 
 // Heartbeat tracking
 unsigned long lastPingTime = 0;           // Time of last received ping

@@ -21,7 +21,7 @@
 #define UWB_SELECTOR_SWITCH_PIN 12
 #define GIMBAL_FUNCTION_BUTTON_PIN 13
 #define LOCK_SWITCH_PIN 14
-#define DRIVE_MODE_BUTTON_PIN 25
+#define DRIVE_MODE_BUTTON_PIN 35
 
 #define BATTERY_LED_RED_PIN 26
 #define BATTERY_LED_GREEN_PIN 32
@@ -42,25 +42,13 @@
 #define STEERING_STICK_X_PIN 2
 #define THROTTLE_STICK_Y_PIN 36
 #define GIMBAL_STICK_X_PIN 15
-#define GIMBAL_STICK_Y_PIN 35
+#define GIMBAL_STICK_Y_PIN 25
 #define BATTERY_ADC_PIN 39  // ADC pin to measure battery voltage.
-
-#define STICK_DEAD_ZONE 200
-#define ADC_MAX 4095   // ESP32 ADC range
-#define ADC_MID (ADC_MAX / 2) // Midpoint for dead zone calculation
-
-#define SMOOTHING_FACTOR 0.2  // Smoothing factor (0.0 - 1.0, higher = more smoothing)
-
-// Smoothed joystick values
-float smoothedX = ADC_MID;
-float smoothedY = ADC_MID;
-float smoothedGX = ADC_MID;
-float smoothedGY = ADC_MID;
 
 const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
 const int minSteering = 1000, maxSteering = 2000, midSteering = 1500;
-const float minPitch = -1, maxPitch = 1, midPitch = 0;
-const float minYaw = -1, maxYaw = 1, midYaw = 0;
+const float minPitch = -2, maxPitch = 2, midPitch = 0;
+const float minYaw = -2, maxYaw = 2, midYaw = 0;
 
 // State indicators.
 int state = SERVER_STATE_NOT_READY;
@@ -107,6 +95,24 @@ struct ButtonDebounce {
 // Instantiate debounce objects for each button.
 ButtonDebounce modeSwitchDebounce = { DRIVE_MODE_BUTTON_PIN, HIGH, HIGH, DRIVE_MODE_MANUAL };
 ButtonDebounce gimbalFnDebounce = { GIMBAL_FUNCTION_BUTTON_PIN, HIGH, HIGH, 0 };
+
+
+// Joystick Input Helpers
+struct JoystickInput {
+  uint8_t pin;           // Analog pin
+  int adcMin;            // ADC minimum value
+  int adcMax;            // ADC maximum value
+  int adcMid;            // Midpoint
+  int deadZone;          // Dead zone range around the center
+  float smoothingFactor; // EMA smoothing factor
+  float smoothedValue;   // Internal smoothed value
+};
+
+// Joystick Inputs
+JoystickInput steeringX = {STEERING_STICK_X_PIN, 550, 3200, 1818, 50, 0.2f};
+JoystickInput throttleY = {THROTTLE_STICK_Y_PIN, 740, 3060, 1860, 50, 0.2f};
+JoystickInput gimbalX = {GIMBAL_STICK_X_PIN, 648, 3090, 1885, 50, 0.2f};
+JoystickInput gimbalY = {GIMBAL_STICK_Y_PIN, 633, 3250, 1889, 50, 0.2f};
 
 LEDController ledController;
 
@@ -190,7 +196,7 @@ void setupLED() {
 
 void setupInput() {
   // Set button input pins as input with internal pull-up.
-  pinMode(DRIVE_MODE_BUTTON_PIN, INPUT_PULLUP);
+  pinMode(DRIVE_MODE_BUTTON_PIN, INPUT);
   pinMode(GIMBAL_FUNCTION_BUTTON_PIN, INPUT_PULLUP);
   pinMode(LOCK_SWITCH_PIN, INPUT_PULLUP);
   pinMode(UWB_SELECTOR_SWITCH_PIN, INPUT_PULLUP);
@@ -244,6 +250,12 @@ void setupBLE() {
 }
 
 void updateState(int newState) {
+  if ((newState & SERVER_STATE_SENSOR_READY) == 0 || (newState & SERVER_STATE_REMOTE_READY) == 0) {
+    // Reset drive mode, because at this point the server must be in DRIVE_MODE_MANUAL.
+    driveModeTriggerValue = DRIVE_MODE_MANUAL;
+    lastSentData.driveMode = DRIVE_MODE_MANUAL;
+  }
+
   if (state == newState) {
     return;
   }
@@ -387,7 +399,6 @@ void checkDriveModeButton() {
     }
     //LOGF("Drive mode set to: %d after %d click(s)\n", driveModeTriggerValue, clickCount);
     // Optionally update the global drive mode immediately:
-    updateDriveMode(driveModeTriggerValue);
     // Reset the click counter for the next sequence.
     clickCount = 0;
   }
@@ -407,54 +418,67 @@ uint16_t readUWBSelector() {
   return digitalRead(UWB_SELECTOR_SWITCH_PIN) == LOW ? 1 : 0;
 }
 
+float readJoystick(JoystickInput &joy) {
+  int raw = analogRead(joy.pin);
+
+  // Apply dead zone
+  if (abs(raw - joy.adcMid) < joy.deadZone) {
+    raw = joy.adcMid;
+  }
+
+  // Exponential Moving Average smoothing
+  joy.smoothedValue = (joy.smoothingFactor * raw) +
+                      ((1.0f - joy.smoothingFactor) * joy.smoothedValue);
+  return joy.smoothedValue;
+}
+
+float mapJoystickCentered(float smoothedValue, int adcMin, int adcMid, int adcMax, int deadZone, float outA, float outMid, float outB) {
+  if (abs((int)smoothedValue - adcMid) < deadZone) {
+    return outMid;
+  } else if (smoothedValue < adcMid) {
+    return mapFloat(smoothedValue, adcMin, adcMid, outA, outMid);
+  } else {
+    return mapFloat(smoothedValue, adcMid, adcMax, outMid, outB);
+  }
+}
+
+float mapFloat(float x, float in_min, float in_max, float outA, float outB) {
+  float result = outA + (x - in_min) * (outB - outA) / (in_max - in_min);
+  // Clamp result according to the ordering of outA and outB
+  if (outA < outB) {
+    if(result < outA) result = outA;
+    if(result > outB) result = outB;
+  } else {
+    if(result > outA) result = outA;
+    if(result < outB) result = outB;
+  }
+  return result;
+}
+
+void readJoysticks() {
+  steeringValue = mapJoystickCentered(readJoystick(steeringX), steeringX.adcMin, steeringX.adcMid, steeringX.adcMax, steeringX.deadZone, minSteering, midSteering, maxSteering);
+  throttleValue = mapJoystickCentered(readJoystick(throttleY), throttleY.adcMin, throttleY.adcMid, throttleY.adcMax, throttleY.deadZone, maxThrottle, midThrottle, minThrottle);
+  yawSpeedValue = mapJoystickCentered(readJoystick(gimbalX), gimbalX.adcMin, gimbalX.adcMid, gimbalX.adcMax, gimbalX.deadZone, maxYaw, midYaw, minYaw);
+  pitchSpeedValue = mapJoystickCentered(readJoystick(gimbalY), gimbalY.adcMin, gimbalY.adcMid, gimbalY.adcMax, gimbalY.deadZone, minPitch, midPitch, maxPitch);
+}
+
 void readInput() {
   if (lockSwitchLocked()) {
     // Check the lock switch first.
     // If locked then skip reading the inputs.
     // TODO(yifan): maybe reset all inputs??
-    LOGLN("Lock switch in active, skip input reading");
+    //LOGLN("Lock switch in active, skip input reading");
     return;
   }
 
   // Check buttons.
   checkButtons();
-  uwbSelectorTriggerValue = 1;//readUWBSelector();
-
-  // Read raw joystick values
-  int rawX = analogRead(STEERING_STICK_X_PIN);
-  int rawY = analogRead(THROTTLE_STICK_Y_PIN);
-  int rawGX = analogRead(GIMBAL_STICK_X_PIN);
-  int rawGY = analogRead(GIMBAL_STICK_Y_PIN);
-
-  // Apply dead zone filtering
-  if (abs(rawX - ADC_MID) < STICK_DEAD_ZONE) rawX = ADC_MID;
-  if (abs(rawY - ADC_MID) < STICK_DEAD_ZONE) rawY = ADC_MID;
-  if (abs(rawGX - ADC_MID) < STICK_DEAD_ZONE) rawGX = ADC_MID;
-  if (abs(rawGY - ADC_MID) < STICK_DEAD_ZONE) rawGY = ADC_MID;
-
-  // Apply exponential moving average (smoothing)
-  smoothedX = (SMOOTHING_FACTOR * rawX) + ((1 - SMOOTHING_FACTOR) * smoothedX);
-  smoothedY = (SMOOTHING_FACTOR * rawY) + ((1 - SMOOTHING_FACTOR) * smoothedY);
-  smoothedGX = (SMOOTHING_FACTOR * rawGX) + ((1 - SMOOTHING_FACTOR) * smoothedGX);
-  smoothedGY = (SMOOTHING_FACTOR * rawGY) + ((1 - SMOOTHING_FACTOR) * smoothedGY);
-
-  // Map throttle and steering using floating-point math:
-  throttleValue = minThrottle + (int)round((maxThrottle - minThrottle) * ((float)smoothedY / (float)ADC_MAX));
-  steeringValue = minSteering + (int)round((maxSteering - minSteering) * ((float)smoothedX / (float)ADC_MAX));
-
-  // For yaw: linear mapping from [0, ADC_MAX] to [-1, 1]
-  yawSpeedValue = ((float)smoothedGX / ADC_MAX) * 2.0 - 1.0;
-  pitchSpeedValue = ((float)smoothedGY / ADC_MAX) * 2.0 - 1.0;
-
-  // Ensure the midpoint results in exactly 1500 and 0.
-  if (rawY == ADC_MID) throttleValue = midThrottle;
-  if (rawX == ADC_MID) steeringValue = midSteering;
-  if (rawGX == ADC_MID) yawSpeedValue = midPitch;
-  if (rawGY == ADC_MID) pitchSpeedValue = midYaw;
+  uwbSelectorTriggerValue = readUWBSelector();
+  readJoysticks();
 
   // Print all values, including gimbal joystick positions
-  //LOGF("ModeTrigger=%d, Joystick X=%.1f, Y=%.1f | Throttle=%d, Steering=%d | Gimbal X=%.1f, Y=%.1f | Yaw=%.2f, Pitch=%.2f\n",
-  //              driveModeTriggerValue, smoothedX, smoothedY, throttleValue, steeringValue, smoothedGX, smoothedGY, yawSpeedValue, pitchSpeedValue);
+  //LOGF("ModeTrigger=%d, Joystick X=%.1f, Y=%.1f | Steering=%d, Throttle=%d | Gimbal X=%.1f, Y=%.1f | Yaw=%.2f, Pitch=%.2f\n",
+  //              driveModeTriggerValue,  steeringX.smoothedValue, throttleY.smoothedValue, steeringValue, throttleValue, gimbalX.smoothedValue, gimbalY.smoothedValue, yawSpeedValue, pitchSpeedValue);
 }
 
 bool dataChanged(const RemoteDataBidirection &oldData, const RemoteDataBidirection &newData) {
@@ -496,7 +520,7 @@ void sendInput() {
     toggleState = 0;
     firstUpdate = false;
 
-    //LOGF("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d, yawSpeed=%f, pitchSpeed=%f, toggleState=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state, data.yawSpeed, data.pitchSpeed, data.toggleState, data.uwbSelector);
+    LOGF("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d, yawSpeed=%f, pitchSpeed=%f, toggleState=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state, data.yawSpeed, data.pitchSpeed, data.toggleState, data.uwbSelector);
   }
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();

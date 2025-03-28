@@ -26,7 +26,7 @@ Arduino files for my auto-following camera car!
 - [x] Smooth the distance measurement.
 - [x] Added a different mode (follow).
 - [x] Added gimbal recenter and camera recording.
-- [ ] Assemble together
+- [x] Assemble together
 - [ ] Calibrate the UWB tag and anchor
 - [ ] Measure battery voltage.
 - [ ] (optimize) Store settings in external storage (SD card)
