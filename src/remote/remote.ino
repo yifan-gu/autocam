@@ -21,7 +21,7 @@
 #define UWB_SELECTOR_SWITCH_PIN 12
 #define GIMBAL_FUNCTION_BUTTON_PIN 13
 #define LOCK_SWITCH_PIN 14
-#define DRIVE_MODE_BUTTON_PIN 35
+#define DRIVE_MODE_BUTTON_PIN 25
 
 #define BATTERY_LED_RED_PIN 26
 #define BATTERY_LED_GREEN_PIN 32
@@ -42,7 +42,7 @@
 #define STEERING_STICK_X_PIN 2
 #define THROTTLE_STICK_Y_PIN 36
 #define GIMBAL_STICK_X_PIN 15
-#define GIMBAL_STICK_Y_PIN 25
+#define GIMBAL_STICK_Y_PIN 35
 #define BATTERY_ADC_PIN 39  // ADC pin to measure battery voltage.
 
 const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
@@ -109,10 +109,10 @@ struct JoystickInput {
 };
 
 // Joystick Inputs
-JoystickInput steeringX = {STEERING_STICK_X_PIN, 550, 3200, 1818, 50, 0.2f};
-JoystickInput throttleY = {THROTTLE_STICK_Y_PIN, 740, 3060, 1860, 50, 0.2f};
-JoystickInput gimbalX = {GIMBAL_STICK_X_PIN, 648, 3090, 1885, 50, 0.2f};
-JoystickInput gimbalY = {GIMBAL_STICK_Y_PIN, 633, 3250, 1889, 50, 0.2f};
+JoystickInput steeringX = {STEERING_STICK_X_PIN, 600, 3100, 1850, 50, 0.2f};
+JoystickInput throttleY = {THROTTLE_STICK_Y_PIN, 580, 3080, 1810, 50, 0.2f};
+JoystickInput gimbalX = {GIMBAL_STICK_X_PIN, 480, 2890, 1685, 50, 0.2f};
+JoystickInput gimbalY = {GIMBAL_STICK_Y_PIN, 590, 3200, 1825, 50, 0.2f};
 
 LEDController ledController;
 
