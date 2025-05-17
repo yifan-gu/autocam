@@ -196,7 +196,7 @@ void setupLED() {
 
 void setupInput() {
   // Set button input pins as input with internal pull-up.
-  pinMode(DRIVE_MODE_BUTTON_PIN, INPUT);
+  pinMode(DRIVE_MODE_BUTTON_PIN, INPUT_PULLUP);
   pinMode(GIMBAL_FUNCTION_BUTTON_PIN, INPUT_PULLUP);
   pinMode(LOCK_SWITCH_PIN, INPUT_PULLUP);
   pinMode(UWB_SELECTOR_SWITCH_PIN, INPUT_PULLUP);
@@ -365,6 +365,7 @@ void checkGimbalFnButton() {
     } else if (clickCount >= 3) {
       toggleState = CAMERA_RECORDING_TOGGLED;
     }
+    //LOGF("Toggle state set to: %d after %d click(s)\n", toggleState, clickCount);
     clickCount = 0;
   }
 }
@@ -398,7 +399,7 @@ void checkDriveModeButton() {
       driveModeTriggerValue = DRIVE_MODE_CINEMA;
     }
     //LOGF("Drive mode set to: %d after %d click(s)\n", driveModeTriggerValue, clickCount);
-    // Optionally update the global drive mode immediately:
+    //Optionally update the global drive mode immediately:
     // Reset the click counter for the next sequence.
     clickCount = 0;
   }
