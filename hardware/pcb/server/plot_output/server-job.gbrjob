@@ -5,13 +5,13 @@
       "Application": "Pcbnew",
       "Version": "9.0.0"
     },
-    "CreationDate": "2025-03-19T00:35:28-07:00"
+    "CreationDate": "2025-05-21T23:54:08-07:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
       "Name": "server",
       "GUID": "73657276-6572-42e6-9b69-6361645f7063",
-      "Revision": "v0.2"
+      "Revision": "v0.3"
     },
     "Size": {
       "X": 52.12,

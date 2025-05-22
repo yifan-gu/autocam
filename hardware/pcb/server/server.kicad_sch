@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "Autocam Server")
-		(date "2025-03-18")
-		(rev "v0.2")
+		(date "2025-05-21")
+		(rev "v0.3")
 	)
 	(lib_symbols
 		(symbol "Autocam:2_PIN_Connector"
@@ -978,12 +978,6 @@
 		(color 0 0 0 0)
 		(uuid "7e3622fc-6a7e-4801-a826-c17660dd935d")
 	)
-	(junction
-		(at 165.1 119.38)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "a94af06a-46d2-4fd7-8f49-df0766dd2e9e")
-	)
 	(wire
 		(pts
 			(xy 147.32 106.68) (xy 167.64 106.68)
@@ -996,13 +990,13 @@
 	)
 	(wire
 		(pts
-			(xy 143.51 88.9) (xy 128.27 88.9)
+			(xy 129.54 106.68) (xy 139.7 106.68)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "0a2b6d29-2b71-4608-b9e6-2ecee76ac2f2")
+		(uuid "04a34b6b-b83d-4a4a-a9ff-041e5b165cc8")
 	)
 	(wire
 		(pts
@@ -1013,16 +1007,6 @@
 			(type default)
 		)
 		(uuid "0a3ecc0c-39ce-492f-8389-bce2efd9c18f")
-	)
-	(wire
-		(pts
-			(xy 128.27 111.76) (xy 139.7 111.76)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0c85ca41-50e1-4e6f-ab1c-a079770a4845")
 	)
 	(wire
 		(pts
@@ -1066,63 +1050,83 @@
 	)
 	(wire
 		(pts
-			(xy 143.51 72.39) (xy 143.51 88.9)
+			(xy 185.42 138.43) (xy 102.87 138.43)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "29cbafee-658f-4951-9797-e12524ff8aa8")
+		(uuid "1ec71d3c-29b1-42b6-864e-90a6b41dc5a7")
 	)
 	(wire
 		(pts
-			(xy 157.48 72.39) (xy 157.48 101.6)
+			(xy 129.54 109.22) (xy 139.7 109.22)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "38951223-aa49-436e-8b18-0b304d844c17")
+		(uuid "23609505-4466-4c93-9d8e-6851efcbf459")
 	)
 	(wire
 		(pts
-			(xy 138.43 72.39) (xy 138.43 86.36)
+			(xy 102.87 138.43) (xy 102.87 91.44)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "73a7a652-d542-4a6b-a461-17a59ae4d00d")
+		(uuid "28493ae8-379a-4bf7-8485-eb5819516791")
 	)
 	(wire
 		(pts
-			(xy 128.27 114.3) (xy 139.7 114.3)
+			(xy 93.98 124.46) (xy 109.22 124.46)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "8166a21c-a952-4546-b4cb-27d29d24e2fd")
+		(uuid "53f93b34-7668-4786-a27e-636054019bd6")
 	)
 	(wire
 		(pts
-			(xy 128.27 101.6) (xy 157.48 101.6)
+			(xy 152.4 101.6) (xy 129.54 101.6)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "89552007-a4a9-45c5-9f66-985c0c08d56d")
+		(uuid "64dfa3bf-ccd1-455f-ae73-2134ceaf4a3f")
 	)
 	(wire
 		(pts
-			(xy 128.27 119.38) (xy 165.1 119.38)
+			(xy 129.54 114.3) (xy 139.7 114.3)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "9252f77b-e1c6-4dd4-aa60-788b181bcf36")
+		(uuid "6709f369-5bea-4fd8-8341-beb4edae2962")
+	)
+	(wire
+		(pts
+			(xy 152.4 66.04) (xy 152.4 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6a0d3fbc-d4ef-4ccb-94da-9153e5d2ba10")
+	)
+	(wire
+		(pts
+			(xy 185.42 119.38) (xy 185.42 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "794cbb15-1130-4a3e-b610-de297de7424c")
 	)
 	(wire
 		(pts
@@ -1136,6 +1140,16 @@
 	)
 	(wire
 		(pts
+			(xy 102.87 91.44) (xy 109.22 91.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9582ce60-9536-45ff-b7c8-63fa26711d7f")
+	)
+	(wire
+		(pts
 			(xy 162.56 101.6) (xy 162.56 104.14)
 		)
 		(stroke
@@ -1143,16 +1157,6 @@
 			(type default)
 		)
 		(uuid "9c66e714-5ca9-4641-a44d-1b35210336d9")
-	)
-	(wire
-		(pts
-			(xy 138.43 86.36) (xy 128.27 86.36)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9cf475b9-e12f-4743-9b2f-0a67dbe1293b")
 	)
 	(wire
 		(pts
@@ -1166,6 +1170,16 @@
 	)
 	(wire
 		(pts
+			(xy 93.98 68.58) (xy 93.98 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a57b5e65-b347-4ebb-aa68-18d48fb7f082")
+	)
+	(wire
+		(pts
 			(xy 147.32 111.76) (xy 187.96 111.76)
 		)
 		(stroke
@@ -1176,23 +1190,23 @@
 	)
 	(wire
 		(pts
-			(xy 139.7 104.14) (xy 128.27 104.14)
+			(xy 147.32 66.04) (xy 147.32 99.06)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "b06d023d-f409-4992-905c-6beda243cb18")
+		(uuid "ad415da8-2a15-44df-be66-11b3bb6c15fc")
 	)
 	(wire
 		(pts
-			(xy 139.7 109.22) (xy 128.27 109.22)
+			(xy 99.06 68.58) (xy 99.06 121.92)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "b5ba1e66-9986-470d-98f5-5019bd784292")
+		(uuid "aea3dcb8-0d23-4d04-acb6-e196053c0c3b")
 	)
 	(wire
 		(pts
@@ -1216,23 +1230,13 @@
 	)
 	(wire
 		(pts
-			(xy 152.4 72.39) (xy 152.4 99.06)
+			(xy 129.54 111.76) (xy 139.7 111.76)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "c0cd2f31-2357-423a-8181-29da60da8ff8")
-	)
-	(wire
-		(pts
-			(xy 128.27 106.68) (xy 139.7 106.68)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c2de8c1a-a1ca-464d-8607-62186900a051")
+		(uuid "be38ff4d-54a8-4d64-950d-10b25079dacc")
 	)
 	(wire
 		(pts
@@ -1246,6 +1250,16 @@
 	)
 	(wire
 		(pts
+			(xy 147.32 99.06) (xy 129.54 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d23fd37c-8eac-4b0a-a857-4694471df650")
+	)
+	(wire
+		(pts
 			(xy 187.96 102.87) (xy 187.96 111.76)
 		)
 		(stroke
@@ -1256,13 +1270,13 @@
 	)
 	(wire
 		(pts
-			(xy 152.4 99.06) (xy 128.27 99.06)
+			(xy 129.54 104.14) (xy 139.7 104.14)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "defee6ad-80da-42aa-8c9e-1995fc5ac166")
+		(uuid "e0f1a128-6843-43e7-a37d-02ef9e101ad6")
 	)
 	(wire
 		(pts
@@ -1273,6 +1287,16 @@
 			(type default)
 		)
 		(uuid "ee7a8749-3ebe-48f1-9245-0193eb77e763")
+	)
+	(wire
+		(pts
+			(xy 99.06 121.92) (xy 109.22 121.92)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f7fd5e85-8e21-442c-a108-5ca8806f6c09")
 	)
 	(symbol
 		(lib_id "Autocam:ANODE_RGB_LED_Round")
@@ -1351,16 +1375,15 @@
 	)
 	(symbol
 		(lib_id "Autocam:2_PIN_Connector")
-		(at 140.97 69.85 0)
+		(at 96.52 66.04 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "244c6e4b-61da-471f-a968-d465902c14ea")
 		(property "Reference" "2_PIN_CONNECTOR1"
-			(at 146.05 70.4849 0)
+			(at 101.6 66.6749 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1369,7 +1392,7 @@
 			)
 		)
 		(property "Value" "VIN_GND"
-			(at 146.05 72.39 0)
+			(at 101.6 68.58 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1378,7 +1401,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:2-PIN Connector"
-			(at 140.97 69.85 0)
+			(at 96.52 66.04 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1387,7 +1410,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 140.97 69.85 0)
+			(at 96.52 66.04 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1396,7 +1419,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 140.97 69.85 0)
+			(at 96.52 66.04 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1421,7 +1444,7 @@
 	)
 	(symbol
 		(lib_id "Autocam:Arduino_ESP32_Nano")
-		(at 118.11 102.87 0)
+		(at 119.38 107.95 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -1430,7 +1453,7 @@
 		(fields_autoplaced yes)
 		(uuid "38552251-9e17-4fab-92e4-79db586e3181")
 		(property "Reference" "ESP32_Nano1"
-			(at 118.11 78.74 0)
+			(at 119.38 80.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1438,7 +1461,7 @@
 			)
 		)
 		(property "Value" "Server"
-			(at 118.11 81.28 0)
+			(at 119.38 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1446,7 +1469,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:Arduino ESP32 Nano"
-			(at 118.11 92.71 0)
+			(at 119.38 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1455,7 +1478,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 118.11 92.71 0)
+			(at 119.38 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1464,7 +1487,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 118.11 92.71 0)
+			(at 119.38 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1916,7 +1939,7 @@
 	)
 	(symbol
 		(lib_id "Autocam:2_PIN_Connector")
-		(at 154.94 69.85 0)
+		(at 149.86 63.5 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -1925,7 +1948,7 @@
 		(fields_autoplaced yes)
 		(uuid "d9da32d4-61d8-43eb-8de1-a5635a8addc9")
 		(property "Reference" "2_PIN_CONNECTOR2"
-			(at 160.02 69.8499 0)
+			(at 154.94 63.4999 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1934,7 +1957,7 @@
 			)
 		)
 		(property "Value" "STEERING_THROTTLE"
-			(at 160.02 72.3899 0)
+			(at 154.94 66.0399 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1943,7 +1966,7 @@
 			)
 		)
 		(property "Footprint" "Autocam:2-PIN Connector"
-			(at 154.94 69.85 0)
+			(at 149.86 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1952,7 +1975,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 154.94 69.85 0)
+			(at 149.86 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1961,7 +1984,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 154.94 69.85 0)
+			(at 149.86 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
