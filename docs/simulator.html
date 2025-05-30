@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Car with Refined Logic</title>
+        <style>
+            body {
+                text-align: center;
+                font-family: sans-serif;
+            }
+            canvas {
+                border: 1px solid #000;
+                display: block;
+                margin: 10px auto;
+                background-color: #f0f0f0;
+            }
+            #hint {
+                font-size: 14px;
+                color: #666;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="hint">Click a button to change mode:</div>
+        <div id="modeButtons">
+            <button data-mode="manual">Manual Mode</button>
+            <button data-mode="follow">Follow Mode</button>
+            <button data-mode="cinema">Cinema Mode</button>
+        </div>
+        <canvas id="simulationCanvas" width="1080" height="720"></canvas>
+
+        <script>
+         const canvas = document.getElementById("simulationCanvas");
+         const ctx = canvas.getContext("2d");
+
+         let mode = "manual";
+
+         let moveEnabled = false;
+
+         const modeButtons = document.querySelectorAll("#modeButtons button");
+         modeButtons.forEach((btn) => {
+             btn.addEventListener("click", () => {
+                 mode = btn.getAttribute("data-mode");
+                 console.log(`Mode changed to: ${mode}`);
+             });
+         });
+
+         let car = {
+             globalX: canvas.width / 2,
+             globalY: canvas.height / 2,
+             angle: 0,
+             throttle: 0,
+             maxThrottle: 2.0,
+             acceleration: 0.1,
+             wheelBase: 40,
+             steering: 0,
+             maxSteering: 20.0,
+             width: 56,
+             height: 40,
+             sensorAngle: 0,
+             distance: 0,
+             targetDistance: 0,
+             heading: 0,
+             targetHeading: 0,
+             currentX: 0,
+             currentY: 0,
+             targetX: 0,
+             targetY: 0,
+             headingDiff: 0,
+         };
+
+         let targetGlobal = { x: car.globalX, y: car.globalY };
+
+         // PID state
+         let integral_t = 0,
+             previousError_t = 0;
+         let Kp_t = 0.1,
+             Ki_t = 0,
+             Kd_t = 1;
+         let minMoveThrottle = -car.maxThrottle,
+             maxMoveThrottle = car.maxThrottle;
+         let fieldOfViewRatio = 28 / 20; // Car width / car length (measured from the wheel).
+         let leadingTurningCoefficient = 0.01;
+         let pushingTurningCoefficient = 2;
+
+         let lastX = car.currentX;
+
+         canvas.addEventListener("click", () => {
+             moveEnabled = !moveEnabled;
+             car.throttle = 0;
+             car.steering = 0;
+         });
+
+         let touchStartX = 0;
+         let touchStartY = 0;
+         let touchMoved = false;
+
+         canvas.addEventListener("touchstart", (e) => {
+             e.preventDefault();
+             const touch = e.touches[0];
+             touchStartX = touch.clientX;
+             touchStartY = touch.clientY;
+             touchMoved = false;
+         });
+
+         canvas.addEventListener("touchmove", (e) => {
+             e.preventDefault();
+             const touch = e.touches[0];
+             const dx = touch.clientX - touchStartX;
+             const dy = touch.clientY - touchStartY;
+             if (Math.hypot(dx, dy) > 10) {
+                 // Threshold for drag detection
+                 touchMoved = true;
+             }
+             const rect = canvas.getBoundingClientRect();
+             targetGlobal.x = touch.clientX - rect.left;
+             targetGlobal.y = touch.clientY - rect.top;
+         });
+
+         canvas.addEventListener("touchend", (e) => {
+             e.preventDefault();
+             if (!touchMoved) {
+                 moveEnabled = !moveEnabled;
+                 car.throttle = 0;
+                 car.steering = 0;
+                 // Treat as a tap: set target to last touch point
+                 const touch = e.changedTouches[0];
+                 const rect = canvas.getBoundingClientRect();
+                 targetGlobal.x = touch.clientX - rect.left;
+                 targetGlobal.y = touch.clientY - rect.top;
+                 console.log("Tap target set to", targetGlobal.x, targetGlobal.y);
+             }
+         });
+
+         canvas.addEventListener("mousemove", (e) => {
+             const rect = canvas.getBoundingClientRect();
+             targetGlobal.x = e.clientX - rect.left;
+             targetGlobal.y = e.clientY - rect.top;
+         });
+
+         let keyState = { up: false, down: false, left: false, right: false };
+
+         document.addEventListener("keydown", (e) => {
+             if (mode !== "manual") return;
+             switch (e.key) {
+                 case "ArrowUp":
+                     keyState.up = true;
+                     break;
+                 case "ArrowDown":
+                     keyState.down = true;
+                     break;
+                 case "ArrowLeft":
+                     keyState.left = true;
+                     break;
+                 case "ArrowRight":
+                     keyState.right = true;
+                     break;
+             }
+         });
+
+         document.addEventListener("keyup", (e) => {
+             if (mode !== "manual") return;
+             switch (e.key) {
+                 case "ArrowUp":
+                     keyState.up = false;
+                     break;
+                 case "ArrowDown":
+                     keyState.down = false;
+                     break;
+                 case "ArrowLeft":
+                     keyState.left = false;
+                     break;
+                 case "ArrowRight":
+                     keyState.right = false;
+                     break;
+             }
+         });
+
+         function calculateCoordinates() {
+             const dx = targetGlobal.x - car.globalX;
+             const dy = targetGlobal.y - car.globalY;
+             const distance = Math.hypot(dx, dy);
+             const absoluteHeading = Math.atan2(dy, dx);
+             let heading = car.angle - absoluteHeading;
+             heading = (heading + 2 * Math.PI) % (2 * Math.PI);
+             heading = (heading * 180) / Math.PI;
+             heading = (heading + 360) % 360;
+
+             car.distance = distance;
+             car.heading = heading;
+             car.currentY = Math.cos(-car.angle) * dx - Math.sin(-car.angle) * dy;
+             car.currentX = Math.sin(-car.angle) * dx + Math.cos(-car.angle) * dy;
+
+             if (!moveEnabled || mode == "manual") {
+                 car.targetX = car.currentX;
+                 car.targetY = car.currentY;
+                 car.targetDistance = car.distance;
+                 car.targetHeading = car.heading;
+             }
+         }
+
+         function calculateSteeringThrottleFollow() {
+             const distanceDelta = 5;
+             const headingDelta = 5;
+
+             const distanceError = car.distance - car.targetDistance;
+             if (distanceError <= distanceDelta) {
+                 car.throttle = 0;
+                 car.steering = 0;
+                 return;
+             }
+
+             let deltaTime = 16; // Assuming ~60fps; refine as needed
+             let error_t = distanceError;
+             throttle = calculateThrottleDiff(error_t, deltaTime);
+             console.log("throttle", throttle);
+
+             let moveForward = false;
+             let moveBackward = false;
+
+             if (car.currentY >= distanceDelta) {
+                 setMoveForward(throttle);
+                 moveForward = true;
+             } else if (car.currentY <= -distanceDelta) {
+                 setMoveBackward(throttle);
+                 moveBackward = true;
+             }
+
+             car.headingDiff = car.heading;
+             if (moveForward) {
+                 if (car.headingDiff > 180) car.headingDiff -= 360;
+             } else {
+                 car.headingDiff = car.headingDiff - 180;
+             }
+
+             if (Math.abs(car.headingDiff) < headingDelta) {
+                 car.steering = 0;
+                 return;
+             }
+
+             steering = car.headingDiff;
+             console.log("steering", steering);
+
+             if (moveForward) {
+                 setSteering(steering);
+             } else if (moveBackward) {
+                 setSteering(-steering);
+             }
+         }
+
+         function calculateSteeringThrottleCinema() {
+             const distanceDelta = 0;
+             const headingDelta = 0;
+
+             const yDiff = car.currentY - car.targetY;
+             const xDiff = car.currentX - car.targetX;
+             car.headingDiff = car.heading - car.targetHeading;
+             if (car.headingDiff > 180) {
+                 car.headingDiff -= 360;
+             } else if (car.headingDiff <= -180) {
+                 car.headingDiff += 360;
+             }
+
+             if (Math.abs(yDiff) <= distanceDelta) {
+                 car.throttle = 0;
+                 car.steering = 0;
+                 return;
+             }
+
+             let moveForward = false;
+             let moveBackward = false;
+
+             let deltaTime = 16; // Assuming ~60fps; refine as needed
+             let error_t = yDiff;
+             throttle = calculateThrottleDiff(yDiff, deltaTime);
+             console.log("throttle", throttle);
+
+             if (yDiff > 0) {
+                 setMoveForward(throttle);
+                 moveForward = true;
+             } else {
+                 setMoveBackward(-throttle);
+                 moveBackward = true;
+             }
+
+             if (isLeading(car.targetX, car.targetY, moveForward, moveBackward)) {
+                 // Leading.
+                 let steeringC = Math.abs(xDiff) * leadingTurningCoefficient;
+                 console.log("leading steering coefficient", steeringC);
+                 if (pushingLeft(car.currentX, car.targetX, distanceDelta, lastX)) {
+                     console.log("steering left");
+                     setSteering(steeringC * car.maxSteering);
+                 } else if (pushingRight(car.currentX, car.targetX, distanceDelta, lastX)) {
+                     console.log("steering right");
+                     setSteering(-steeringC * car.maxSteering);
+                 }
+             } else {
+                 // Pushing.
+                 let steeringC = car.headingDiff / car.maxSteering * pushingTurningCoefficient;
+                 console.log("pushing steering coefficient", steeringC);
+                 if (moveForward) {
+                     setSteering(steeringC * car.maxSteering);
+                 } else if (moveBackward) {
+                     setSteering(-steeringC * car.maxSteering);
+                 }
+             }
+             lastX = car.currentX;
+         }
+
+         function pushingRight(currentX, targetX, distanceDelta, lastX) {
+             return currentX > targetX + distanceDelta && currentX >= lastX;
+         }
+
+         function pushingLeft(currentX, targetX, distanceDelta, lastX) {
+             return currentX < targetX - distanceDelta && currentX <= lastX;
+         }
+
+         function pullingOutward(currentX, targetX, distanceDelta) {
+             let xDiffAbs = Math.abs(currentX - targetX);
+             let result = Math.abs(currentX) > Math.abs(targetX) + distanceDelta && xDiffAbs > xDiffPullOutAbs;
+             xDiffPullOutAbs = xDiffAbs;
+             return result;
+         }
+
+         function isInRearTriangle(currentX, currentY, fieldOfViewRatio, moveForward, moveBackward) {
+             if ((currentY >= 0 && moveForward) || (currentY <= 0 && moveBackward)) {
+                 // Not behind the car
+                 return false;
+             }
+
+             // Check if the point is inside the wedge
+             return Math.abs(currentY) >= fieldOfViewRatio * Math.abs(currentX);
+         }
+
+         function isLeading(currentX, currentY, moveForward, moveBackward) {
+             return !isInRearTriangle(currentX, currentY, fieldOfViewRatio, moveForward, moveBackward);
+         }
+
+         function setMoveForward(throttle) {
+             car.throttle = Math.min(car.maxThrottle, throttle);
+         }
+
+         function setMoveBackward(throttle) {
+             car.throttle = Math.max(-car.maxThrottle, -throttle);
+         }
+
+         function setSteering(steeringDiff) {
+             if (steeringDiff > 0) {
+                 car.steering = Math.min(car.maxSteering, steeringDiff);
+             } else {
+                 car.steering = Math.max(-car.maxSteering, steeringDiff);
+             }
+         }
+
+         function handleManualControl() {
+             if (keyState.up) {
+                 car.throttle = Math.min(car.maxThrottle, car.throttle + car.acceleration);
+             } else if (keyState.down) {
+                 car.throttle = Math.max(-car.maxThrottle, car.throttle - car.acceleration);
+             } else {
+                 car.throttle = 0;
+             }
+
+             if (keyState.left) {
+                 car.steering = Math.min(car.maxSteering, car.steering + 1);
+             } else if (keyState.right) {
+                 car.steering = Math.max(-car.maxSteering, car.steering - 1);
+             } else {
+                 car.steering = 0;
+             }
+         }
+
+         function calculateThrottleDiff(error_t, deltaTime) {
+             integral_t += error_t * deltaTime;
+             let derivative_t = (error_t - previousError_t) / deltaTime;
+             let throttle = Kp_t * error_t + Ki_t * integral_t + Kd_t * derivative_t;
+             throttle = Math.max(minMoveThrottle, Math.min(maxMoveThrottle, throttle));
+             previousError_t = error_t;
+             return throttle;
+         }
+
+         function updatePosition() {
+             car.sensorAngle = Math.atan2(targetGlobal.y - car.globalY, targetGlobal.x - car.globalX);
+             if (car.throttle !== 0) {
+                 const steeringRadians = car.steering * (Math.PI / 180);
+                 const turningRadius = car.wheelBase / Math.tan(-steeringRadians);
+                 const angularVelocity = car.throttle / turningRadius;
+                 car.angle += angularVelocity;
+                 car.globalX += car.throttle * Math.cos(car.angle);
+                 car.globalY += car.throttle * Math.sin(car.angle);
+             }
+         }
+
+         function update() {
+             calculateCoordinates();
+             calculateSteeringThrottle();
+             updatePosition();
+         }
+
+         function calculateSteeringThrottle() {
+             if (!moveEnabled) {
+                 return;
+             }
+
+             switch (mode) {
+                 case "follow":
+                     calculateSteeringThrottleFollow();
+                     break;
+                 case "cinema":
+                     calculateSteeringThrottleCinema();
+                     break;
+                 default:
+                     // "manual"
+                     handleManualControl();
+                     return;
+             }
+         }
+
+         function drawCar() {
+             ctx.save();
+             ctx.translate(car.globalX, car.globalY);
+             ctx.rotate(car.angle);
+
+             ctx.fillStyle = "blue";
+             ctx.fillRect(-car.width / 2, -car.height / 2, car.width, car.height);
+
+             ctx.fillStyle = "yellow";
+             ctx.beginPath();
+             ctx.moveTo(car.width / 2 + 10, 0);
+             ctx.lineTo(car.width / 2, -car.height / 4);
+             ctx.lineTo(car.width / 2, car.height / 4);
+             ctx.closePath();
+             ctx.fill();
+
+             ctx.save();
+             ctx.rotate(car.sensorAngle - car.angle);
+             ctx.strokeStyle = "orange";
+             ctx.lineWidth = 2;
+             ctx.beginPath();
+             ctx.moveTo(0, 0);
+             ctx.lineTo(40, 0);
+             ctx.stroke();
+             ctx.restore();
+
+             ctx.restore();
+         }
+
+         function drawTarget() {
+             ctx.fillStyle = "red";
+             ctx.beginPath();
+             ctx.arc(targetGlobal.x, targetGlobal.y, 5, 0, 2 * Math.PI);
+             ctx.fill();
+         }
+
+         function drawInfo() {
+             ctx.fillStyle = "black";
+             ctx.font = "16px monospace";
+             let lines = [
+                 `distance: ${car.distance.toFixed(2)}`,
+                 `targetDistance: ${car.targetDistance.toFixed(2)}`,
+                 `heading: ${car.heading.toFixed(2)}`,
+                 `targetHeading: ${car.targetHeading.toFixed(2)}`,
+                 `currentX: ${car.currentX.toFixed(2)}`,
+                 `targetX: ${car.targetX.toFixed(2)}`,
+                 `currentY: ${car.currentY.toFixed(2)}`,
+                 `targetY: ${car.targetY.toFixed(2)}`,
+                 `throttle: ${car.throttle.toFixed(2)}`,
+                 `steering: ${car.steering.toFixed(2)}°`,
+                 `headingDiff: ${car.headingDiff.toFixed(2)}°`,
+             ];
+             lines.forEach((line, i) => {
+                 ctx.fillText(line, 10, 20 + i * 20);
+             });
+
+             // Mode display (color-coded)
+             ctx.font = "20px Arial";
+             switch (mode) {
+                 case "follow":
+                     ctx.fillStyle = "green";
+                     break;
+                 case "manual":
+                     ctx.fillStyle = "blue";
+                     break;
+                 case "cinema":
+                     ctx.fillStyle = "orange";
+                     break;
+             }
+             ctx.fillText(`Mode: ${mode.toUpperCase()}`, 10, 250);
+             if (mode == "manual") {
+                 ctx.fillText(`(Use arrow keys to control the car)`, 10, 270);
+             } else {
+                 if (!moveEnabled) {
+                     ctx.fillText(`(Click canvas to set target)`, 10, 270);
+                 } else {
+                     ctx.fillText(`(Click canvas to reset target)`, 10, 270);
+                 }
+             }
+         }
+
+         function loop() {
+             ctx.clearRect(0, 0, canvas.width, canvas.height);
+             update();
+             drawCar();
+             drawTarget();
+             drawInfo();
+             requestAnimationFrame(loop);
+         }
+
+         loop();
+        </script>
+    </body>
+</html>
