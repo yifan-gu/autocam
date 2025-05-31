@@ -10,14 +10,16 @@ const char *AutocamRemoteServiceUUID = "f49f531a-9cba-4ada-905c-68699d400122";
 
 const char *AutocamSensorDataSendCharacteristicUUID = "B328";
 const char *AutocamSensorDataRecvCharacteristicUUID = "B329";
-const char *AutocamRemoteDataBidirectionCharacteristicUUID = "B330";
+const char *AutocamRemoteDataSendCharacteristicUUID = "B330";
+const char *AutocamRemoteDataRecvCharacteristicUUID = "B331";
 
 BLEService AutocamSensorService(AutocamSensorServiceUUID);
 BLEService AutocamRemoteService(AutocamRemoteServiceUUID);
 
 BLECharacteristic AutocamSensorDataSend(AutocamSensorDataSendCharacteristicUUID, BLERead | BLENotify, sizeof(SensorDataSend));
 BLECharacteristic AutocamSensorDataRecv(AutocamSensorDataRecvCharacteristicUUID, BLEWrite, sizeof(SensorDataRecv));
-BLECharacteristic AutocamRemoteDataBidirection(AutocamRemoteDataBidirectionCharacteristicUUID, BLERead | BLEWrite | BLENotify, sizeof(RemoteDataBidirection));
+BLECharacteristic AutocamRemoteDataSend(AutocamRemoteDataSendCharacteristicUUID, BLERead | BLENotify, sizeof(RemoteDataSend));
+BLECharacteristic AutocamRemoteDataRecv(AutocamRemoteDataRecvCharacteristicUUID, BLEWrite, sizeof(RemoteDataRecv));
 
 unsigned long scanIntervalMillis = 1000;
 
