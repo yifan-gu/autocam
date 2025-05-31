@@ -922,16 +922,16 @@ char const* parameters_page_html = R"rawliteral(
     </div>
     <form id="parameters-form">
       <div class="slider-container">
-        <label>DistanceDelta: <span id="distanceDelta-value">0.5</span></label>
-        <input class="slider" type="range" name="distanceDelta" min="0" max="2" step="0.01" value="0.5" oninput="updateValue('distanceDelta', this.value)" />
+        <label>DistanceDelta: <span id="distanceDelta-value">0.05</span></label>
+        <input class="slider" type="range" name="distanceDelta" min="0" max="1" step="0.01" value="0.5" oninput="updateValue('distanceDelta', this.value)" />
       </div>
       <!-- New slider for headingDelta added right after distanceDelta -->
       <div class="slider-container">
-        <label>HeadingDelta: <span id="headingDelta-value">0.0</span></label>
-        <input class="slider" type="range" name="headingDelta" min="0" max="90" step="1" value="30" oninput="updateValue('headingDelta', this.value)" />
+        <label>HeadingDelta: <span id="headingDelta-value">1</span></label>
+        <input class="slider" type="range" name="headingDelta" min="0" max="30" step="1" value="30" oninput="updateValue('headingDelta', this.value)" />
       </div>
       <div class="slider-container">
-        <label>Kp_t: <span id="Kp_t-value">100</span></label>
+        <label>Kp_t: <span id="Kp_t-value">1</span></label>
         <input class="slider" type="range" name="Kp_t" min="0" max="10" step="0.1" value="1" oninput="updateValue('Kp_t', this.value)" />
       </div>
       <div class="slider-container">
@@ -943,7 +943,7 @@ char const* parameters_page_html = R"rawliteral(
         <input class="slider" type="range" name="Kd_t" min="0" max="10" step="0.1" value="0" oninput="updateValue('Kd_t', this.value)" />
       </div>
       <div class="slider-container">
-        <label>Kp_s: <span id="Kp_s-value">10</span></label>
+        <label>Kp_s: <span id="Kp_s-value">1</span></label>
         <input class="slider" type="range" name="Kp_s" min="0" max="10" step="0.1" value="1" oninput="updateValue('Kp_s', this.value)" />
       </div>
       <div class="slider-container">
@@ -955,11 +955,11 @@ char const* parameters_page_html = R"rawliteral(
         <input class="slider" type="range" name="Kd_s" min="0" max="10" step="0.1" value="0" oninput="updateValue('Kd_s', this.value)" />
       </div>
       <div class="slider-container">
-        <label>Max Throttle: <span id="maxMoveThrottle-value">300</span></label>
+        <label>Max Throttle: <span id="maxMoveThrottle-value">200</span></label>
         <input class="slider" type="range" name="maxMoveThrottle" min="0" max="500" step="1" value="300" oninput="updateValue('maxMoveThrottle', this.value)" />
       </div>
       <div class="slider-container">
-        <label>Min Throttle: <span id="minMoveThrottle-value">-300</span></label>
+        <label>Min Throttle: <span id="minMoveThrottle-value">-200</span></label>
         <input class="slider" type="range" name="minMoveThrottle" min="0" max="500" step="1" value="300" oninput="updateValue('minMoveThrottle', this.value)" />
       </div>
       <div class="slider-container">
