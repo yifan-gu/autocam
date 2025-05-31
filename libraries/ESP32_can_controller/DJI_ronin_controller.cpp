@@ -122,14 +122,14 @@ bool validate_data(uint8_t *data) {
 
   if (expected_crc16 != actual_crc16) {
     WARNF("Invalid CRC16 checksum, expecting 0x%04X, got 0x%04X\n", expected_crc16, actual_crc16);
-    WARNF("Data:\n");
-    for (int i = 0; i < data_len; i++) {
-      WARNF("%02X ", data[i]);
-      if ((i + 1) % 8 == 0)  {
-        WARNF("\n");
-      }
-    }
-    WARNF("\n");
+    //WARNF("Data:\n");
+    //for (int i = 0; i < data_len; i++) {
+    //  WARNF("%02X ", data[i]);
+    //  if ((i + 1) % 8 == 0)  {
+    //    WARNF("\n");
+    //  }
+    //}
+    //WARNF("\n");
     return false;
   }
 
@@ -141,14 +141,14 @@ bool validate_data(uint8_t *data) {
 
   if (expected_crc32 != actual_crc32) {
     WARNF("Invalid CRC32 checksum, expecting 0x%08X, got 0x%08X\n", expected_crc32, actual_crc32);
-    WARNF("Data:\n");
-    for (int i = 0; i < data_len; i++) {
-      WARNF("%02X ", data[i]);
-      if ((i + 1) % 8 == 0)  {
-        WARNF("\n");
-      }
-    }
-    WARNF("\n");
+    //WARNF("Data:\n");
+    //for (int i = 0; i < data_len; i++) {
+    //  WARNF("%02X ", data[i]);
+    //  if ((i + 1) % 8 == 0)  {
+    //    WARNF("\n");
+    //  }
+    //}
+    //WARNF("\n");
     return false;
   }
 

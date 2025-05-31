@@ -50,7 +50,7 @@ const int minSteering = 1000, maxSteering = 2000, midSteering = 1500; // 1000 = 
 
 const float fieldOfViewRatio = 28 / 20; // Car length / car width (measured from the wheel).
 
-int minMoveThrottle = 1200, maxMoveThrottle = 1800;
+int minMoveThrottle = 1300, maxMoveThrottle = 1700;
 int minMoveSteering = 1000, maxMoveSteering = 2000;
 
 // Heartbeat tracking
@@ -71,6 +71,10 @@ struct GlobalState {
   float pitchSpeed;        // Pitch speed
   int toggleState;         // Flag to store all the toggle button value (activeTrack, gimbalRecenter, cameraRecording)
   uint16_t uwbSelector;    // UWB selector value
+  float currentX;          // The tag's current coordinates.
+  float currentY;          // The tag's current coordinates.
+  float targetX;           // The tag's target coordinates.
+  float targetY;           // The tag's target coordinates.
 };
 
 GlobalState globalState = {
@@ -85,11 +89,15 @@ GlobalState globalState = {
   0.0,                   // yawSpeed
   0.0,                   // pitchSpeed
   0,                     // toggleState
-  0                      // uwbSelector
+  1,                     // uwbSelector
+  0.0,                   // currentX
+  0.0,                   // currentY
+  0.0,                   // targetX
+  0.0,                   // targetY
 };
 
 void printGlobalState() {
-  LOGF("Throttle:%d, Steering:%d, State:%d, Drive Mode:%d, Dist:%.2f, TargDist:%.2f, Head:%.2f, TargHead:%.2f, Yaw:%.2f, Pitch:%.2f, toggleState:%d, UWB Selector:%d\n",
+  LOGF("Throttle:%d, Steering:%d, State:%d, Drive Mode:%d, Dist:%.2f, TargetDist:%.2f, Head:%.2f, TargetHead:%.2f, Yaw:%.2f, Pitch:%.2f, toggleState:%d, UWB Selector:%d, currentX: %.2f, currentY: %.2f, targetX: %.2f, targetY: %.2f\n",
     globalState.throttleValue,
     globalState.steeringValue,
     globalState.state,
@@ -101,22 +109,17 @@ void printGlobalState() {
     globalState.yawSpeed,
     globalState.pitchSpeed,
     globalState.toggleState,
-    globalState.uwbSelector
+    globalState.uwbSelector,
+    globalState.currentX,
+    globalState.currentY,
+    globalState.targetX,
+    globalState.targetY
   );
 }
 
 
 
 bool autocamRemoteInputChanged = false;
-
-// The calculated coordinates of the tag.
-float currentX = 0, currentY = 0;
-
-// The target coordinates to match.
-float targetX = 0, targetY = 0;
-
-float lastX = currentX;
-
 
 //////////////////////////////////////////////////////////////////////////////////
 //
@@ -365,10 +368,10 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
         response += "\"steering\":" + String(globalState.steeringValue) + ",";
         response += "\"distance\":" + String(globalState.distance, 2) + ",";
         response += "\"heading\":" + String(globalState.heading, 2) + ",";
-        response += "\"currentX\":" + String(currentX, 2) + ",";
-        response += "\"currentY\":" + String(currentY, 2 ) + ",";
-        response += "\"targetX\":" + String(targetX, 2) + ",";
-        response += "\"targetY\":" + String(targetY, 2) + ",";
+        response += "\"currentX\":" + String(globalState.currentX, 2) + ",";
+        response += "\"currentY\":" + String(globalState.currentY, 2 ) + ",";
+        response += "\"targetX\":" + String(globalState.targetX, 2) + ",";
+        response += "\"targetY\":" + String(globalState.targetY, 2) + ",";
         response += "\"state\":" + String(globalState.state) + ",";
         response += "\"driveMode\":" + String(globalState.driveMode);
         response += "}";
@@ -650,10 +653,10 @@ void calculateSteeringThrottleFollow() {
 
   boolean moveForward = false;
   boolean moveBackward = false;
-  if (currentY > distanceDelta) {
+  if (globalState.currentY > distanceDelta) {
     setMoveForward(throttleCoeff);
     moveForward = true;
-  } else if (currentY < -distanceDelta) {
+  } else if (globalState.currentY < -distanceDelta) {
     setMoveBackward(throttleCoeff);
     moveBackward = true;
   }
@@ -698,8 +701,8 @@ void calculateSteeringThrottleCinema() {
 
   lastDeltaTimeMillis = deltaTimeMillis;
 
-  float yDiff = currentY - targetY;
-  float xDiff = currentX - targetX;
+  float yDiff = globalState.currentY - globalState.targetY;
+  float xDiff = globalState.currentX - globalState.targetX;
   float headingDiff = globalState.heading - globalState.targetHeading;
   if (headingDiff > 180) {
     headingDiff -= 360;
@@ -734,12 +737,12 @@ void calculateSteeringThrottleCinema() {
   }
 
   float steeringCoeff;
-  if (isLeading(targetX, targetY, moveForward, moveBackward)) {
+  if (isLeading(globalState.targetX, globalState.targetY, moveForward, moveBackward)) {
     // Leading.
     steeringCoeff = abs(xDiff) * leadingTurningCoefficient;
-    if (pushingLeft(currentX, targetX, distanceDelta)) {
+    if (pushingLeft(globalState.currentX, globalState.targetX, distanceDelta)) {
       setSteering(steeringCoeff);
-    } else if (pushingRight(currentX, targetX, distanceDelta)) {
+    } else if (pushingRight(globalState.currentX, globalState.targetX, distanceDelta)) {
       setSteering(-steeringCoeff);
     }
   } else {
@@ -815,24 +818,24 @@ void calculateCoordinates() {
   float headingRadians = radians(globalState.heading + 90); // +90 since we are always facing towards +Y axis.
 
   // Use trigonometry to calculate the coordinates
-  currentX = globalState.distance * cos(headingRadians);
-  currentY = globalState.distance * sin(headingRadians);
+  globalState.currentX = globalState.distance * cos(headingRadians);
+  globalState.currentY = globalState.distance * sin(headingRadians);
 
   // Serial output for debugging
   //LOG("Calculated coordinates (currentX, currentY): ");
-  //LOG(currentX);
+  //LOG(globalState.currentX);
   //LOG(", ");
-  //LOGLN(currentY)
+  //LOGLN(globalState.currentY)
 
   if (globalState.driveMode == DRIVE_MODE_MANUAL) { // Update the real time target coordinates if in manual mode.
-    targetX = currentX;
-    targetY = currentY;
+    globalState.targetX = globalState.currentX;
+    globalState.targetY = globalState.currentY;
     globalState.targetDistance = globalState.distance;
     globalState.targetHeading = globalState.heading;
     //LOG("Updated target coordinates (targetX, targetY): ");
-    //LOG(targetX);
+    //LOG(globalState.targetX);
     //LOG(", ");
-    //LOGLN(targetY);
+    //LOGLN(globalState.targetY);
   }
   return;
 }
