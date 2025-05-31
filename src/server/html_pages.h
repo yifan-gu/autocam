@@ -932,7 +932,7 @@ char const* parameters_page_html = R"rawliteral(
       </div>
       <div class="slider-container">
         <label>Kp_t: <span id="Kp_t-value">100</span></label>
-        <input class="slider" type="range" name="Kp_t" min="0" max="200" step="0.1" value="100" oninput="updateValue('Kp_t', this.value)" />
+        <input class="slider" type="range" name="Kp_t" min="0" max="10" step="0.1" value="1" oninput="updateValue('Kp_t', this.value)" />
       </div>
       <div class="slider-container">
         <label>Ki_t: <span id="Ki_t-value">0</span></label>
@@ -944,7 +944,7 @@ char const* parameters_page_html = R"rawliteral(
       </div>
       <div class="slider-container">
         <label>Kp_s: <span id="Kp_s-value">10</span></label>
-        <input class="slider" type="range" name="Kp_s" min="0" max="20" step="0.1" value="10" oninput="updateValue('Kp_s', this.value)" />
+        <input class="slider" type="range" name="Kp_s" min="0" max="10" step="0.1" value="1" oninput="updateValue('Kp_s', this.value)" />
       </div>
       <div class="slider-container">
         <label>Ki_s: <span id="Ki_s-value">0</span></label>

@@ -114,7 +114,7 @@ float targetX = 0, targetY = 0;
 float distanceDelta = 0.5; // The distance tolerance.
 float headingDelta = 30; // The heading tolerance.
 
-float Kp_t = 100.0;  // Proportional gain. Diff = Kp_t * distance
+float Kp_t = 1.0;  // Proportional gain. Diff = Kp_t * distance
 float Ki_t = 0.0;  // Integral gain. Diff = Ki_t * distance * 1000 * second.
 float Kd_t = 0.0;  // Derivative gain. Diff = Kd_t / (speed m/s * 1000 ms)
 
@@ -125,7 +125,7 @@ float maxMoveThrottle = 300;                 // Maximum throttle value in practi
 float minMoveThrottle = -maxMoveThrottle;    // Minimum throttle value in practice.
 
 // // PID Controller variables for steering.
-float Kp_s = 10.0;   // Proportional gain. Diff = Kp_s * angle diff.
+float Kp_s = 1.0;   // Proportional gain. Diff = Kp_s * angle diff.
 float Ki_s = 0.0;  // Integral gain. Diff = Ki_s * angle diff * 1000 * second.
 float Kd_s = 0.0;   // Derivative gain. Diff = Kd_s / (anglur speed * 1000 ms)
 
