@@ -1,4 +1,3 @@
-#include <ESP32Servo.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
 #include <math.h>
@@ -9,21 +8,30 @@
 #include "LED_controller.hpp"
 #include "util.h"
 
-// Pin configuration
-#define STEERING_PIN D8  //  D8 for steering
-#define THROTTLE_PIN D7  //  D7 for throttle
+// Use 50Hz for servos/ESCs, 12-bit resolution
+#define PWM_FREQ 50
+#define PWM_RESOLUTION 12  // 12-bit (0–4095)
 
-#define SENSOR_LED_RED_PIN D6 // D6
-#define SENSOR_LED_GREEN_PIN D5 // D5
+// ESC output PWM channels
+#define THROTTLE_PWM_CHANNEL 0
+#define STEERING_PWM_CHANNEL 1
+
+// Pin configuration
+ // Pin configuration
+#define STEERING_PIN A6  //  A6 for steering
+#define THROTTLE_PIN A5  //  A5 for throttle
+
+#define SENSOR_LED_RED_PIN A4 // A4
+#define SENSOR_LED_GREEN_PIN A3 // A3
 #define SENSOR_LED_BLUE_PIN -1
 
-#define REMOTE_LED_RED_PIN D4 // D4
-#define REMOTE_LED_GREEN_PIN D3 // D3
+#define REMOTE_LED_RED_PIN A2 // A2
+#define REMOTE_LED_GREEN_PIN A1 // A1
 #define REMOTE_LED_BLUE_PIN -1
 
 #define DRIVE_MODE_LED_RED_PIN -1
 #define DRIVE_MODE_LED_GREEN_PIN -1
-#define DRIVE_MODE_LED_BLUE_PIN D2 // D2
+#define DRIVE_MODE_LED_BLUE_PIN A0 // A0
 
 LEDController ledController;
 
@@ -35,10 +43,6 @@ const char* hostname = "autocam"; // mDNS hostname
 // Async WebSocket server
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
-
-// Servo objects
-Servo throttleServo;
-Servo steeringServo;
 
 // Define throttle and steering ranges
 const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
@@ -205,13 +209,16 @@ void setupESC() {
   LOGLN("Initializing ESC...");
   delay(1000); // Wait 1 seconds to ensure the ESC ready to arm.
 
-  // Attach servos
-  throttleServo.attach(THROTTLE_PIN, minThrottle, maxThrottle);
-  steeringServo.attach(STEERING_PIN, minSteering, maxSteering);
+  // Setup PWM
+  ledcSetup(THROTTLE_PWM_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
+  ledcAttachPin(THROTTLE_PIN, THROTTLE_PWM_CHANNEL);
 
-  // Initialize to neutral positions to arm the ESC.
-  throttleServo.writeMicroseconds(midThrottle);
-  steeringServo.writeMicroseconds(midSteering);
+  ledcSetup(STEERING_PWM_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
+  ledcAttachPin(STEERING_PIN, STEERING_PWM_CHANNEL);
+
+  // Send neutral signals
+  setThrottlePWM(midThrottle);
+  setSteeringPWM(midSteering);
 
   LOGLN("ESC Initialized!");
 }
@@ -405,9 +412,19 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
   }
 }
 
+void setThrottlePWM(int microseconds) {
+  uint32_t duty = microseconds * 4095 / 20000;
+  ledcWrite(THROTTLE_PWM_CHANNEL, duty);
+}
+
+void setSteeringPWM(int microseconds) {
+  uint32_t duty = microseconds * 4095 / 20000;
+  ledcWrite(STEERING_PWM_CHANNEL, duty);
+}
+
 void runESCController() {
-  steeringServo.writeMicroseconds(globalState.steeringValue);
-  throttleServo.writeMicroseconds(globalState.throttleValue);
+  setSteeringPWM(globalState.steeringValue);
+  setThrottlePWM(globalState.throttleValue);
 
    /*LOG("Throttle: ");
    LOG(globalState.throttleValue);
