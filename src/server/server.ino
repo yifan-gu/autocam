@@ -44,6 +44,11 @@ Servo steeringServo;
 const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
 const int minSteering = 1000, maxSteering = 2000, midSteering = 1500; // 1000 = max right turn, 2000 = max left turn.
 
+const float fieldOfViewRatio = 28 / 20; // Car length / car width (measured from the wheel).
+
+int minMoveThrottle = 1200, maxMoveThrottle = 1800;
+int minMoveSteering = 1000, maxMoveSteering = 2000;
+
 // Heartbeat tracking
 unsigned long lastPingTime = 0;           // Time of last received ping
 const unsigned long heartbeatTimeout = 1000; // 1 second timeout
@@ -106,13 +111,17 @@ float currentX = 0, currentY = 0;
 // The target coordinates to match.
 float targetX = 0, targetY = 0;
 
+float lastX = currentX;
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //
 // PID Controller variables for throttle. Tunable.
 //
-float distanceDelta = 0.5; // The distance tolerance.
-float headingDelta = 30; // The heading tolerance.
+float distanceDelta = 0.1; // The distance tolerance in meters.
+float headingDelta = 5; // The heading tolerance in degrees.
+float throttleConstant = 100;
+float steeringConstant = 10;
 
 float Kp_t = 1.0;  // Proportional gain. Diff = Kp_t * distance
 float Ki_t = 0.0;  // Integral gain. Diff = Ki_t * distance * 1000 * second.
@@ -120,9 +129,6 @@ float Kd_t = 0.0;  // Derivative gain. Diff = Kd_t / (speed m/s * 1000 ms)
 
 float previousError_t = 0.0;  // Previous error for the derivative term
 float integral_t = 0.0;       // Accumulated integral term
-
-float maxMoveThrottle = 300;                 // Maximum throttle value in practice.
-float minMoveThrottle = -maxMoveThrottle;    // Minimum throttle value in practice.
 
 // // PID Controller variables for steering.
 float Kp_s = 1.0;   // Proportional gain. Diff = Kp_s * angle diff.
@@ -132,12 +138,13 @@ float Kd_s = 0.0;   // Derivative gain. Diff = Kd_s / (anglur speed * 1000 ms)
 float previousError_s = 0.0;  // Previous error for the derivative term
 float integral_s = 0.0;       // Accumulated integral term
 
-float maxMoveSteering = 500;              // Maximum steering value in practice.
-float minMoveSteering = -maxMoveSteering; // Minimum steering value in practice.
-
 float lastDeltaTimeMillis = 0; // Used to calculate ki, and Kd in the PID system.
 float minDeltaTimeMillis = 10; // Control the rate of PID update.
 float distanceSmoothFactor = 0.1; // Smoothing factor for distance readings (0 < alpha <= 1; lower values are smoother).
+
+float leadingTurningCoefficient = 10;
+float tailingTurningCoefficient = 1;
+
 //
 //
 //////////////////////////////////////////////////////////////////////////////////
@@ -622,21 +629,15 @@ void calculateSteeringThrottleFollow() {
   } else {
     distanceDiffError = distanceDiff + distanceDelta;
   }
-  float throttleDiff = calculateThrottleDiff(distanceDiffError, deltaTimeMillis);
+  float throttleCoeff = calculateThrottleCoeff(distanceDiffError, deltaTimeMillis);
 
   boolean moveForward = false;
   boolean moveBackward = false;
-  if (currentY - targetY > distanceDelta) {
-    setMoveForward(throttleDiff);
+  if (currentY > distanceDelta) {
+    setMoveForward(throttleCoeff);
     moveForward = true;
-  } else if (targetY - currentY > distanceDelta) {
-    setMoveBackward(throttleDiff);
-    moveBackward = true;
-  } else if (currentY > 0) { // Parallel moving.
-    setMoveForward(throttleDiff);
-    moveForward = true;
-  } else if (currentY < 0) {
-    setMoveBackward(throttleDiff);
+  } else if (currentY < -distanceDelta) {
+    setMoveBackward(throttleCoeff);
     moveBackward = true;
   }
 
@@ -664,11 +665,11 @@ void calculateSteeringThrottleFollow() {
   } else {
     headingDiffError = headingDiff + headingDelta;
   }
-  float steeringDiff = calculateSteeringDiff(headingDiffError, deltaTimeMillis);
+  float steeringCoeff = calculateSteeringCoeff(headingDiff, deltaTimeMillis);
   if (moveForward) {
-    setSteering(steeringDiff);
+    setSteering(steeringCoeff);
   } else if (moveBackward) {
-    setSteering(-steeringDiff); // In reverse, we need to turn the other way around.
+    setSteering(-steeringCoeff); // In reverse, we need to turn the other way around.
   }
 }
 
@@ -679,46 +680,9 @@ void calculateSteeringThrottleCinema() {
   }
 
   lastDeltaTimeMillis = deltaTimeMillis;
-  float distanceDiff = globalState.distance - globalState.targetDistance;
-  if (abs(distanceDiff) <= distanceDelta) { // No distance change.
-    globalState.throttleValue = midThrottle;
-    globalState.steeringValue = midSteering;
-    return;
-  }
 
-  // Calculate throttle.
-  float distanceDiffError = 0;
-  if (distanceDiff > 0) {
-    distanceDiffError = distanceDiff - distanceDelta; // Compensate the tolerance.
-  } else {
-    distanceDiffError = distanceDiff + distanceDelta;
-  }
-  float throttleDiff = calculateThrottleDiff(distanceDiffError, deltaTimeMillis);
-
-  boolean moveForward = false;
-  boolean moveBackward = false;
-  if (currentY - targetY > distanceDelta) {
-    setMoveForward(throttleDiff);
-    moveForward = true;
-  } else if (targetY - currentY > distanceDelta) {
-    setMoveBackward(throttleDiff);
-    moveBackward = true;
-  } else if (currentY > 0) { // Parallel moving.
-    setMoveForward(throttleDiff);
-    moveForward = true;
-  } else if (currentY < 0) {
-    setMoveBackward(throttleDiff);
-    moveBackward = true;
-  }
-
-  if (abs(currentX - targetX) <= distanceDelta) {
-    globalState.steeringValue = midSteering; // Parallel moving, do not steer.
-    return;
-  }
-
-  // headingDiff (-180, 180].
-  // Positive value means the target is turning counterclockwise, or need to turn left.
-  // Negative value means the target is turning clockwise, or need to turn right.
+  float yDiff = currentY - targetY;
+  float xDiff = currentX - targetX;
   float headingDiff = globalState.heading - globalState.targetHeading;
   if (headingDiff > 180) {
     headingDiff -= 360;
@@ -726,23 +690,75 @@ void calculateSteeringThrottleCinema() {
     headingDiff += 360;
   }
 
-  // Calculate steering.
-  float headingDiffError = 0;
-  if (headingDiff > 0) {
-    headingDiffError = headingDiff - headingDelta; // Compensate the tolerance.
-  } else {
-    headingDiffError = headingDiff + headingDelta;
+  if (abs(yDiff) <= distanceDelta) {
+    globalState.throttleValue = midThrottle;
+    globalState.steeringValue = midSteering;
+    return;
   }
-  float steeringDiff = calculateSteeringDiff(headingDiffError, deltaTimeMillis);
-  if (moveForward) {
-    setSteering(steeringDiff);
-  } else if (moveBackward) {
-    setSteering(-steeringDiff); // In reverse, we need to turn the other way around.
+
+  boolean moveForward = false;
+  boolean moveBackward = false;
+
+  // Calculate throttle.
+  float yDiffError = 0;
+  if (yDiff > 0) {
+    yDiffError = yDiff - distanceDelta; // Compensate the tolerance.
+  } else {
+    yDiffError = yDiff + distanceDelta;
+  }
+  float throttleCoeff = calculateThrottleCoeff(yDiffError, deltaTimeMillis);
+
+  if (yDiff > 0) {
+    setMoveForward(throttleCoeff);
+    moveForward = true;
+  } else {
+    setMoveBackward(-throttleCoeff); // throttleCoeff < 0.
+    moveBackward = true;
+  }
+
+  float steeringCoeff;
+  if (isLeading(targetX, targetY, moveForward, moveBackward)) {
+    // Leading.
+    steeringCoeff = abs(xDiff) * leadingTurningCoefficient;
+    if (pushingLeft(currentX, targetX, distanceDelta)) {
+      setSteering(steeringCoeff);
+    } else if (pushingRight(currentX, targetX, distanceDelta)) {
+      setSteering(-steeringCoeff);
+    }
+  } else {
+    // Tailing.
+    steeringCoeff = headingDiff * tailingTurningCoefficient;
+    if (moveForward) {
+      setSteering(steeringCoeff);
+    } else if (moveBackward) {
+      setSteering(-steeringCoeff);
+    }
   }
 }
 
-// Function to calculate the new throttle diff using PID control.
-float calculateThrottleDiff(float error_t, float deltaTimeMillis) {
+boolean pushingRight(float currentX, float targetX, float distanceDelta) {
+  return currentX > targetX + distanceDelta;
+}
+
+boolean pushingLeft(float currentX, float targetX, float distanceDelta) {
+  return currentX < targetX - distanceDelta;
+}
+
+boolean isInRearTriangle(float currentX, float currentY, float fieldOfViewRatio, boolean moveForward, boolean moveBackward) {
+  if ((currentY >= 0 && moveForward) || (currentY <= 0 && moveBackward)) {
+    // Not behind the car
+    return false;
+  }
+  // Check if the point is inside the wedge
+  return abs(currentY) >= fieldOfViewRatio * abs(currentX);
+}
+
+boolean isLeading(float currentX, float currentY, boolean moveForward, boolean moveBackward) {
+  return !isInRearTriangle(currentX, currentY, fieldOfViewRatio, moveForward, moveBackward);
+}
+
+// Function to calculate the new distance diff using PID control.
+float calculateThrottleCoeff(float error_t, float deltaTimeMillis) {
 
   // Step 1: Calculate integral (accumulated error)
   integral_t += error_t * deltaTimeMillis;
@@ -751,19 +767,16 @@ float calculateThrottleDiff(float error_t, float deltaTimeMillis) {
   float derivative_t = (error_t - previousError_t) / deltaTimeMillis;
 
   // Step 3: Compute PID output
-  float throttle = (Kp_t * error_t) + (Ki_t * integral_t) + (Kd_t * derivative_t);
+  float throttleCoeff = (Kp_t * error_t) + (Ki_t * integral_t) + (Kd_t * derivative_t);
 
-  // Step 4: Constrain throttle within limits
-  throttle = constrain(throttle, minMoveThrottle, maxMoveThrottle);
-
-  // Step 5: Update previous error
+  // Step 4: Update previous error
   previousError_t = error_t;
 
-  return throttle;
+  return throttleCoeff;
 }
 
-// Function to calculate the new steering diff using PID control.
-float calculateSteeringDiff(float error_s, float deltaTimeMillis) {
+// Function to calculate the new heading diff using PID control.
+float calculateSteeringCoeff(float error_s, float deltaTimeMillis) {
 
   // Step 1: Calculate integral (accumulated error)
   integral_s += error_s * deltaTimeMillis;
@@ -772,15 +785,12 @@ float calculateSteeringDiff(float error_s, float deltaTimeMillis) {
   float derivative_s = (error_s - previousError_s) / deltaTimeMillis;
 
   // Step 3: Compute PID output
-  float steering = (Kp_s * error_s) + (Ki_s * integral_s) + (Kd_s * derivative_s);
+  float steeringCoeff = (Kp_s * error_s) + (Ki_s * integral_s) + (Kd_s * derivative_s);
 
-  // Step 4: Constrain throttle within limits
-  steering = constrain(steering, minMoveSteering, maxMoveSteering);
-
-  // Step 5: Update previous error
+  // Step 4: Update previous error
   previousError_s = error_s;
 
-  return steering;
+  return steeringCoeff;
 }
 
 void calculateCoordinates() {
@@ -810,16 +820,19 @@ void calculateCoordinates() {
   return;
 }
 
-void setSteering(float steeringDiff) {
-  globalState.steeringValue = midSteering + (int)steeringDiff;
+void setSteering(float steeringCoeff) {
+  int steering = midSteering + (int) (steeringCoeff * steeringConstant);
+  globalState.steeringValue = constrain(steering, minMoveSteering, maxMoveSteering);
 }
 
-void setMoveForward(float throttleDiff) {
-  globalState.throttleValue = midThrottle + (int)throttleDiff;
+void setMoveForward(float throttleCoeff) {
+  int throttle = midThrottle + (int) (throttleCoeff * throttleConstant);
+  globalState.throttleValue = constrain(throttle, minMoveThrottle, maxMoveThrottle);
 }
 
-void setMoveBackward(float throttleDiff) {
-  globalState.throttleValue = midThrottle - (int)throttleDiff;
+void setMoveBackward(float throttleCoeff) {
+  int throttle = throttle - (int) (throttleCoeff * throttleConstant);
+  globalState.throttleValue = constrain(throttle, minMoveThrottle, maxMoveThrottle);
 }
 
 void emergencyStop() { //TODO(yifan): Refactor out this with a state machine.

@@ -79,11 +79,9 @@
              Kd_t = 1;
          let minMoveThrottle = -car.maxThrottle,
              maxMoveThrottle = car.maxThrottle;
-         let fieldOfViewRatio = 28 / 20; // Car width / car length (measured from the wheel).
+         let fieldOfViewRatio = 28 / 20; // Car length / car width (measured from the wheel).
          let leadingTurningCoefficient = 0.01;
-         let pushingTurningCoefficient = 2;
-
-         let lastX = car.currentX;
+         let tailingTurningCoefficient = 2;
 
          canvas.addEventListener("click", () => {
              moveEnabled = !moveEnabled;
@@ -218,10 +216,10 @@
              let moveForward = false;
              let moveBackward = false;
 
-             if (car.currentY >= distanceDelta) {
+             if (car.currentY > distanceDelta) {
                  setMoveForward(throttle);
                  moveForward = true;
-             } else if (car.currentY <= -distanceDelta) {
+             } else if (car.currentY < -distanceDelta) {
                  setMoveBackward(throttle);
                  moveBackward = true;
              }
@@ -249,8 +247,8 @@
          }
 
          function calculateSteeringThrottleCinema() {
-             const distanceDelta = 0;
-             const headingDelta = 0;
+             const distanceDelta = 5;
+             const headingDelta = 5;
 
              const yDiff = car.currentY - car.targetY;
              const xDiff = car.currentX - car.targetX;
@@ -287,39 +285,31 @@
                  // Leading.
                  let steeringC = Math.abs(xDiff) * leadingTurningCoefficient;
                  console.log("leading steering coefficient", steeringC);
-                 if (pushingLeft(car.currentX, car.targetX, distanceDelta, lastX)) {
+                 if (pushingLeft(car.currentX, car.targetX, distanceDelta)) {
                      console.log("steering left");
                      setSteering(steeringC * car.maxSteering);
-                 } else if (pushingRight(car.currentX, car.targetX, distanceDelta, lastX)) {
+                 } else if (pushingRight(car.currentX, car.targetX, distanceDelta)) {
                      console.log("steering right");
                      setSteering(-steeringC * car.maxSteering);
                  }
              } else {
-                 // Pushing.
-                 let steeringC = car.headingDiff / car.maxSteering * pushingTurningCoefficient;
-                 console.log("pushing steering coefficient", steeringC);
+                 // Tailing.
+                 let steeringC = car.headingDiff / car.maxSteering * tailingTurningCoefficient;
+                 console.log("tailing steering coefficient", steeringC);
                  if (moveForward) {
                      setSteering(steeringC * car.maxSteering);
                  } else if (moveBackward) {
                      setSteering(-steeringC * car.maxSteering);
                  }
              }
-             lastX = car.currentX;
          }
 
-         function pushingRight(currentX, targetX, distanceDelta, lastX) {
-             return currentX > targetX + distanceDelta && currentX >= lastX;
+         function pushingRight(currentX, targetX, distanceDelta) {
+             return currentX > targetX + distanceDelta;
          }
 
-         function pushingLeft(currentX, targetX, distanceDelta, lastX) {
-             return currentX < targetX - distanceDelta && currentX <= lastX;
-         }
-
-         function pullingOutward(currentX, targetX, distanceDelta) {
-             let xDiffAbs = Math.abs(currentX - targetX);
-             let result = Math.abs(currentX) > Math.abs(targetX) + distanceDelta && xDiffAbs > xDiffPullOutAbs;
-             xDiffPullOutAbs = xDiffAbs;
-             return result;
+         function pushingLeft(currentX, targetX, distanceDelta) {
+             return currentX < targetX - distanceDelta;
          }
 
          function isInRearTriangle(currentX, currentY, fieldOfViewRatio, moveForward, moveBackward) {
