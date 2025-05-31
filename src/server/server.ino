@@ -387,11 +387,11 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
         break;
       }
       if (message.startsWith("throttle=")) {
-        globalState.throttleValue = map(message.substring(9).toInt(), 1000, 2000, minThrottle, maxThrottle);
+        globalState.throttleValue = map(message.substring(9).toInt(), 1000, 2000, minMoveThrottle, maxMoveThrottle);
         break;
       }
       if (message.startsWith("steering=")) {
-        globalState.steeringValue = map(message.substring(9).toInt(), 1000, 2000, minSteering, maxSteering);
+        globalState.steeringValue = map(message.substring(9).toInt(), 1000, 2000, minMoveSteering, maxMoveSteering);
         break;
       }
       LOGF("Unknown Websocket message: %s\n", message);
@@ -548,8 +548,8 @@ void getAutocamRemoteData() {
 
   autocamRemoteInputChanged = globalState.yawSpeed != data.yawSpeed || globalState.pitchSpeed != data.pitchSpeed || globalState.toggleState != data.toggleState || globalState.uwbSelector != data.uwbSelector;
 
-  globalState.throttleValue = data.throttleValue;
-  globalState.steeringValue = data.steeringValue;
+  globalState.throttleValue = constrain(data.throttleValue, minMoveThrottle, maxMoveThrottle);
+  globalState.steeringValue = constrain(data.steeringValue, minMoveSteering, maxMoveSteering);
   globalState.yawSpeed = data.yawSpeed;
   globalState.pitchSpeed = data.pitchSpeed;
   globalState.toggleState = data.toggleState;
