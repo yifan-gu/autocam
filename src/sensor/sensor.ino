@@ -42,7 +42,7 @@ Anchor uwbAnchors[] = {
   {0x0001, false}
 };
 
-uint16_t uwbSelector = 0;
+uint16_t uwbSelector = 1;
 
 // TAG antenna delay defaults to 16384
 uint16_t Adelay = 16384;
@@ -69,6 +69,7 @@ void setup() {
     // Wait for Serial or timeout
   }
 
+  delay(10000); // XXX(yifan): This is to compensate the DJI start-up. Looks like if we don't wait long enough, we can't get heading readings.
   setupLED();
   setupUWB();
   setupDJIRoninController();

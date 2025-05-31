@@ -45,15 +45,15 @@
 #define GIMBAL_STICK_Y_PIN 35
 #define BATTERY_ADC_PIN 39  // ADC pin to measure battery voltage.
 
-const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
+const int minThrottle = 1300, maxThrottle = 1700, midThrottle = 1500;
 const int minSteering = 1000, maxSteering = 2000, midSteering = 1500;
-const float minPitch = -2, maxPitch = 2, midPitch = 0;
-const float minYaw = -2, maxYaw = 2, midYaw = 0;
+const float minPitch = -4, maxPitch = 4, midPitch = 0;
+const float minYaw = -4, maxYaw = 4, midYaw = 0;
 
 // State indicators.
 int state = SERVER_STATE_NOT_READY;
 int driveMode = DRIVE_MODE_MANUAL;
-uint16_t uwbSelector = 0;
+uint16_t uwbSelector = 1;
 bool uwbStarted = false;
 
 // Variables to store the drive mode button trigger events.
@@ -459,8 +459,8 @@ float mapFloat(float x, float in_min, float in_max, float outA, float outB) {
 void readJoysticks() {
   steeringValue = mapJoystickCentered(readJoystick(steeringX), steeringX.adcMin, steeringX.adcMid, steeringX.adcMax, steeringX.deadZone, minSteering, midSteering, maxSteering);
   throttleValue = mapJoystickCentered(readJoystick(throttleY), throttleY.adcMin, throttleY.adcMid, throttleY.adcMax, throttleY.deadZone, maxThrottle, midThrottle, minThrottle);
-  yawSpeedValue = mapJoystickCentered(readJoystick(gimbalX), gimbalX.adcMin, gimbalX.adcMid, gimbalX.adcMax, gimbalX.deadZone, maxYaw, midYaw, minYaw);
-  pitchSpeedValue = mapJoystickCentered(readJoystick(gimbalY), gimbalY.adcMin, gimbalY.adcMid, gimbalY.adcMax, gimbalY.deadZone, minPitch, midPitch, maxPitch);
+  yawSpeedValue = mapJoystickCentered(readJoystick(gimbalX), gimbalX.adcMin, gimbalX.adcMid, gimbalX.adcMax, gimbalX.deadZone, minYaw, midYaw, maxYaw);
+  pitchSpeedValue = mapJoystickCentered(readJoystick(gimbalY), gimbalY.adcMin, gimbalY.adcMid, gimbalY.adcMax, gimbalY.deadZone, maxPitch, midPitch, minPitch);
 }
 
 void readInput() {
