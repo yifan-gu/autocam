@@ -121,10 +121,10 @@ bool autocamRemoteInputChanged = false;
 //
 // PID Controller variables for throttle. Tunable.
 //
-float distanceDelta = 0.1; // The distance tolerance in meters.
-float headingDelta = 5; // The heading tolerance in degrees.
+float distanceDelta = 0.05; // The distance tolerance in meters.
+float headingDelta = 1; // The heading tolerance in degrees.
 float throttleConstant = 100;
-float steeringConstant = 10;
+float steeringConstant = 20;
 
 float Kp_t = 1.0;  // Proportional gain. Diff = Kp_t * distance
 float Ki_t = 0.0;  // Integral gain. Diff = Ki_t * distance * 1000 * second.
@@ -837,7 +837,7 @@ void setMoveForward(float throttleCoeff) {
 }
 
 void setMoveBackward(float throttleCoeff) {
-  int throttle = throttle - (int) (throttleCoeff * throttleConstant);
+  int throttle = midThrottle - (int) (throttleCoeff * throttleConstant);
   globalState.throttleValue = constrain(throttle, minMoveThrottle, maxMoveThrottle);
 }
 
