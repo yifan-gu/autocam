@@ -182,7 +182,7 @@ void loop() {
   //LOGF("Interval since last iteration: %u ms\n", intervalMs);
 
   getAutocamSensorData();
-  getAutocamRemoteDataBidirection();
+  getAutocamRemoteData();
   //printGlobalState();
   sendGimbalControllerData();
   calculateCoordinates();
@@ -444,7 +444,10 @@ void runHealthCheck() {
 }
 
 void establishAutocamRemoteBLEConnection() {
-  while (!scanForPeripheral(AutocamRemote, AutocamRemoteService, AutocamRemoteDataBidirection, AutocamRemoteServiceUUID, AutocamRemoteDataBidirectionCharacteristicUUID)) {
+  while (!scanForPeripheral(AutocamRemote, AutocamRemoteService, AutocamRemoteDataSend, AutocamRemoteServiceUUID, AutocamRemoteDataSendCharacteristicUUID)) {
+    delay(1000);
+  }
+  while (!scanForPeripheral(AutocamRemote, AutocamRemoteService, AutocamRemoteDataRecv, AutocamRemoteServiceUUID, AutocamRemoteDataRecvCharacteristicUUID)) {
     delay(1000);
   }
   updateState(globalState.state | SERVER_STATE_REMOTE_READY);
@@ -521,23 +524,23 @@ void getAutocamSensorData() {
   lastPingTime = millis();
 }
 
-void getAutocamRemoteDataBidirection() {
+void getAutocamRemoteData() {
   if (!AutocamRemote.connected()) {
     emergencyStop();
     updateState(globalState.state & ~SERVER_STATE_REMOTE_READY); // Clear the remote controller ready indicator bit.
     return;
   }
 
-  if (!AutocamRemoteDataBidirection.valueUpdated()) { // No available data.
+  if (!AutocamRemoteDataSend.valueUpdated()) { // No available data.
     return;
   }
 
-  if (AutocamRemoteDataBidirection.valueLength() != sizeof(RemoteDataBidirection)) { // Appearantly if read too fast, the valueLength() is invalid.
+  if (AutocamRemoteDataSend.valueLength() != sizeof(RemoteDataSend)) { // Appearantly if read too fast, the valueLength() is invalid.
     return;
   }
 
-  RemoteDataBidirection data;
-  AutocamRemoteDataBidirection.readValue((uint8_t *)&data, sizeof(RemoteDataBidirection));
+  RemoteDataSend data;
+  AutocamRemoteDataSend.readValue((uint8_t *)&data, sizeof(RemoteDataSend));
   //LOGF("Received throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, toggleState=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.toggleState, data.uwbSelector);
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
 
@@ -569,8 +572,8 @@ void updateAutocamRemoteStatus() {
     return;
   }
 
-  RemoteDataBidirection data = {.driveMode = globalState.driveMode, .toggleState = globalState.toggleState, .uwbSelector = globalState.uwbSelector, .state = globalState.state};
-  AutocamRemoteDataBidirection.writeValue((uint8_t *)&data, sizeof(RemoteDataBidirection));
+  RemoteDataRecv data = {.driveMode = globalState.driveMode, .toggleState = globalState.toggleState, .uwbSelector = globalState.uwbSelector, .state = globalState.state};
+  AutocamRemoteDataRecv.writeValue((uint8_t *)&data, sizeof(RemoteDataRecv));
   LOGF("Sent status to remote via BLE: driveMode = %d, state=%d\n", globalState.driveMode, globalState.state);
   return;
 }

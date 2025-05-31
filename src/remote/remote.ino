@@ -70,11 +70,11 @@ float yawSpeedValue = 0.0;
 float pitchSpeedValue = 0.0;
 int toggleState = 0; // Bit 0 = activeTrackToggled, bit 1 = gimbalRecenterToggled, bit 2 = cameraRecordingToggled.
 
-RemoteDataBidirection receivedData;
+RemoteDataRecv receivedData;
 
 // Global variable to hold last sent data.
 // (Initialize with known defaults.)
-RemoteDataBidirection lastSentData = { midThrottle, midSteering, DRIVE_MODE_MANUAL, midPitch, midYaw, false, uwbSelector };
+RemoteDataSend lastSentData = { midThrottle, midSteering, DRIVE_MODE_MANUAL, midPitch, midYaw, false, uwbSelector };
 
 unsigned int lastPingTime = 0;
 
@@ -245,7 +245,8 @@ void checkUWB() {
 }
 
 void setupBLE() {
-  AutocamRemoteService.addCharacteristic(AutocamRemoteDataBidirection);
+  AutocamRemoteService.addCharacteristic(AutocamRemoteDataSend);
+  AutocamRemoteService.addCharacteristic(AutocamRemoteDataRecv);
   setupBLEPeripheral("Autocam Remote", "autocam-remote", AutocamRemoteService);
 }
 
@@ -292,8 +293,8 @@ void readStatusData() {
     updateState(state | SERVER_STATE_REMOTE_READY);
   }
 
-  if (AutocamRemoteDataBidirection.written()) {
-    AutocamRemoteDataBidirection.readValue((uint8_t *)&receivedData, sizeof(RemoteDataBidirection));
+  if (AutocamRemoteDataRecv.written()) {
+    AutocamRemoteDataRecv.readValue((uint8_t *)&receivedData, sizeof(RemoteDataRecv));
     LOGF("Received state=%d, driveMode=%d, toggleState=%d, uwbSelector=%d\n", receivedData.state, receivedData.driveMode, receivedData.toggleState, receivedData.uwbSelector);
     updateState(receivedData.state);
     updateDriveMode(receivedData.driveMode);
@@ -482,7 +483,7 @@ void readInput() {
   //              driveModeTriggerValue,  steeringX.smoothedValue, throttleY.smoothedValue, steeringValue, throttleValue, gimbalX.smoothedValue, gimbalY.smoothedValue, yawSpeedValue, pitchSpeedValue);
 }
 
-bool dataChanged(const RemoteDataBidirection &oldData, const RemoteDataBidirection &newData) {
+bool dataChanged(const RemoteDataSend &oldData, const RemoteDataSend &newData) {
   if (oldData.throttleValue != newData.throttleValue) return true;
   if (oldData.steeringValue != newData.steeringValue) return true;
   if (oldData.driveMode != newData.driveMode) return true;
@@ -502,7 +503,7 @@ void sendInput() {
     updateState(state | SERVER_STATE_REMOTE_READY);
   }
 
-  RemoteDataBidirection data = {
+  RemoteDataSend data = {
     .throttleValue = throttleValue,
     .steeringValue = steeringValue,
     .driveMode = driveModeTriggerValue,
@@ -515,13 +516,13 @@ void sendInput() {
   // Send update only if there is a change.
   static bool firstUpdate = true;
   if (firstUpdate || dataChanged(lastSentData, data)) {
-    AutocamRemoteDataBidirection.writeValue((uint8_t *)&data, sizeof(RemoteDataBidirection));
+    AutocamRemoteDataSend.writeValue((uint8_t *)&data, sizeof(RemoteDataSend));
     lastSentData = data;
     lastSentData.toggleState = 0; // Do not resend zero toggleState, because it's an no-op anyway.
     toggleState = 0;
     firstUpdate = false;
 
-    LOGF("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, state=%d, yawSpeed=%f, pitchSpeed=%f, toggleState=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.state, data.yawSpeed, data.pitchSpeed, data.toggleState, data.uwbSelector);
+    LOGF("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, toggleState=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.toggleState, data.uwbSelector);
   }
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
   lastPingTime = millis();

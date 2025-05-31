@@ -6,14 +6,15 @@
 extern BLEDevice BLECentral;
 extern BLEDevice AutocamSensor, AutocamRemote;
 extern BLEService AutocamSensorService, AutocamRemoteService;
-extern BLECharacteristic AutocamSensorDataSend, AutocamSensorDataRecv, AutocamRemoteDataBidirection;
+extern BLECharacteristic AutocamSensorDataSend, AutocamSensorDataRecv, AutocamRemoteDataSend, AutocamRemoteDataRecv;
 
 extern const char *AutocamSensorServiceUUID;
 extern const char *AutocamRemoteServiceUUID;
 
 extern const char *AutocamSensorDataSendCharacteristicUUID;
 extern const char *AutocamSensorDataRecvCharacteristicUUID;
-extern const char *AutocamRemoteDataBidirectionCharacteristicUUID;
+extern const char *AutocamRemoteDataSendCharacteristicUUID;
+extern const char *AutocamRemoteDataRecvCharacteristicUUID;
 
 struct SensorDataSend {
   float distance;
@@ -29,7 +30,7 @@ struct SensorDataRecv {
   uint16_t uwbSelector;
 };
 
-struct RemoteDataBidirection {
+struct RemoteDataSend {
   int throttleValue;
   int steeringValue;
   int driveMode;
@@ -37,9 +38,15 @@ struct RemoteDataBidirection {
   float pitchSpeed;
   int toggleState; // Bit 0 = activeTrackToggled, bit 1 = gimbalRecenterToggled, bit 2 = cameraRecordingToggled.activeTrackToggled;
   uint16_t uwbSelector;
-
-  int state; // This value is written by the central (server).
 };
+
+struct RemoteDataRecv {
+  int driveMode;
+  int toggleState; // Bit 0 = activeTrackToggled, bit 1 = gimbalRecenterToggled, bit 2 = cameraRecordingToggled.activeTrackToggled;
+  uint16_t uwbSelector;
+  int state;
+};
+
 
 void setupBLECentral();
 bool connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID);
