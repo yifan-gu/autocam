@@ -257,73 +257,74 @@ void setupServer() {
     String json = "{";
     json += "\"distanceDelta\":" + String(distanceDelta, 2) + ",";
     json += "\"headingDelta\":" + String(headingDelta, 0) + ",";
-    json += "\"Kp_t\":" + String(Kp_t, 1) + ",";
-    json += "\"Ki_t\":" + String(Ki_t, 1) + ",";
-    json += "\"Kd_t\":" + String(Kd_t, 1) + ",";
-    json += "\"Kp_s\":" + String(Kp_s, 1) + ",";
-    json += "\"Ki_s\":" + String(Ki_s, 1) + ",";
-    json += "\"Kd_s\":" + String(Kd_s, 1) + ",";
-    json += "\"maxMoveThrottle\":" + String(maxMoveThrottle, 0) + ",";
-    json += "\"minMoveThrottle\":" + String(minMoveThrottle, 0) + ",";
-    json += "\"maxMoveSteering\":" + String(maxMoveSteering, 0) + ",";
-    json += "\"minMoveSteering\":" + String(minMoveSteering, 0) + ",";
+    json += "\"Kp_t\":" + String(Kp_t, 2) + ",";
+    json += "\"Ki_t\":" + String(Ki_t, 3) + ",";
+    json += "\"Kd_t\":" + String(Kd_t, 2) + ",";
+    json += "\"Kp_s\":" + String(Kp_s, 2) + ",";
+    json += "\"Ki_s\":" + String(Ki_s, 3) + ",";
+    json += "\"Kd_s\":" + String(Kd_s, 2) + ",";
+    json += "\"maxMoveThrottle\":" + String(maxMoveThrottle - midThrottle) + ",";
+    json += "\"minMoveThrottle\":" + String(minMoveThrottle - midThrottle) + ",";
+    json += "\"maxMoveSteering\":" + String(maxMoveSteering - midSteering) + ",";
+    json += "\"minMoveSteering\":" + String(minMoveSteering - midSteering) + ",";
     json += "\"distanceSmoothFactor\":" + String(distanceSmoothFactor, 2);
     json += "}";
     request->send(200, "application/json", json);
+    LOGF("get_parameters: %s\n", json.c_str());
   });
 
   // Add a handler to process the parameters update
   server.on("/update_parameters", HTTP_POST, [](AsyncWebServerRequest *request) {
     if (request->hasParam("distanceDelta", true)) {
-      distanceDelta = request->getParam("distanceDelta", true)->value().toFloat();
+      distanceDelta = constrain(request->getParam("distanceDelta", true)->value().toFloat(), 0, 1);
       LOGF("distanceDelta: %f\n", distanceDelta);
     }
     if (request->hasParam("headingDelta", true)) {
-      headingDelta = request->getParam("headingDelta", true)->value().toFloat();
+      headingDelta = constrain(request->getParam("headingDelta", true)->value().toFloat(), 0, 30);
       LOGF("headingDelta: %f\n", headingDelta);
     }
     if (request->hasParam("Kp_t", true)) {
-      Kp_t = request->getParam("Kp_t", true)->value().toFloat();
+      Kp_t = constrain(request->getParam("Kp_t", true)->value().toFloat(), 0, 10);
       LOGF("Kp_t: %f\n", Kp_t);
     }
     if (request->hasParam("Ki_t", true)) {
-      Ki_t = request->getParam("Ki_t", true)->value().toFloat();
+      Ki_t = constrain(request->getParam("Ki_t", true)->value().toFloat(), 0, 0.1);
       LOGF("Ki_t: %f\n", Ki_t);
     }
     if (request->hasParam("Kd_t", true)) {
-      Kd_t = request->getParam("Kd_t", true)->value().toFloat();
+      Kd_t = constrain(request->getParam("Kd_t", true)->value().toFloat(), 0, 10);
       LOGF("Kd_t: %f\n", Kd_t);
     }
     if (request->hasParam("Kp_s", true)) {
-      Kp_s = request->getParam("Kp_s", true)->value().toFloat();
+      Kp_s = constrain(request->getParam("Kp_s", true)->value().toFloat(), 0, 10);
       LOGF("Kp_s: %f\n", Kp_s);
     }
     if (request->hasParam("Ki_s", true)) {
-      Ki_s = request->getParam("Ki_s", true)->value().toFloat();
+      Ki_s = constrain(request->getParam("Ki_s", true)->value().toFloat(), 0, 0.1);
       LOGF("Ki_s: %f\n", Ki_s);
     }
     if (request->hasParam("Kd_s", true)) {
-      Kd_s = request->getParam("Kd_s", true)->value().toFloat();
+      Kd_s = constrain(request->getParam("Kd_s", true)->value().toFloat(), 0, 10);
       LOGF("Kd_s: %f\n", Kd_s);
     }
     if (request->hasParam("maxMoveThrottle", true)) {
-      maxMoveThrottle = request->getParam("maxMoveThrottle", true)->value().toFloat();
+      maxMoveThrottle = midThrottle + constrain(request->getParam("maxMoveThrottle", true)->value().toFloat(), 0, 500);
       LOGF("maxMoveThrottle: %f\n", maxMoveThrottle);
     }
     if (request->hasParam("minMoveThrottle", true)) {
-      minMoveThrottle = request->getParam("minMoveThrottle", true)->value().toFloat();
+      minMoveThrottle = midThrottle + constrain(request->getParam("minMoveThrottle", true)->value().toFloat(), -500, 0);
       LOGF("minMoveThrottle: %f\n", minMoveThrottle);
     }
     if (request->hasParam("maxMoveSteering", true)) {
-      maxMoveSteering = request->getParam("maxMoveSteering", true)->value().toFloat();
+      maxMoveSteering = midSteering + constrain(request->getParam("maxMoveSteering", true)->value().toFloat(), 0, 500);
       LOGF("maxMoveSteering: %f\n", maxMoveSteering);
     }
     if (request->hasParam("minMoveSteering", true)) {
-      minMoveSteering = request->getParam("minMoveSteering", true)->value().toFloat();
+      minMoveSteering = midSteering + constrain(request->getParam("minMoveSteering", true)->value().toFloat(), -500, 0);
       LOGF("minMoveSteering: %f\n", minMoveSteering);
     }
     if (request->hasParam("distanceSmoothFactor", true)) {
-      distanceSmoothFactor = request->getParam("distanceSmoothFactor", true)->value().toFloat();
+      distanceSmoothFactor = constrain(request->getParam("distanceSmoothFactor", true)->value().toFloat(), 0.01, 1);
       LOGF("distanceSmoothFactor: %f\n", distanceSmoothFactor);
     }
 

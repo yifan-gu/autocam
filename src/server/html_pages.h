@@ -923,12 +923,12 @@ char const* parameters_page_html = R"rawliteral(
     <form id="parameters-form">
       <div class="slider-container">
         <label>DistanceDelta: <span id="distanceDelta-value">0.05</span></label>
-        <input class="slider" type="range" name="distanceDelta" min="0" max="1" step="0.01" value="0.5" oninput="updateValue('distanceDelta', this.value)" />
+        <input class="slider" type="range" name="distanceDelta" min="0" max="1" step="0.01" value="0.05" oninput="updateValue('distanceDelta', this.value)" />
       </div>
       <!-- New slider for headingDelta added right after distanceDelta -->
       <div class="slider-container">
         <label>HeadingDelta: <span id="headingDelta-value">1</span></label>
-        <input class="slider" type="range" name="headingDelta" min="0" max="30" step="1" value="30" oninput="updateValue('headingDelta', this.value)" />
+        <input class="slider" type="range" name="headingDelta" min="0" max="30" step="1" value="1" oninput="updateValue('headingDelta', this.value)" />
       </div>
       <div class="slider-container">
         <label>Kp_t: <span id="Kp_t-value">1</span></label>
@@ -936,7 +936,7 @@ char const* parameters_page_html = R"rawliteral(
       </div>
       <div class="slider-container">
         <label>Ki_t: <span id="Ki_t-value">0</span></label>
-        <input class="slider" type="range" name="Ki_t" min="0" max="10" step="0.1" value="0" oninput="updateValue('Ki_t', this.value)" />
+        <input class="slider" type="range" name="Ki_t" min="0" max="0.1" step="0.001" value="0" oninput="updateValue('Ki_t', this.value)" />
       </div>
       <div class="slider-container">
         <label>Kd_t: <span id="Kd_t-value">0</span></label>
@@ -948,7 +948,7 @@ char const* parameters_page_html = R"rawliteral(
       </div>
       <div class="slider-container">
         <label>Ki_s: <span id="Ki_s-value">0</span></label>
-        <input class="slider" type="range" name="Ki_s" min="0" max="10" step="0.1" value="0" oninput="updateValue('Ki_s', this.value)" />
+        <input class="slider" type="range" name="Ki_s" min="0" max="0.1" step="0.001" value="0" oninput="updateValue('Ki_s', this.value)" />
       </div>
       <div class="slider-container">
         <label>Kd_s: <span id="Kd_s-value">0</span></label>
@@ -956,11 +956,11 @@ char const* parameters_page_html = R"rawliteral(
       </div>
       <div class="slider-container">
         <label>Max Throttle: <span id="maxMoveThrottle-value">200</span></label>
-        <input class="slider" type="range" name="maxMoveThrottle" min="0" max="500" step="1" value="300" oninput="updateValue('maxMoveThrottle', this.value)" />
+        <input class="slider" type="range" name="maxMoveThrottle" min="0" max="500" step="1" value="200" oninput="updateValue('maxMoveThrottle', this.value)" />
       </div>
       <div class="slider-container">
         <label>Min Throttle: <span id="minMoveThrottle-value">-200</span></label>
-        <input class="slider" type="range" name="minMoveThrottle" min="0" max="500" step="1" value="300" oninput="updateValue('minMoveThrottle', this.value)" />
+        <input class="slider" type="range" name="minMoveThrottle" min="0" max="500" step="1" value="200" oninput="updateValue('minMoveThrottle', this.value)" />
       </div>
       <div class="slider-container">
         <label>Max Steering: <span id="maxMoveSteering-value">500</span></label>
@@ -970,7 +970,6 @@ char const* parameters_page_html = R"rawliteral(
         <label>Min Steering: <span id="minMoveSteering-value">-500</span></label>
         <input class="slider" type="range" name="minMoveSteering" min="0" max="500" step="1" value="500" oninput="updateValue('minMoveSteering', this.value)" />
       </div>
-      <!-- New slider container for distanceSmoothFactor with min set to 0.01 -->
       <div class="slider-container">
         <label>Distance Smooth Factor: <span id="distanceSmoothFactor-value">0.10</span></label>
         <input class="slider" type="range" name="distanceSmoothFactor" min="0.01" max="1" step="0.01" value="0.10" oninput="updateValue('distanceSmoothFactor', this.value)" />
