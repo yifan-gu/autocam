@@ -111,9 +111,7 @@ void nonUWBTask(void * parameter) {
     getSensorDataRecv();
     applyUWBSelector();
     setGimbalPosition();
-    checkActiveTrack();
-    checkGimbalRecenter();
-    checkCameraRecording();
+    checkGimbalToggleState();
 
     vTaskDelay(pdMS_TO_TICKS(LOOP_PERIOD_MS));
   }
@@ -197,30 +195,38 @@ void setGimbalPosition() {
   }
 }
 
-void checkActiveTrack() {
-  if (toggleState & ACTIVE_TRACK_TOGGLED) {
-    if (!djiRoninController.gimbal_active_track()) {
-      LOGLN("Failed to trigger DJI Ronin active track");
-    }
-    toggleState &= ~ACTIVE_TRACK_TOGGLED;
+void checkGimbalToggleState() {
+  switch (toggleState) {
+    case NO_GIMBAL_TOGGLE:
+      break;
+    case ACTIVE_TRACK_TOGGLED:
+      toggleActiveTrack();
+      break;
+    case GIMBAL_RECENTER_TOGGLED:
+      triggerGimbalRecenter();
+      break;
+    case CAMERA_RECORDING_TOGGLED:
+      toggleCameraRecording();
+      break;
+    default:
+      LOGF("Unknown toggle state %d\n", toggleState);
+  }
+  toggleState = NO_GIMBAL_TOGGLE;
+}
+
+void toggleActiveTrack() {
+  if (!djiRoninController.gimbal_active_track()) {
+    LOGLN("Failed to trigger DJI Ronin active track");
   }
 }
 
-void checkGimbalRecenter() {
-  if (toggleState & GIMBAL_RECENTER_TOGGLED) {
-    if (!djiRoninController.gimbal_recenter()) {
-      LOGLN("Failed to trigger DJI Ronin gimbal recenter");
-    }
-    toggleState &= ~GIMBAL_RECENTER_TOGGLED;
+void triggerGimbalRecenter() {
+  if (!djiRoninController.gimbal_recenter()) {
+    LOGLN("Failed to trigger DJI Ronin gimbal recenter");
   }
 }
 
-void checkCameraRecording() {
-  if (!(toggleState & CAMERA_RECORDING_TOGGLED)) {
-    return;
-  }
-  toggleState &= ~CAMERA_RECORDING_TOGGLED;
-
+void toggleCameraRecording() {
   bool isCameraRecording = false;
   if (!djiRoninController.check_camera_recording_state(&isCameraRecording)) {
     LOGLN("Failed to get DJI Ronin camera recording state");

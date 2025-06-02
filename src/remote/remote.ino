@@ -68,7 +68,9 @@ int throttleValue = midThrottle, steeringValue = midSteering;
 // Variables to store the gimbal controller data.
 float yawSpeedValue = 0.0;
 float pitchSpeedValue = 0.0;
-int toggleState = 0; // Bit 0 = activeTrackToggled, bit 1 = gimbalRecenterToggled, bit 2 = cameraRecordingToggled.
+int toggleState = NO_GIMBAL_TOGGLE;
+
+bool buttonIsPressed = false;
 
 RemoteDataRecv receivedData;
 
@@ -368,6 +370,7 @@ void checkGimbalFnButton() {
     }
     //LOGF("Toggle state set to: %d after %d click(s)\n", toggleState, clickCount);
     clickCount = 0;
+    buttonIsPressed = true;
   }
 }
 
@@ -392,6 +395,7 @@ void checkDriveModeButton() {
 
   // If the timeout has passed since the last detected click, process the clicks.
   if (clickCount > 0 && (millis() - lastClickTime > clickTimeout)) {
+
     if (clickCount == 1) {
       driveModeTriggerValue = DRIVE_MODE_MANUAL;
     } else if (clickCount == 2) {
@@ -400,9 +404,10 @@ void checkDriveModeButton() {
       driveModeTriggerValue = DRIVE_MODE_CINEMA;
     }
     //LOGF("Drive mode set to: %d after %d click(s)\n", driveModeTriggerValue, clickCount);
-    //Optionally update the global drive mode immediately:
+    // Optionally update the global drive mode immediately:
     // Reset the click counter for the next sequence.
     clickCount = 0;
+    buttonIsPressed = true;
   }
 }
 
@@ -486,10 +491,8 @@ void readInput() {
 bool dataChanged(const RemoteDataSend &oldData, const RemoteDataSend &newData) {
   if (oldData.throttleValue != newData.throttleValue) return true;
   if (oldData.steeringValue != newData.steeringValue) return true;
-  if (oldData.driveMode != newData.driveMode) return true;
-  if (fabs(oldData.yawSpeed - newData.yawSpeed) > 0.01) return true;
-  if (fabs(oldData.pitchSpeed - newData.pitchSpeed) > 0.01) return true;
-  if (oldData.toggleState != newData.toggleState) return true;
+  if (oldData.yawSpeed !=  newData.yawSpeed) return true;
+  if (oldData.pitchSpeed != newData.pitchSpeed) return true;
   if (oldData.uwbSelector != newData.uwbSelector) return true;
   return false;
 }
@@ -515,12 +518,13 @@ void sendInput() {
 
   // Send update only if there is a change.
   static bool firstUpdate = true;
-  if (firstUpdate || dataChanged(lastSentData, data)) {
+  if (firstUpdate || buttonIsPressed || dataChanged(lastSentData, data)) {
     AutocamRemoteDataSend.writeValue((uint8_t *)&data, sizeof(RemoteDataSend));
     lastSentData = data;
-    lastSentData.toggleState = 0; // Do not resend zero toggleState, because it's an no-op anyway.
-    toggleState = 0;
+    lastSentData.toggleState = NO_GIMBAL_TOGGLE; // Do not resend zero toggleState, because it's an no-op anyway.
+    toggleState = NO_GIMBAL_TOGGLE;
     firstUpdate = false;
+    buttonIsPressed = false;
 
     LOGF("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, toggleState=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.toggleState, data.uwbSelector);
   }
