@@ -31,9 +31,10 @@
 #define DRIVE_MODE_CINEMA 2
 
 // Gimbal fn button state.
+#define NO_GIMBAL_TOGGLE 0
 #define ACTIVE_TRACK_TOGGLED 1
 #define GIMBAL_RECENTER_TOGGLED 2
-#define CAMERA_RECORDING_TOGGLED 4
+#define CAMERA_RECORDING_TOGGLED 3
 
 // Sensor specific state.
 #define SENSOR_STATE_NOT_READY 0

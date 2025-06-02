@@ -37,6 +37,12 @@ Arduino files for my auto-following camera car!
 
 - [ ] <s> Nice to have, detect active track failure</s> Turns out there's no API support for that
 
+## KNOWN ISSUES
+- [ ] Steering thread issue (Do not steer before throttle is applied)
+- [ ] BLE connection issue
+- [ ] ESC init issue
+- [ ] Start/stop recording issue
+- [x] Every time the remote buttons are pressed, send values to the server.
 
 ## 🚗 Simulator
 

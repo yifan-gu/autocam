@@ -123,8 +123,9 @@ bool autocamRemoteInputChanged = false;
 //
 float distanceDelta = 0.05; // The distance tolerance in meters.
 float headingDelta = 1; // The heading tolerance in degrees.
+float cinemaLeadingHeadingDelta = 0; // The heading tolerance in cinema leading in meters (converts xDiff to headingDiff);
 float throttleConstant = 100;
-float steeringConstant = 20;
+float steeringConstant = 10;
 
 float Kp_t = 1.0;  // Proportional gain. Diff = Kp_t * distance
 float Ki_t = 0.0;  // Integral gain. Diff = Ki_t * distance * 1000 * second.
@@ -132,6 +133,8 @@ float Kd_t = 0.0;  // Derivative gain. Diff = Kd_t / (speed m/s * 1000 ms)
 
 float previousError_t = 0.0;  // Previous error for the derivative term
 float integral_t = 0.0;       // Accumulated integral term
+float maxIntegralLimit_t = 1;
+float maxIntegralLimit_s = 0;
 
 // // PID Controller variables for steering.
 float Kp_s = 1.0;   // Proportional gain. Diff = Kp_s * angle diff.
@@ -143,10 +146,12 @@ float integral_s = 0.0;       // Accumulated integral term
 
 float lastDeltaTimeMillis = 0; // Used to calculate ki, and Kd in the PID system.
 float minDeltaTimeMillis = 10; // Control the rate of PID update.
-float distanceSmoothFactor = 0.1; // Smoothing factor for distance readings (0 < alpha <= 1; lower values are smoother).
+float deltaTimeThreshold = 1000; // If the delay is more than the threshold, skip the iteration.
+float distanceSmoothFactor = 0.1; // Smoothing factor for distance readings (0 < alpha <= 1; lower values are smoother but slower to converge).
 
 float leadingTurningCoefficient = 10;
 float tailingTurningCoefficient = 1;
+
 
 //
 //
@@ -257,11 +262,14 @@ void setupServer() {
     String json = "{";
     json += "\"distanceDelta\":" + String(distanceDelta, 2) + ",";
     json += "\"headingDelta\":" + String(headingDelta, 0) + ",";
+    json += "\"cinemaLeadingHeadingDelta\":" + String(cinemaLeadingHeadingDelta, 2) + ",";
+    json += "\"maxIntegralLimit_t\":" + String(maxIntegralLimit_t, 2) + ",";
+    json += "\"maxIntegralLimit_s\":" + String(maxIntegralLimit_s, 2) + ",";
     json += "\"Kp_t\":" + String(Kp_t, 2) + ",";
-    json += "\"Ki_t\":" + String(Ki_t, 3) + ",";
+    json += "\"Ki_t\":" + String(Ki_t, 2) + ",";
     json += "\"Kd_t\":" + String(Kd_t, 2) + ",";
     json += "\"Kp_s\":" + String(Kp_s, 2) + ",";
-    json += "\"Ki_s\":" + String(Ki_s, 3) + ",";
+    json += "\"Ki_s\":" + String(Ki_s, 2) + ",";
     json += "\"Kd_s\":" + String(Kd_s, 2) + ",";
     json += "\"maxMoveThrottle\":" + String(maxMoveThrottle - midThrottle) + ",";
     json += "\"minMoveThrottle\":" + String(minMoveThrottle - midThrottle) + ",";
@@ -276,19 +284,31 @@ void setupServer() {
   // Add a handler to process the parameters update
   server.on("/update_parameters", HTTP_POST, [](AsyncWebServerRequest *request) {
     if (request->hasParam("distanceDelta", true)) {
-      distanceDelta = constrain(request->getParam("distanceDelta", true)->value().toFloat(), 0, 1);
+      distanceDelta = constrain(request->getParam("distanceDelta", true)->value().toFloat(), 0, 5);
       LOGF("distanceDelta: %f\n", distanceDelta);
     }
     if (request->hasParam("headingDelta", true)) {
       headingDelta = constrain(request->getParam("headingDelta", true)->value().toFloat(), 0, 30);
       LOGF("headingDelta: %f\n", headingDelta);
     }
+    if (request->hasParam("cinemaLeadingHeadingDelta", true)) {
+      cinemaLeadingHeadingDelta = constrain(request->getParam("cinemaLeadingHeadingDelta", true)->value().toFloat(), 0, 5);
+      LOGF("cinemaLeadingHeadingDelta: %f\n", cinemaLeadingHeadingDelta);
+    }
+    if (request->hasParam("maxIntegralLimit_t", true)) {
+      maxIntegralLimit_t = constrain(request->getParam("maxIntegralLimit_t", true)->value().toFloat(), 0, 100);
+      LOGF("maxIntegralLimit_t: %f\n", maxIntegralLimit_t);
+    }
+    if (request->hasParam("maxIntegralLimit_s", true)) {
+      maxIntegralLimit_s = constrain(request->getParam("maxIntegralLimit_s", true)->value().toFloat(), 0, 100);
+      LOGF("maxIntegralLimit_s: %f\n", maxIntegralLimit_s);
+    }
     if (request->hasParam("Kp_t", true)) {
       Kp_t = constrain(request->getParam("Kp_t", true)->value().toFloat(), 0, 10);
       LOGF("Kp_t: %f\n", Kp_t);
     }
     if (request->hasParam("Ki_t", true)) {
-      Ki_t = constrain(request->getParam("Ki_t", true)->value().toFloat(), 0, 0.1);
+      Ki_t = constrain(request->getParam("Ki_t", true)->value().toFloat(), 0, 10);
       LOGF("Ki_t: %f\n", Ki_t);
     }
     if (request->hasParam("Kd_t", true)) {
@@ -300,7 +320,7 @@ void setupServer() {
       LOGF("Kp_s: %f\n", Kp_s);
     }
     if (request->hasParam("Ki_s", true)) {
-      Ki_s = constrain(request->getParam("Ki_s", true)->value().toFloat(), 0, 0.1);
+      Ki_s = constrain(request->getParam("Ki_s", true)->value().toFloat(), 0, 10);
       LOGF("Ki_s: %f\n", Ki_s);
     }
     if (request->hasParam("Kd_s", true)) {
@@ -329,6 +349,8 @@ void setupServer() {
     }
 
     request->send(200, "text/plain", "Parameters updated");
+
+    setDriveMode(DRIVE_MODE_MANUAL);
   });
 
   // Start server
@@ -346,8 +368,6 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
     case WS_EVT_DISCONNECT:
       LOGLN("WebSocket disconnected");
       setDriveMode(DRIVE_MODE_MANUAL);
-      globalState.throttleValue = midThrottle;
-      globalState.steeringValue = midSteering;
       LOGLN("Throttle and Steering reset to middle positions");
       break;
 
@@ -584,8 +604,19 @@ void setDriveMode(int newDriveMode) {
     return;
   }
   globalState.driveMode = newDriveMode;
+  globalState.throttleValue = midThrottle;
+  globalState.steeringValue = midSteering;
+  resetPIDValues();
   ledController.updateDriveModeLED(globalState.driveMode);
   updateAutocamRemoteStatus();
+}
+
+void resetPIDValues() {
+  previousError_t = 0;
+  integral_t = 0;
+  previousError_s = 0;
+  integral_s = 0;
+  lastDeltaTimeMillis = 0;
 }
 
 void setUWBSelector(uint16_t newUWBSelector) {
@@ -616,30 +647,43 @@ void calculateSteeringThrottle() {
 }
 
 void calculateSteeringThrottleFollow() {
-  float deltaTimeMillis = millis() - lastDeltaTimeMillis;
+  float now = millis();
+  float deltaTimeMillis = now - lastDeltaTimeMillis;
+  lastDeltaTimeMillis = now;
+
   if (deltaTimeMillis < minDeltaTimeMillis) {
     return; // No change.
   }
-  lastDeltaTimeMillis = deltaTimeMillis;
 
-  float distanceDiff = globalState.distance - globalState.targetDistance;
-  if (distanceDiff <= distanceDelta) { // Stay still if the target is moving closer.
-    globalState.throttleValue = midThrottle;
-    globalState.steeringValue = midSteering;
+  if (deltaTimeMillis == now) {
+    return; // Skip the first iteration for a clean start.
+  }
+
+  if (deltaTimeMillis > deltaTimeThreshold) {
+    LOGF("WARN: Throttle / steering calculation interval (%s ms) is larger than the threshold (%s ms), will reset the integral and previous error", deltaTimeMillis, deltaTimeThreshold);
+    resetPIDValues();
     return;
   }
 
-  // Calculate throttle.
-  float distanceDiffError = 0;
-  if (distanceDiff > 0) {
-    distanceDiffError = distanceDiff - distanceDelta; // Compensate the tolerance.
-  } else {
-    distanceDiffError = distanceDiff + distanceDelta;
-  }
-  float throttleCoeff = calculateThrottleCoeff(distanceDiffError, deltaTimeMillis);
+  float distanceDiff = globalState.distance - globalState.targetDistance;
 
-  boolean moveForward = false;
-  boolean moveBackward = false;
+  // Calculate the error and compensate for the tolerance.
+  float distanceDiffError = 0;
+  if (abs(distanceDiff) > distanceDelta) {
+    if (distanceDiff >= 0) {
+      distanceDiffError -= distanceDelta;
+    } else {
+      distanceDiffError += distanceDelta;
+    }
+  }
+
+  float throttleCoeff = calculateThrottleCoeff(distanceDiffError, deltaTimeMillis);
+  if (throttleCoeff < 0) {
+    throttleCoeff = 0; // Prevent the car from backing off (If the throttleCoeff is 0 the car will slow down eventually).
+  }
+
+  bool moveForward = false;
+  bool moveBackward = false;
   if (globalState.currentY > distanceDelta) {
     setMoveForward(throttleCoeff);
     moveForward = true;
@@ -660,18 +704,16 @@ void calculateSteeringThrottleFollow() {
     headingDiff = headingDiff - 180;
   }
 
-  if (abs(headingDiff) < headingDelta) {
-    globalState.steeringValue = midSteering; // Within tolerance, no steering.
-    return;
-  }
-
   // Calculate steering.
   float headingDiffError = 0;
-  if (headingDiff > 0) {
-    headingDiffError = headingDiff - headingDelta; // Compensate the tolerance.
-  } else {
-    headingDiffError = headingDiff + headingDelta;
+  if (abs(headingDiff) > headingDelta) {
+    if (headingDiff > 0) {
+      headingDiffError = headingDiff - headingDelta; // Compensate the tolerance.
+    } else {
+      headingDiffError = headingDiff + headingDelta;
+    }
   }
+
   float steeringCoeff = calculateSteeringCoeff(headingDiff, deltaTimeMillis);
   if (moveForward) {
     setSteering(steeringCoeff);
@@ -681,12 +723,23 @@ void calculateSteeringThrottleFollow() {
 }
 
 void calculateSteeringThrottleCinema() {
-  float deltaTimeMillis = millis() - lastDeltaTimeMillis;
+  float now = millis();
+  float deltaTimeMillis = now - lastDeltaTimeMillis;
+  lastDeltaTimeMillis = now;
+
   if (deltaTimeMillis < minDeltaTimeMillis) {
     return; // No change.
   }
 
-  lastDeltaTimeMillis = deltaTimeMillis;
+  if (deltaTimeMillis == now) {
+    return; // Skip the first iteration for a clean start.
+  }
+
+  if (deltaTimeMillis > deltaTimeThreshold) {
+    LOGF("WARN: Throttle / steering calculation interval (%s ms) is larger than the threshold (%s ms), will reset the integral and previous error", deltaTimeMillis, deltaTimeThreshold);
+    resetPIDValues();
+    return;
+  }
 
   float yDiff = globalState.currentY - globalState.targetY;
   float xDiff = globalState.currentX - globalState.targetX;
@@ -697,36 +750,40 @@ void calculateSteeringThrottleCinema() {
     headingDiff += 360;
   }
 
-  if (abs(yDiff) <= distanceDelta) {
-    globalState.throttleValue = midThrottle;
-    globalState.steeringValue = midSteering;
-    return;
-  }
-
-  boolean moveForward = false;
-  boolean moveBackward = false;
-
   // Calculate throttle.
   float yDiffError = 0;
-  if (yDiff > 0) {
-    yDiffError = yDiff - distanceDelta; // Compensate the tolerance.
-  } else {
-    yDiffError = yDiff + distanceDelta;
+  if (abs(yDiff) > distanceDelta) {
+    if (yDiff > 0) {
+      yDiffError = yDiff - distanceDelta; // Compensate the tolerance.
+    } else {
+      yDiffError = yDiff + distanceDelta;
+    }
   }
+
   float throttleCoeff = calculateThrottleCoeff(yDiffError, deltaTimeMillis);
 
-  if (yDiff > 0) {
+  bool moveForward = false;
+  bool moveBackward = false;
+  if (yDiff > 0) { // In front of the center of the car.
     setMoveForward(throttleCoeff);
     moveForward = true;
-  } else {
+  } else { // Behind the center of the car.
     setMoveBackward(-throttleCoeff); // throttleCoeff < 0.
     moveBackward = true;
   }
 
+  float headingDiffError = 0;
   float steeringCoeff;
   if (isLeading(globalState.targetX, globalState.targetY, moveForward, moveBackward)) {
     // Leading.
-    steeringCoeff = abs(xDiff) * leadingTurningCoefficient;
+    if (abs(xDiff) > cinemaLeadingHeadingDelta) {
+      if (xDiff > 0) {
+        headingDiffError = xDiff - cinemaLeadingHeadingDelta;
+      } else {
+        headingDiffError = xDiff + cinemaLeadingHeadingDelta;
+      }
+    }
+    steeringCoeff = calculateSteeringCoeff(headingDiffError, deltaTimeMillis) * leadingTurningCoefficient;
     if (pushingLeft(globalState.currentX, globalState.targetX, distanceDelta)) {
       setSteering(steeringCoeff);
     } else if (pushingRight(globalState.currentX, globalState.targetX, distanceDelta)) {
@@ -734,7 +791,14 @@ void calculateSteeringThrottleCinema() {
     }
   } else {
     // Tailing.
-    steeringCoeff = headingDiff * tailingTurningCoefficient;
+    if (abs(headingDiff) > headingDelta) {
+      if (headingDiff > 0) {
+        headingDiffError = headingDiff - headingDelta;
+      } else {
+        headingDiffError = headingDiff + headingDelta;
+      }
+    }
+    steeringCoeff = calculateSteeringCoeff(headingDiffError, deltaTimeMillis) * tailingTurningCoefficient;
     if (moveForward) {
       setSteering(steeringCoeff);
     } else if (moveBackward) {
@@ -743,15 +807,15 @@ void calculateSteeringThrottleCinema() {
   }
 }
 
-boolean pushingRight(float currentX, float targetX, float distanceDelta) {
+bool pushingRight(float currentX, float targetX, float distanceDelta) {
   return currentX > targetX + distanceDelta;
 }
 
-boolean pushingLeft(float currentX, float targetX, float distanceDelta) {
+bool pushingLeft(float currentX, float targetX, float distanceDelta) {
   return currentX < targetX - distanceDelta;
 }
 
-boolean isInRearTriangle(float currentX, float currentY, float fieldOfViewRatio, boolean moveForward, boolean moveBackward) {
+bool isInRearTriangle(float currentX, float currentY, float fieldOfViewRatio, bool moveForward, bool moveBackward) {
   if ((currentY >= 0 && moveForward) || (currentY <= 0 && moveBackward)) {
     // Not behind the car
     return false;
@@ -760,23 +824,32 @@ boolean isInRearTriangle(float currentX, float currentY, float fieldOfViewRatio,
   return abs(currentY) >= fieldOfViewRatio * abs(currentX);
 }
 
-boolean isLeading(float currentX, float currentY, boolean moveForward, boolean moveBackward) {
+bool isLeading(float currentX, float currentY, bool moveForward, bool moveBackward) {
   return !isInRearTriangle(currentX, currentY, fieldOfViewRatio, moveForward, moveBackward);
 }
 
 // Function to calculate the new distance diff using PID control.
 float calculateThrottleCoeff(float error_t, float deltaTimeMillis) {
-
   // Step 1: Calculate integral (accumulated error)
-  integral_t += error_t * deltaTimeMillis;
+  integral_t += error_t * deltaTimeMillis / 1000;
+  integral_t = constrain(integral_t, -maxIntegralLimit_t, maxIntegralLimit_t);
 
   // Step 2: Calculate derivative (rate of error change)
-  float derivative_t = (error_t - previousError_t) / deltaTimeMillis;
+  float derivative_t = (error_t - previousError_t) * 1000 / deltaTimeMillis;
 
-  // Step 3: Compute PID output
-  float throttleCoeff = (Kp_t * error_t) + (Ki_t * integral_t) + (Kd_t * derivative_t);
+  // Step 3: Calculate all the terms.
+  float Kp_term = Kp_t * error_t;
 
-  // Step 4: Update previous error
+  float Ki_term = Ki_t * integral_t;
+
+  float Kd_term = Kd_t * derivative_t;
+
+  LOGF("Kp_term: %.2f, Ki_term: %.2f, Kd_term: %.2f\n", Kp_term, Ki_term, Kd_term);
+
+  // Step 4: Compute PID output
+  float throttleCoeff = Kp_term + Ki_term + Kd_term;
+
+  // Step 5: Update previous error
   previousError_t = error_t;
 
   return throttleCoeff;
@@ -786,15 +859,25 @@ float calculateThrottleCoeff(float error_t, float deltaTimeMillis) {
 float calculateSteeringCoeff(float error_s, float deltaTimeMillis) {
 
   // Step 1: Calculate integral (accumulated error)
-  integral_s += error_s * deltaTimeMillis;
+  integral_s += error_s * deltaTimeMillis / 1000;
+  integral_s = constrain(integral_s, -maxIntegralLimit_s, maxIntegralLimit_s);
 
   // Step 2: Calculate derivative (rate of error change)
-  float derivative_s = (error_s - previousError_s) / deltaTimeMillis;
+  float derivative_s = (error_s - previousError_s) * 1000 / deltaTimeMillis;
 
-  // Step 3: Compute PID output
-  float steeringCoeff = (Kp_s * error_s) + (Ki_s * integral_s) + (Kd_s * derivative_s);
+  // Step 3: Calculate all the terms.
+  float Kp_term = Kp_s * error_s;
 
-  // Step 4: Update previous error
+  float Ki_term = Ki_s * integral_s;
+
+  float Kd_term = Kd_s * derivative_s;
+
+  //LOGF("Kp_term: %.2f, Ki_term: %.2f, Kd_term: %.2f\n", Kp_term, Ki_term, Kd_term);
+
+  // Step 4: Compute PID output
+  float steeringCoeff = Kp_term + Ki_term + Kd_term;
+
+  // Step 5: Update previous error
   previousError_s = error_s;
 
   return steeringCoeff;
@@ -850,8 +933,6 @@ void emergencyStop() { //TODO(yifan): Refactor out this with a state machine.
   globalState.targetHeading = 0;
   globalState.yawSpeed = 0;
   globalState.pitchSpeed = 0;
-  globalState.throttleValue = midThrottle;
-  globalState.steeringValue = midSteering;
   autocamRemoteInputChanged = true; // Force gimbal to stop.
 }
 
