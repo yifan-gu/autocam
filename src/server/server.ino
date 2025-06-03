@@ -761,7 +761,7 @@ void calculateSteeringThrottleFollow() {
   float deltaTimeMillis = now - lastDeltaTimeMillis;
   lastDeltaTimeMillis = now;
 
-  if (deltaTimeMillis < minDeltaTimeMillis) {
+  if (deltaTimeMillis < minDeltaTimeMillis) { // Also handles deltaTimeMillis < 0 where the timestamps wraps around.
     return; // No change.
   }
 
@@ -780,10 +780,10 @@ void calculateSteeringThrottleFollow() {
   // Calculate the error and compensate for the tolerance.
   float distanceDiffError = 0;
   if (abs(distanceDiff) > distanceDelta) {
-    if (distanceDiff >= 0) {
-      distanceDiffError -= distanceDelta;
+    if (distanceDiff > 0) {
+      distanceDiffError = distanceDiff - distanceDelta;
     } else {
-      distanceDiffError += distanceDelta;
+      distanceDiffError = distanceDiff + distanceDelta;
     }
   }
 
@@ -837,7 +837,7 @@ void calculateSteeringThrottleCinema() {
   float deltaTimeMillis = now - lastDeltaTimeMillis;
   lastDeltaTimeMillis = now;
 
-  if (deltaTimeMillis < minDeltaTimeMillis) {
+  if (deltaTimeMillis < minDeltaTimeMillis) { // Also handles deltaTimeMillis < 0 where the timestamps wraps around.
     return; // No change.
   }
 
@@ -954,7 +954,7 @@ float calculateThrottleCoeff(float error_t, float deltaTimeMillis) {
 
   float Kd_term = Kd_t * derivative_t;
 
-  LOGF("Kp_term: %.2f, Ki_term: %.2f, Kd_term: %.2f\n", Kp_term, Ki_term, Kd_term);
+  //LOGF("Kp_term: %.2f, Ki_term: %.2f, Kd_term: %.2f\n", Kp_term, Ki_term, Kd_term);
 
   // Step 4: Compute PID output
   float throttleCoeff = Kp_term + Ki_term + Kd_term;
