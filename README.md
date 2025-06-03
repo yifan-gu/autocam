@@ -31,14 +31,14 @@ Arduino files for my auto-following camera car!
 - [ ] Calibrate the UWB tag and anchor
 - [ ] Measure battery voltage.
 - [ ] (optimize) Store settings in external storage (SD card)
-- [ ] (optimize) Refactor the server code with a state machine
+- [x] (optimize) Refactor the server code with a state machine, (Almost a state machine now).
 - [ ] (optimize) Refactor the sensor LED control with LED controller
 - [ ] (optimize) Reorganize shared code into libraries, add external dependencies 
 
 - [ ] <s> Nice to have, detect active track failure</s> Turns out there's no API support for that
 
 ## KNOWN ISSUES
-- [ ] Steering thread issue (Do not steer before throttle is applied)
+- [x] Steering thread issue (Do not steer before throttle is applied)
 - [x] BLE connection issue
 - [ ] ESC init issue
 <s>- [x] Start/stop recording issue</s> Not actually an issue—I plugged the USB-C cable into the wrong gimbal port. However, since the camera drains the gimbal’s battery, I still remove the cable to conserve power.

@@ -43,6 +43,7 @@ Servo steeringServo;
 // Define throttle and steering ranges
 const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
 const int minSteering = 1000, maxSteering = 2000, midSteering = 1500; // 1000 = max right turn, 2000 = max left turn.
+const int minSteeringThrottle = 50;
 
 const float fieldOfViewRatio = 28 / 20; // Car length / car width (measured from the wheel).
 
@@ -462,14 +463,16 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 }
 
 void runESCController() {
-  steeringServo.writeMicroseconds(globalState.steeringValue);
   throttleServo.writeMicroseconds(globalState.throttleValue);
+  if (abs(globalState.throttleValue - midThrottle) > minSteeringThrottle) { // Prevent dry (stationary) steering: only drive steering when throttle exceeds a minimum value.
+    steeringServo.writeMicroseconds(globalState.steeringValue);
+  }
 
-   /*LOG("Throttle: ");
-   LOG(globalState.throttleValue);
-   LOG(" | ");
-   LOG("Steering: ");
-   LOGLN(globalState.steeringValue);*/
+  /*LOG("Throttle: ");
+  LOG(globalState.throttleValue);
+  LOG(" | ");
+  LOG("Steering: ");
+  LOGLN(globalState.steeringValue);*/
 }
 
 void runHealthCheck() {
@@ -997,6 +1000,11 @@ float calculateSteeringCoeff(float error_s, float deltaTimeMillis) {
 }
 
 void calculateCoordinates() {
+  if (sensorState != BLE_CONNECTED) {
+    resetGlobalStateDistanceValues();
+    return;
+  }
+
   // Calculate the heading angle in radians
   float headingRadians = radians(globalState.heading + 90); // +90 since we are always facing towards +Y axis.
 
@@ -1040,10 +1048,22 @@ void setMoveBackward(float throttleCoeff) {
 
 void emergencyStop() { //TODO(yifan): Refactor out this with a state machine.
   setDriveMode(DRIVE_MODE_MANUAL);
+  resetGlobalStateDistanceValues();
+  resetGlobalStateGimbalValues();
+}
+
+void resetGlobalStateDistanceValues() {
   globalState.distance = 0;
   globalState.targetDistance = 0;
   globalState.heading = 0;
   globalState.targetHeading = 0;
+  globalState.currentX = 0;
+  globalState.currentY = 0;
+  globalState.targetX = 0;
+  globalState.targetY = 0;
+}
+
+void resetGlobalStateGimbalValues() {
   globalState.yawSpeed = 0;
   globalState.pitchSpeed = 0;
   autocamRemoteInputChanged = true; // Force gimbal to stop.
