@@ -121,19 +121,19 @@ bool autocamRemoteInputChanged = false;
 //
 // PID Controller variables for throttle. Tunable.
 //
-float distanceDelta = 0.05; // The distance tolerance in meters.
-float headingDelta = 1; // The heading tolerance in degrees.
+float distanceDelta = 0.0; // The distance tolerance in meters.
+float headingDelta = 0; // The heading tolerance in degrees.
 float cinemaLeadingHeadingDelta = 0; // The heading tolerance in cinema leading in meters (converts xDiff to headingDiff);
 float throttleConstant = 100;
 float steeringConstant = 10;
 
-float Kp_t = 1.0;  // Proportional gain. Diff = Kp_t * distance
-float Ki_t = 0.0;  // Integral gain. Diff = Ki_t * distance * 1000 * second.
-float Kd_t = 0.0;  // Derivative gain. Diff = Kd_t / (speed m/s * 1000 ms)
+float Kp_t = 0.5;  // Proportional gain. Diff = Kp_t * distance
+float Ki_t = 4;  // Integral gain. Diff = Ki_t * distance * 1000 * second, Ki_t * maxIntegralLimit_t * throttleConstant = IntegramThrottle
+float Kd_t = 0.5;  // Derivative gain. Diff = Kd_t / (speed m/s * 1000 ms)
 
 float previousError_t = 0.0;  // Previous error for the derivative term
 float integral_t = 0.0;       // Accumulated integral term
-float maxIntegralLimit_t = 1;
+float maxIntegralLimit_t = 0.25; // Ki_t * maxIntegralLimit_t * throttleConstant = IntegramThrottle
 float maxIntegralLimit_s = 0;
 
 // // PID Controller variables for steering.
@@ -171,8 +171,8 @@ void setup() {
   setupESC();
   setupServer();
   setupBLECentral();
-  establishAutocamSensorBLEConnection();
   establishAutocamRemoteBLEConnection();
+  establishAutocamSensorBLEConnection();
 }
 
 void loop() {

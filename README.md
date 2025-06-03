@@ -41,7 +41,7 @@ Arduino files for my auto-following camera car!
 - [ ] Steering thread issue (Do not steer before throttle is applied)
 - [ ] BLE connection issue
 - [ ] ESC init issue
-- [ ] Start/stop recording issue
+<s>- [ ] Start/stop recording issue</s> Not actually an issue—I plugged the USB-C cable into the wrong gimbal port. However, since the camera drains the gimbal’s battery, I still remove the cable to conserve power.
 - [x] Every time the remote buttons are pressed, send values to the server.
 
 ## 🚗 Simulator
