@@ -288,7 +288,7 @@ void updateUWBSelector(uint16_t newUWBSelector) {
 void readStatusData() {
   if (!(BLECentral && BLECentral.connected())) {
     updateState(state & ~SERVER_STATE_REMOTE_READY);
-    driveModeTriggerValue = DRIVE_MODE_MANUAL;
+    resetInputButtonValues();
     if (!connectToCentral()) {
       return;
     }
@@ -500,6 +500,7 @@ bool dataChanged(const RemoteDataSend &oldData, const RemoteDataSend &newData) {
 void sendInput() {
   if (!(BLECentral && BLECentral.connected())) {
     updateState(state & ~SERVER_STATE_REMOTE_READY);
+    resetInputButtonValues();
     if (!connectToCentral()) {
       return;
     }
@@ -554,4 +555,9 @@ void newDevice(DW1000Device *device) {
 
 void inactiveDevice(DW1000Device *device) {
   LOGF("Autocam Sensor disconnected, address=%X\n", device->getShortAddress());
+}
+
+void resetInputButtonValues() {
+  driveModeTriggerValue = DRIVE_MODE_MANUAL;
+  toggleState = NO_GIMBAL_TOGGLE;
 }
