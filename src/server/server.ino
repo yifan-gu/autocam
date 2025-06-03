@@ -50,7 +50,8 @@ int minMoveThrottle = 1300, maxMoveThrottle = 1700;
 int minMoveSteering = 1000, maxMoveSteering = 2000;
 
 // Heartbeat tracking
-unsigned long lastPingTime = 0;           // Time of last received ping
+unsigned long lastWebSocketDataMillis = 0;
+unsigned long lastSensorDataMillis = 0;
 const unsigned long heartbeatTimeout = 1000; // 1 second timeout
 
 
@@ -134,6 +135,14 @@ bool            sensorRecvReady   = false;
 unsigned long lastSensorConnectedTime = 0;
 unsigned long lastRemoteConnectedTime = 0;
 const unsigned long CONNECT_GRACE_MS = 500;
+
+// For Websocket:
+enum WebSocketState {
+  WEBSOCKET_DISCONNECTED = 0,
+  WEBSOCKET_CONNECTED,
+};
+
+WebSocketState wsState = WEBSOCKET_DISCONNECTED;
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -384,17 +393,19 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
   switch (type) {
     case WS_EVT_CONNECT:
       LOGLN("WebSocket connected");
+      wsState = WEBSOCKET_CONNECTED;
       break;
 
     case WS_EVT_DISCONNECT:
       LOGLN("WebSocket disconnected");
       setDriveMode(DRIVE_MODE_MANUAL);
       LOGLN("Throttle and Steering reset to middle positions");
+      wsState = WEBSOCKET_DISCONNECTED;
       break;
 
     case WS_EVT_DATA: {
       String message = String((char*)data).substring(0, len);
-      lastPingTime = millis();
+      lastWebSocketDataMillis = millis();
 
       if (message == "REQUEST_DATA") {
         // Respond with the current state as a JSON string
@@ -465,7 +476,8 @@ void runHealthCheck() {
   unsigned long now;
 
   // ----- Sensor health -----
-  if (!AutocamSensor.connected() && sensorState != BLE_SCANNING) {
+  now = millis();
+  if ((AutocamSensor.connected() && sensorState == BLE_CONNECTED && now - lastSensorDataMillis > heartbeatTimeout) || (!AutocamSensor.connected() && sensorState != BLE_SCANNING)) {
     LOGLN("Sensor disconnected → restarting non‐blocking scan");
     AutocamSensor.disconnect();
     sensorState = BLE_IDLE;
@@ -484,22 +496,12 @@ void runHealthCheck() {
     establishAutocamRemoteBLEConnection();
   }
 
-  // ----- Heartbeat timeout (same as before) -----
+  // ----- WebSocket health -----
   now = millis();
-  if (now > lastPingTime && now - lastPingTime > heartbeatTimeout && sensorState != BLE_SCANNING && remoteState != BLE_SCANNING) {
-    LOGF("Heartbeat timeout, resetting\n");
-
-    AutocamSensor.disconnect();
-    AutocamRemote.disconnect();
-    sensorState = BLE_IDLE;
-    remoteState = BLE_IDLE;
-    emergencyStop();
-    updateState(globalState.state & ~SERVER_STATE_SENSOR_READY);
-    updateState(globalState.state & ~SERVER_STATE_REMOTE_READY);
-    establishAutocamSensorBLEConnection();
-    establishAutocamRemoteBLEConnection();
-
-    lastPingTime = now;
+  if (wsState == WEBSOCKET_CONNECTED && now - lastWebSocketDataMillis > heartbeatTimeout) {
+    LOGLN("WebSocket inactive → closing all clients");
+    ws.closeAll();                     // Close every WebSocket client
+    wsState = WEBSOCKET_DISCONNECTED;
   }
 }
 
@@ -632,6 +634,9 @@ void getAutocamSensorData() {
   SensorDataSend data;
 
   AutocamSensorDataSend.readValue((uint8_t *)&data, sizeof(SensorDataSend));
+
+  lastSensorDataMillis = millis();
+
   //LOGF("Received distance=%f, heading=%f, state=%d\n", data.distance, data.heading, data.state);
 
   // Smooth the distance reading using an exponential moving average.
@@ -650,7 +655,7 @@ void getAutocamSensorData() {
   }
 
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
-  lastPingTime = millis();
+  //lastPingTime = millis();
 }
 
 void getAutocamRemoteData() {
@@ -670,8 +675,6 @@ void getAutocamRemoteData() {
   AutocamRemoteDataSend.readValue((uint8_t *)&data, sizeof(RemoteDataSend));
   //LOGF("Received throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, toggleState=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.toggleState, data.uwbSelector);
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
-
-  lastPingTime = millis();
 
   autocamRemoteInputChanged = globalState.yawSpeed != data.yawSpeed || globalState.pitchSpeed != data.pitchSpeed || globalState.toggleState != data.toggleState || globalState.uwbSelector != data.uwbSelector;
 

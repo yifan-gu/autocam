@@ -287,7 +287,7 @@ void updateUWBSelector(uint16_t newUWBSelector) {
 
 void readStatusData() {
   if (!(BLECentral && BLECentral.connected())) {
-    updateState(state & ~SERVER_STATE_REMOTE_READY);
+    updateState(SERVER_STATE_NOT_READY);
     resetInputButtonValues();
     if (!connectToCentral()) {
       return;
@@ -306,33 +306,6 @@ void readStatusData() {
     //lastPingTime = millis();
   }
 }
-
-//// Returns true if the button is detected as a new press (transition to LOW)
-//// without using a blocking delay.
-//bool buttonPressed(ButtonDebounce &button, unsigned long debounceDelay = 0) {
-//  int reading = digitalRead(button.pin);
-//  bool event = false;
-//
-//  // If the reading has changed, reset the debounce timer.
-//  if (reading != button.lastReading) {
-//    button.lastDebounceTime = millis();
-//  }
-//
-//  // If the reading has been stable for longer than debounceDelay...
-//  if ((millis() - button.lastDebounceTime) > debounceDelay) {
-//    // If the stable state has changed, update it.
-//    if (reading != button.stableState) {
-//      button.stableState = reading;
-//      // Detect a press (when the stable state goes LOW).
-//      if (button.stableState == LOW) {
-//        event = true;
-//      }
-//    }
-//  }
-//
-//  button.lastReading = reading;
-//  return event;
-//}
 
 bool buttonPressed(ButtonDebounce &button) {
   int previousState = button.stableState;
@@ -499,7 +472,7 @@ bool dataChanged(const RemoteDataSend &oldData, const RemoteDataSend &newData) {
 
 void sendInput() {
   if (!(BLECentral && BLECentral.connected())) {
-    updateState(state & ~SERVER_STATE_REMOTE_READY);
+    updateState(SERVER_STATE_NOT_READY);
     resetInputButtonValues();
     if (!connectToCentral()) {
       return;
