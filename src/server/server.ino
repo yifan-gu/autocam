@@ -113,9 +113,28 @@ void printGlobalState() {
   );
 }
 
-
-
 bool autocamRemoteInputChanged = false;
+
+enum BleConnectState {
+  BLE_IDLE = 0,
+  BLE_SCANNING,   // Actively trying to discover “Send” and/or “Recv”
+  BLE_CONNECTED   // Both characteristics discovered
+};
+
+// For Remote:
+BleConnectState remoteState       = BLE_IDLE;
+bool            remoteSendReady   = false;
+bool            remoteRecvReady   = false;
+
+// For Sensor:
+BleConnectState sensorState       = BLE_IDLE;
+bool            sensorSendReady   = false;
+bool            sensorRecvReady   = false;
+
+unsigned long lastSensorConnectedTime = 0;
+unsigned long lastRemoteConnectedTime = 0;
+const unsigned long CONNECT_GRACE_MS = 500;
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //
@@ -167,12 +186,12 @@ void setup() {
     // Wait for Serial or timeout
   }
 
+  establishAutocamRemoteBLEConnection();
+  establishAutocamSensorBLEConnection();
   setupLED();
   setupESC();
   setupServer();
   setupBLECentral();
-  establishAutocamRemoteBLEConnection();
-  establishAutocamSensorBLEConnection();
 }
 
 void loop() {
@@ -186,6 +205,8 @@ void loop() {
   previousIteration = currentIteration;
   //LOGF("Interval since last iteration: %u ms\n", intervalMs);
 
+  attemptConnectRemote();
+  attemptConnectSensor();
   getAutocamSensorData();
   getAutocamRemoteData();
   //printGlobalState();
@@ -441,55 +462,147 @@ void runESCController() {
 }
 
 void runHealthCheck() {
-  if (!AutocamSensor.connected()) {
-    LOGLN("AutocamSensor not connected, will reconnect...");
+  unsigned long now;
+
+  // ----- Sensor health -----
+  if (!AutocamSensor.connected() && sensorState != BLE_SCANNING) {
+    LOGLN("Sensor disconnected → restarting non‐blocking scan");
+    AutocamSensor.disconnect();
+    sensorState = BLE_IDLE;
     emergencyStop();
-    updateState(globalState.state & ~SERVER_STATE_SENSOR_READY); // Clear the sensor ready indicator bit.
+    updateState(globalState.state & ~SERVER_STATE_SENSOR_READY);
     establishAutocamSensorBLEConnection();
   }
 
-  if (!AutocamRemote.connected()) {
-    LOGLN("AutocamRemote not connected, will reconnect...");
+  // ----- Remote health -----
+  if (!AutocamRemote.connected() && remoteState != BLE_SCANNING) {
+    LOGLN("Remote disconnected → restarting non‐blocking scan");
+    AutocamRemote.disconnect();
+    remoteState = BLE_IDLE;
     emergencyStop();
-    sendGimbalControllerData();
-    updateState(globalState.state & ~SERVER_STATE_REMOTE_READY); // Clear the remote controller ready indicator bit.
+    updateState(globalState.state & ~SERVER_STATE_REMOTE_READY);
     establishAutocamRemoteBLEConnection();
   }
 
-  unsigned long currentMillis = millis();
-  if (currentMillis > lastPingTime && currentMillis - lastPingTime > heartbeatTimeout) {
-    LOGF("Heartbeat timeout, current: %lu, last: %lu, reset\n", currentMillis, lastPingTime);
+  // ----- Heartbeat timeout (same as before) -----
+  now = millis();
+  if (now > lastPingTime && now - lastPingTime > heartbeatTimeout && sensorState != BLE_SCANNING && remoteState != BLE_SCANNING) {
+    LOGF("Heartbeat timeout, resetting\n");
+
+    AutocamSensor.disconnect();
+    AutocamRemote.disconnect();
+    sensorState = BLE_IDLE;
+    remoteState = BLE_IDLE;
     emergencyStop();
-    lastPingTime = millis(); // Reset timer to avoid repeated timeouts
+    updateState(globalState.state & ~SERVER_STATE_SENSOR_READY);
+    updateState(globalState.state & ~SERVER_STATE_REMOTE_READY);
+    establishAutocamSensorBLEConnection();
+    establishAutocamRemoteBLEConnection();
+
+    lastPingTime = now;
   }
 }
 
 void establishAutocamRemoteBLEConnection() {
-  while (!scanForPeripheral(AutocamRemote, AutocamRemoteService, AutocamRemoteDataSend, AutocamRemoteServiceUUID, AutocamRemoteDataSendCharacteristicUUID)) {
-    delay(1000);
-  }
-  while (!scanForPeripheral(AutocamRemote, AutocamRemoteService, AutocamRemoteDataRecv, AutocamRemoteServiceUUID, AutocamRemoteDataRecvCharacteristicUUID)) {
-    delay(1000);
-  }
-  updateState(globalState.state | SERVER_STATE_REMOTE_READY);
+  // Reset the flags and enter SCANNING mode
+  remoteSendReady  = false;
+  remoteRecvReady  = false;
+  remoteState      = BLE_SCANNING;
 }
 
 void establishAutocamSensorBLEConnection() {
-  while (!scanForPeripheral(AutocamSensor, AutocamSensorService, AutocamSensorDataSend, AutocamSensorServiceUUID, AutocamSensorDataSendCharacteristicUUID)) {
-    delay(1000);
-  };
-  while (!scanForPeripheral(AutocamSensor, AutocamSensorService, AutocamSensorDataRecv, AutocamSensorServiceUUID, AutocamSensorDataRecvCharacteristicUUID)) {
-    delay(1000);
-  };
+  sensorSendReady  = false;
+  sensorRecvReady  = false;
+  sensorState      = BLE_SCANNING;
 }
 
-void sendGimbalControllerData() {
-  if (!autocamRemoteInputChanged) {
+void attemptConnectRemote() {
+  if (remoteState != BLE_SCANNING) {
+    // Not in “scanning” mode, nothing to do.
     return;
   }
 
-  if (!AutocamSensor.connected()) {
-    LOGLN("UWB Anchor is not connected, will not update gimbal");
+  // Step 1: If Send is not yet discovered, try it once per second
+  if (!remoteSendReady) {
+    bool okSend = scanForPeripheral(
+      AutocamRemote,
+      AutocamRemoteService,
+      AutocamRemoteDataSend,
+      AutocamRemoteServiceUUID,
+      AutocamRemoteDataSendCharacteristicUUID
+    );
+    if (okSend) {
+      // Successfully discovered “Send” characteristic:
+      remoteSendReady = true;
+    }
+  }
+
+  // Step 2: If Send is ready but Recv is not, try Recv immediately (no delay):
+  if (!remoteRecvReady) {
+    bool okRecv = scanForPeripheral(
+      AutocamRemote,
+      AutocamRemoteService,
+      AutocamRemoteDataRecv,
+      AutocamRemoteServiceUUID,
+      AutocamRemoteDataRecvCharacteristicUUID
+    );
+    if (okRecv) {
+      // Successfully discovered “Recv” characteristic:
+      remoteRecvReady = true;
+    }
+  }
+
+  if (remoteSendReady && remoteRecvReady && AutocamRemote.connected()) {
+    remoteState = BLE_CONNECTED;
+    updateState(globalState.state | SERVER_STATE_REMOTE_READY);
+  }
+}
+
+void attemptConnectSensor() {
+  if (sensorState != BLE_SCANNING) {
+    return;
+  }
+
+  // Step 1: Try “Send” once per second
+  if (!sensorSendReady) {
+    bool okSend = scanForPeripheral(
+      AutocamSensor,
+      AutocamSensorService,
+      AutocamSensorDataSend,
+      AutocamSensorServiceUUID,
+      AutocamSensorDataSendCharacteristicUUID
+    );
+    if (okSend) {
+      sensorSendReady = true;
+    }
+  }
+
+  // Step 2: If Send is ready but Recv not yet, attempt Recv immediately
+  if (!sensorRecvReady) {
+    bool okRecv = scanForPeripheral(
+      AutocamSensor,
+      AutocamSensorService,
+      AutocamSensorDataRecv,
+      AutocamSensorServiceUUID,
+      AutocamSensorDataRecvCharacteristicUUID
+    );
+    if (okRecv) {
+      sensorRecvReady = true;
+    }
+  }
+  if (sensorSendReady && sensorRecvReady && AutocamSensor.connected()) {
+    sensorState = BLE_CONNECTED;
+    updateState(globalState.state | SERVER_STATE_SENSOR_READY);
+  }
+}
+
+
+void sendGimbalControllerData() {
+  if (sensorState != BLE_CONNECTED) {
+    return;
+  }
+
+  if (!autocamRemoteInputChanged) {
     return;
   }
 
@@ -504,12 +617,7 @@ void sendGimbalControllerData() {
 
 // Get data from the UWB Anchor via BLE.
 void getAutocamSensorData() {
-  if (!AutocamSensor.connected()) {
-    if (globalState.driveMode != DRIVE_MODE_MANUAL) {
-      emergencyStop();
-    }
-
-    updateState(globalState.state & ~SERVER_STATE_SENSOR_READY); // Clear the sensor ready indicator bit.
+  if (sensorState != BLE_CONNECTED) {
     return;
   }
 
@@ -546,9 +654,7 @@ void getAutocamSensorData() {
 }
 
 void getAutocamRemoteData() {
-  if (!AutocamRemote.connected()) {
-    emergencyStop();
-    updateState(globalState.state & ~SERVER_STATE_REMOTE_READY); // Clear the remote controller ready indicator bit.
+  if (remoteState != BLE_CONNECTED) {
     return;
   }
 
@@ -588,8 +694,7 @@ void updateState(int newState) {
   updateAutocamRemoteStatus();
 }
 void updateAutocamRemoteStatus() {
-  if (!AutocamRemote.connected()) {
-    LOGLN("Autocam controller is not connected, will not update status!");
+  if (remoteState != BLE_CONNECTED) {
     return;
   }
 
@@ -603,6 +708,11 @@ void setDriveMode(int newDriveMode) {
   if (globalState.driveMode == newDriveMode) {
     return;
   }
+
+  if (sensorState != BLE_CONNECTED && newDriveMode != DRIVE_MODE_MANUAL) {
+    return;
+  }
+
   globalState.driveMode = newDriveMode;
   globalState.throttleValue = midThrottle;
   globalState.steeringValue = midSteering;

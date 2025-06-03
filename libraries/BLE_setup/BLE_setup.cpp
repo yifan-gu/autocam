@@ -45,6 +45,12 @@ bool scanForPeripheral(BLEDevice &device, BLEService &service, BLECharacteristic
   }
   lastScanMillis = currentMillis;
 
+    // If we already had a device but it is no longer connected, clear it:
+  if (device && !device.connected()) {
+    LOGLN("Previously connected device is gone—clearing reference.");
+    device = BLEDevice();  // assign an empty object to force a rescan
+  }
+
   if (!device) {
     LOGF("Scanning for BLE peripheral [%s]...\n", serviceUUID);
     BLE.scanForUuid(serviceUUID);
