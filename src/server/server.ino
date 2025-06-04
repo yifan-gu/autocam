@@ -217,15 +217,22 @@ void loop() {
 
   attemptConnectRemote();
   attemptConnectSensor();
+  yield();
+
   getAutocamSensorData();
   getAutocamRemoteData();
   //printGlobalState();
   sendGimbalControllerData();
+  yield();
+
   calculateCoordinates();
   calculateSteeringThrottle();
+  yield();
+
   runESCController();
   checkDriveModeLED();
   runHealthCheck();
+  yield();
 
   // Delay until the next period; this call ensures a steady 10 ms loop period.
   vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(LOOP_PERIOD_MS));
@@ -500,12 +507,12 @@ void runHealthCheck() {
   }
 
   // ----- WebSocket health -----
-  now = millis();
-  if (wsState == WEBSOCKET_CONNECTED && now - lastWebSocketDataMillis > heartbeatTimeout) {
-    LOGLN("WebSocket inactive → closing all clients");
-    ws.closeAll();                     // Close every WebSocket client
-    wsState = WEBSOCKET_DISCONNECTED;
-  }
+  //now = millis();
+  //if (wsState == WEBSOCKET_CONNECTED && now - lastWebSocketDataMillis > heartbeatTimeout) {
+  //  LOGLN("WebSocket inactive → closing all clients");
+  //  ws.closeAll();                     // Close every WebSocket client
+  //  wsState = WEBSOCKET_DISCONNECTED;
+  //}
 }
 
 void establishAutocamRemoteBLEConnection() {
@@ -681,8 +688,8 @@ void getAutocamRemoteData() {
 
   autocamRemoteInputChanged = globalState.yawSpeed != data.yawSpeed || globalState.pitchSpeed != data.pitchSpeed || globalState.toggleState != data.toggleState || globalState.uwbSelector != data.uwbSelector;
 
-  globalState.throttleValue = constrain(data.throttleValue, minMoveThrottle, maxMoveThrottle);
-  globalState.steeringValue = constrain(data.steeringValue, minMoveSteering, maxMoveSteering);
+  globalState.throttleValue = map(data.throttleValue, minThrottle, maxThrottle, minMoveThrottle, maxMoveThrottle);
+  globalState.steeringValue = map(data.steeringValue, minSteering, maxSteering, minMoveSteering, maxMoveSteering);
   globalState.yawSpeed = data.yawSpeed;
   globalState.pitchSpeed = data.pitchSpeed;
   globalState.toggleState = data.toggleState;
@@ -1047,9 +1054,17 @@ void setMoveBackward(float throttleCoeff) {
 }
 
 void emergencyStop() { //TODO(yifan): Refactor out this with a state machine.
+  stopCar();
   setDriveMode(DRIVE_MODE_MANUAL);
   resetGlobalStateDistanceValues();
   resetGlobalStateGimbalValues();
+}
+
+void stopCar() {
+  globalState.throttleValue = midThrottle;
+  globalState.steeringValue = midSteering;
+  setThrottlePWM(globalState.throttleValue);
+  setSteeringPWM(globalState.steeringValue);
 }
 
 void resetGlobalStateDistanceValues() {

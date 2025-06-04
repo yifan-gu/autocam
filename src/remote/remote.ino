@@ -45,7 +45,7 @@
 #define GIMBAL_STICK_Y_PIN 35
 #define BATTERY_ADC_PIN 39  // ADC pin to measure battery voltage.
 
-const int minThrottle = 1300, maxThrottle = 1700, midThrottle = 1500;
+const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
 const int minSteering = 1000, maxSteering = 2000, midSteering = 1500;
 const float minPitch = -4, maxPitch = 4, midPitch = 0;
 const float minYaw = -4, maxYaw = 4, midYaw = 0;
@@ -519,7 +519,7 @@ void checkBattery() {
 }
 
 void newRange() {
-  LOGF("Autocam Sensor address=%X, distance=%f(m)\n", DW1000Ranging.getDistantDevice()->getShortAddress(), DW1000Ranging.getDistantDevice()->getRange());
+  //LOGF("Autocam Sensor address=%X, distance=%f(m)\n", DW1000Ranging.getDistantDevice()->getShortAddress(), DW1000Ranging.getDistantDevice()->getRange());
 }
 
 void newDevice(DW1000Device *device) {
