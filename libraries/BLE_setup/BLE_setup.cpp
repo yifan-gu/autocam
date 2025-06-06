@@ -48,6 +48,7 @@ void setupBLECentral() {
   if (!BLE.begin()) {
     panic("Failed to start BLE as central");
   }
+
   LOGLN("BLE Central initialized.");
   BLE.setConnectionInterval(6, 6); // from 7.5ms to 7.5ms (6 * 1.5ms).
 }
@@ -93,8 +94,6 @@ bool connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristi
     }
   }
 
-  LOGF("here1: %ld\n", millis() - now);
-
   LOGF("Connected to [%s]!\n", device.localName());
   if (millis() - now > bleBlockingLimitMillis) {
     return false;
@@ -102,40 +101,36 @@ bool connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristi
 
   if (!isAttributesDiscovered(serviceUUID) && !device.discoverAttributes()) {
     LOGF("Attribute discovery failed for [%s]! Disconnecting...\n", device.localName());
-    device.disconnect();
+    disconnectPeripheral(device, serviceUUID);
     return false;
   }
   setAttributesDiscovered(serviceUUID, true);
 
-  LOGF("here2: %ld\n", millis() - now);
+  LOGF("BLE device name: [%s], advertised svc count: [%d], Real svc count: [%d], characteristics count: [%d]\n", device.deviceName(), device.advertisedServiceUuidCount(), device.serviceCount(), device.characteristicCount());
   if (millis() - now > bleBlockingLimitMillis) {
     return false;
   }
 
   service = device.service(serviceUUID);
-  LOGF("BLE device name: [%s], advertised svc count: [%d], Real svc count: [%d], characteristics count: [%d]\n", device.deviceName(), device.advertisedServiceUuidCount(), device.serviceCount(), device.characteristicCount());
   characteristic = service.characteristic(characteristicUUID);
-
-  LOGF("here3: %ld\n", millis() - now);
   if (millis() - now > bleBlockingLimitMillis) {
     return false;
   }
 
   if (!characteristic) {
     LOGF("Failed to find characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
-    device.disconnect();
+    disconnectPeripheral(device, serviceUUID);
     return false;
   }
 
   if (characteristic.canSubscribe()) {
     if (!characteristic.subscribe()) {
       LOGF("Failed to subscribe characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
-      device.disconnect();
+      disconnectPeripheral(device, serviceUUID);
       return false;
     }
   }
 
-  LOGF("here4: %ld\n", millis() - now);
   LOGF("Found characteristic [%s] on device [%s] and successfully subscribed!\n", characteristicUUID, device.deviceName());
   return true;
 }
@@ -179,8 +174,8 @@ bool connectToCentral() {
   return true;
 }
 
-void disconnectPeripheral(BLEDevice& service, const char *serviceUUID) {
-  service.disconnect();
+void disconnectPeripheral(BLEDevice& device, const char *serviceUUID) {
+  device.disconnect();
   // Once we disconnect, clear the “discovered” flag for that UUID:
   setAttributesDiscovered(serviceUUID, false);
 }

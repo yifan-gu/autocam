@@ -19,34 +19,39 @@ extern const char *AutocamRemoteDataRecvCharacteristicUUID;
 struct SensorDataSend {
   float distance;
   float heading;
-  int state; // 1 = ready, 0 = not ready.
+  uint8_t state; // 1 = ready, 0 = not ready.
 };
 
 struct SensorDataRecv {
   // Values below are written by the central (server).
   float yawSpeed;
   float pitchSpeed;
-  int toggleState; // Bit 0 = activeTrackToggled, bit 1 = gimbalRecenterToggled, bit 2 = cameraRecordingToggled.activeTrackToggled;
-  uint16_t uwbSelector;
+  uint8_t toggleState; // Bit 0 = activeTrackToggled, bit 1 = gimbalRecenterToggled, bit 2 = cameraRecordingToggled.activeTrackToggled;
+  uint8_t uwbSelector;
 };
 
 struct RemoteDataSend {
-  int throttleValue;
-  int steeringValue;
-  int driveMode;
+  int16_t throttleValue;
+  int16_t steeringValue;
   float yawSpeed;
   float pitchSpeed;
-  int toggleState; // Bit 0 = activeTrackToggled, bit 1 = gimbalRecenterToggled, bit 2 = cameraRecordingToggled.activeTrackToggled;
-  uint16_t uwbSelector;
+  uint8_t driveMode;
+  uint8_t toggleState;
+  uint8_t uwbSelector;
 };
+
+// This ensures the iOS and ESP32 agree on byte order and length.
+static_assert(sizeof(RemoteDataSend) == 16, "Size mismatch");
 
 struct RemoteDataRecv {
-  int driveMode;
-  int toggleState; // Bit 0 = activeTrackToggled, bit 1 = gimbalRecenterToggled, bit 2 = cameraRecordingToggled.activeTrackToggled;
-  uint16_t uwbSelector;
-  int state;
+  uint8_t state;
+  uint8_t driveMode;
+  uint8_t toggleState;
+  uint8_t uwbSelector;
 };
 
+// This ensures the iOS and ESP32 agree on byte order and length.
+static_assert(sizeof(RemoteDataRecv) == 4, "Size mismatch");
 
 void setupBLECentral();
 bool connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID);

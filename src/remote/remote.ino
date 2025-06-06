@@ -45,30 +45,30 @@
 #define GIMBAL_STICK_Y_PIN 35
 #define BATTERY_ADC_PIN 39  // ADC pin to measure battery voltage.
 
-const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
-const int minSteering = 1000, maxSteering = 2000, midSteering = 1500;
+const int16_t minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
+const int16_t minSteering = 1000, maxSteering = 2000, midSteering = 1500;
 const float minPitch = -4, maxPitch = 4, midPitch = 0;
 const float minYaw = -4, maxYaw = 4, midYaw = 0;
 
 // State indicators.
-int state = SERVER_STATE_NOT_READY;
-int driveMode = DRIVE_MODE_MANUAL;
-uint16_t uwbSelector = 1;
+uint8_t state = SERVER_STATE_NOT_READY;
+uint8_t driveMode = DRIVE_MODE_MANUAL;
+uint8_t uwbSelector = 1;
 bool uwbStarted = false;
 
 // Variables to store the drive mode button trigger events.
-int driveModeTriggerValue = DRIVE_MODE_MANUAL;
+uint8_t driveModeTriggerValue = DRIVE_MODE_MANUAL;
 
 // Variables toggle the UWB selector switch trigger events.
-uint16_t uwbSelectorTriggerValue = 0;
+uint8_t uwbSelectorTriggerValue = 0;
 
 // Variables to store values
-int throttleValue = midThrottle, steeringValue = midSteering;
+int16_t throttleValue = midThrottle, steeringValue = midSteering;
 
 // Variables to store the gimbal controller data.
 float yawSpeedValue = 0.0;
 float pitchSpeedValue = 0.0;
-int toggleState = NO_GIMBAL_TOGGLE;
+uint8_t toggleState = NO_GIMBAL_TOGGLE;
 
 bool buttonIsPressed = false;
 
@@ -254,7 +254,7 @@ void setupBLE() {
   setupBLEPeripheral("Autocam Remote", "autocam-remote", AutocamRemoteService);
 }
 
-void updateState(int newState) {
+void updateState(uint8_t newState) {
   if ((newState & SERVER_STATE_SENSOR_READY) == 0 || (newState & SERVER_STATE_REMOTE_READY) == 0) {
     // Reset drive mode, because at this point the server must be in DRIVE_MODE_MANUAL.
     driveModeTriggerValue = DRIVE_MODE_MANUAL;
@@ -270,7 +270,7 @@ void updateState(int newState) {
   LOGF("Update state=%d\n", state);
 }
 
-void updateDriveMode(int newDriveMode) {
+void updateDriveMode(uint8_t newDriveMode) {
   if (driveMode == newDriveMode) {
     return;
   }
@@ -279,7 +279,7 @@ void updateDriveMode(int newDriveMode) {
   LOGF("Update drive mode=%d\n", driveMode);
 }
 
-void updateUWBSelector(uint16_t newUWBSelector) {
+void updateUWBSelector(uint8_t newUWBSelector) {
   if (uwbSelector == newUWBSelector) {
     return;
   }
@@ -396,7 +396,7 @@ bool lockSwitchLocked() {
   return digitalRead(LOCK_SWITCH_PIN) == LOW;
 }
 
-uint16_t readUWBSelector() {
+uint8_t readUWBSelector() {
   return digitalRead(UWB_SELECTOR_SWITCH_PIN) == LOW ? 1 : 0;
 }
 
@@ -487,9 +487,9 @@ void sendInput() {
   RemoteDataSend data = {
     .throttleValue = throttleValue,
     .steeringValue = steeringValue,
-    .driveMode = driveModeTriggerValue,
     .yawSpeed = yawSpeedValue,
     .pitchSpeed = pitchSpeedValue,
+    .driveMode = driveModeTriggerValue,
     .toggleState = toggleState,
     .uwbSelector = uwbSelectorTriggerValue,
   };

@@ -37,7 +37,7 @@ LEDController ledController;
 float minVoltage = 3.0; // TODO(yifan): To verify
 float maxVoltage = 4.2; // TODO(yifan): To verify.
 
-int tagState = TAG_STATE_SENSOR_NOT_CONNECTED;
+uint8_t tagState = TAG_STATE_SENSOR_NOT_CONNECTED;
 
 unsigned int lastBatteryCheckTimeMillis = 0;
 unsigned int batteryCheckIntervalMillis = 2000;
@@ -136,7 +136,7 @@ void checkBattery() {
   }
 }
 
-void updateState(int newState) {
+void updateState(uint8_t newState) {
   if (tagState == newState) {
     return;
   }

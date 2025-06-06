@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Disable pinch zoom by setting maximum-scale to 1.0 and user-scalable to no -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Parameters</title>
+    <style>
+      /* Disable text selection but allow scrolling */
+      html,
+      body {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        padding: 8px;
+        touch-action: none; /* Prevent default pinch-zoom */
+        overflow: auto; /* Enable scrolling */
+      }
+      /* Header container for the back button, title, and reset button */
+      .header {
+        position: relative;
+        text-align: center;
+        margin-bottom: 8px;
+      }
+      /* Small back button positioned at the left of the header */
+      .back-button {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 5px;
+        background-color: #eeeeee;
+        color: #007bff;
+        border: none;
+        cursor: pointer;
+      }
+      .back-button:hover {
+        background-color: #e0e0e0;
+      }
+      /* Reset button styled similarly to the back button, positioned at the right */
+      .reset-button {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 5px;
+        background-color: #eeeeee;
+        color: #007bff;
+        border: none;
+        cursor: pointer;
+      }
+      .reset-button:hover {
+        background-color: #e0e0e0;
+      }
+      h2 {
+        font-size: 16px;
+        margin: 0;
+      }
+      .slider-container {
+        margin: 2px 0;
+        width: 100%;
+      }
+      .slider-container label {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        margin-bottom: 3px;
+      }
+      .slider {
+        width: 100%;
+        height: 8px;
+        background: #ddd;
+        border-radius: 4px;
+        outline: none;
+        transition: 0.2s;
+      }
+      .number-input {
+        width: 60px;
+        font-size: 14px;
+        padding: 2px 4px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+      }
+      input[type="submit"] {
+        display: block;
+        width: 100%;
+        padding: 8px;
+        font-size: 14px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-top: 10px;
+      }
+      input[type="submit"]:hover {
+        background-color: #0056b3;
+      }
+      #status {
+        font-size: 12px;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <button type="button" class="back-button" onclick="window.location.href='/'">Back</button>
+      <h2>Autocam Parameters</h2>
+      <button type="button" class="reset-button" onclick="resetAll()">Reset</button>
+    </div>
+    <form id="parameters-form">
+      <!-- DistanceDelta -->
+      <div class="slider-container">
+        <label for="distanceDelta-slider">
+          DistanceDelta:
+          <input
+            type="number"
+            id="distanceDelta-input"
+            class="number-input"
+            min="0"
+            max="5"
+            step="0.01"
+            value="0.05"
+            onblur="syncFromNumber('distanceDelta', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('distanceDelta', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="distanceDelta-slider"
+          class="slider"
+          type="range"
+          name="distanceDelta"
+          min="0"
+          max="5"
+          step="0.01"
+          value="0.05"
+          oninput="syncFromSlider('distanceDelta', this.value)"
+        />
+      </div>
+
+      <!-- HeadingDelta -->
+      <div class="slider-container">
+        <label for="headingDelta-slider">
+          HeadingDelta:
+          <input
+            type="number"
+            id="headingDelta-input"
+            class="number-input"
+            min="0"
+            max="30"
+            step="1"
+            value="1"
+            onblur="syncFromNumber('headingDelta', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('headingDelta', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="headingDelta-slider"
+          class="slider"
+          type="range"
+          name="headingDelta"
+          min="0"
+          max="30"
+          step="1"
+          value="1"
+          oninput="syncFromSlider('headingDelta', this.value)"
+        />
+      </div>
+
+      <!-- CinemaLeadingHeadingDelta -->
+      <div class="slider-container">
+        <label for="cinemaLeadingHeadingDelta-slider">
+          CinemaLeadingHeadingDelta:
+          <input
+            type="number"
+            id="cinemaLeadingHeadingDelta-input"
+            class="number-input"
+            min="0"
+            max="5"
+            step="0.01"
+            value="0"
+            onblur="syncFromNumber('cinemaLeadingHeadingDelta', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('cinemaLeadingHeadingDelta', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="cinemaLeadingHeadingDelta-slider"
+          class="slider"
+          type="range"
+          name="cinemaLeadingHeadingDelta"
+          min="0"
+          max="5"
+          step="0.01"
+          value="0"
+          oninput="syncFromSlider('cinemaLeadingHeadingDelta', this.value)"
+        />
+      </div>
+
+      <!-- maxIntegralLimit_t -->
+      <div class="slider-container">
+        <label for="maxIntegralLimit_t-slider">
+          maxIntegralLimit_t:
+          <input
+            type="number"
+            id="maxIntegralLimit_t-input"
+            class="number-input"
+            min="0"
+            max="100"
+            step="0.01"
+            value="1"
+            onblur="syncFromNumber('maxIntegralLimit_t', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('maxIntegralLimit_t', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="maxIntegralLimit_t-slider"
+          class="slider"
+          type="range"
+          name="maxIntegralLimit_t"
+          min="0"
+          max="100"
+          step="0.01"
+          value="1"
+          oninput="syncFromSlider('maxIntegralLimit_t', this.value)"
+        />
+      </div>
+
+      <!-- maxIntegralLimit_s -->
+      <div class="slider-container">
+        <label for="maxIntegralLimit_s-slider">
+          maxIntegralLimit_s:
+          <input
+            type="number"
+            id="maxIntegralLimit_s-input"
+            class="number-input"
+            min="0"
+            max="100"
+            step="0.01"
+            value="0"
+            onblur="syncFromNumber('maxIntegralLimit_s', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('maxIntegralLimit_s', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="maxIntegralLimit_s-slider"
+          class="slider"
+          type="range"
+          name="maxIntegralLimit_s"
+          min="0"
+          max="100"
+          step="0.01"
+          value="0"
+          oninput="syncFromSlider('maxIntegralLimit_s', this.value)"
+        />
+      </div>
+
+      <!-- Kp_t -->
+      <div class="slider-container">
+        <label for="Kp_t-slider">
+          Kp_t:
+          <input
+            type="number"
+            id="Kp_t-input"
+            class="number-input"
+            min="0"
+            max="10"
+            step="0.01"
+            value="1"
+            onblur="syncFromNumber('Kp_t', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('Kp_t', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="Kp_t-slider"
+          class="slider"
+          type="range"
+          name="Kp_t"
+          min="0"
+          max="10"
+          step="0.01"
+          value="1"
+          oninput="syncFromSlider('Kp_t', this.value)"
+        />
+      </div>
+
+      <!-- Ki_t -->
+      <div class="slider-container">
+        <label for="Ki_t-slider">
+          Ki_t:
+          <input
+            type="number"
+            id="Ki_t-input"
+            class="number-input"
+            min="0"
+            max="10"
+            step="0.01"
+            value="0"
+            onblur="syncFromNumber('Ki_t', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('Ki_t', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="Ki_t-slider"
+          class="slider"
+          type="range"
+          name="Ki_t"
+          min="0"
+          max="10"
+          step="0.01"
+          value="0"
+          oninput="syncFromSlider('Ki_t', this.value)"
+        />
+      </div>
+
+      <!-- Kd_t -->
+      <div class="slider-container">
+        <label for="Kd_t-slider">
+          Kd_t:
+          <input
+            type="number"
+            id="Kd_t-input"
+            class="number-input"
+            min="0"
+            max="10"
+            step="0.01"
+            value="0"
+            onblur="syncFromNumber('Kd_t', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('Kd_t', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="Kd_t-slider"
+          class="slider"
+          type="range"
+          name="Kd_t"
+          min="0"
+          max="10"
+          step="0.01"
+          value="0"
+          oninput="syncFromSlider('Kd_t', this.value)"
+        />
+      </div>
+
+      <!-- Kp_s -->
+      <div class="slider-container">
+        <label for="Kp_s-slider">
+          Kp_s:
+          <input
+            type="number"
+            id="Kp_s-input"
+            class="number-input"
+            min="0"
+            max="10"
+            step="0.01"
+            value="1"
+            onblur="syncFromNumber('Kp_s', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('Kp_s', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="Kp_s-slider"
+          class="slider"
+          type="range"
+          name="Kp_s"
+          min="0"
+          max="10"
+          step="0.01"
+          value="1"
+          oninput="syncFromSlider('Kp_s', this.value)"
+        />
+      </div>
+
+      <!-- Ki_s -->
+      <div class="slider-container">
+        <label for="Ki_s-slider">
+          Ki_s:
+          <input
+            type="number"
+            id="Ki_s-input"
+            class="number-input"
+            min="0"
+            max="10"
+            step="0.01"
+            value="0"
+            onblur="syncFromNumber('Ki_s', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('Ki_s', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="Ki_s-slider"
+          class="slider"
+          type="range"
+          name="Ki_s"
+          min="0"
+          max="10"
+          step="0.01"
+          value="0"
+          oninput="syncFromSlider('Ki_s', this.value)"
+        />
+      </div>
+
+      <!-- Kd_s -->
+      <div class="slider-container">
+        <label for="Kd_s-slider">
+          Kd_s:
+          <input
+            type="number"
+            id="Kd_s-input"
+            class="number-input"
+            min="0"
+            max="10"
+            step="0.01"
+            value="0"
+            onblur="syncFromNumber('Kd_s', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('Kd_s', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="Kd_s-slider"
+          class="slider"
+          type="range"
+          name="Kd_s"
+          min="0"
+          max="10"
+          step="0.01"
+          value="0"
+          oninput="syncFromSlider('Kd_s', this.value)"
+        />
+      </div>
+
+      <!-- Max Throttle -->
+      <div class="slider-container">
+        <label for="maxMoveThrottle-slider">
+          Max Throttle:
+          <input
+            type="number"
+            id="maxMoveThrottle-input"
+            class="number-input"
+            min="0"
+            max="500"
+            step="1"
+            value="200"
+            onblur="syncFromNumber('maxMoveThrottle', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('maxMoveThrottle', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="maxMoveThrottle-slider"
+          class="slider"
+          type="range"
+          name="maxMoveThrottle"
+          min="0"
+          max="500"
+          step="1"
+          value="200"
+          oninput="syncFromSlider('maxMoveThrottle', this.value)"
+        />
+      </div>
+
+      <!-- Min Throttle (negative) -->
+      <div class="slider-container">
+        <label for="minMoveThrottle-slider">
+          Min Throttle:
+          <input
+            type="number"
+            id="minMoveThrottle-input"
+            class="number-input"
+            min="-500"
+            max="0"
+            step="1"
+            value="-200"
+            onblur="syncFromNumber('minMoveThrottle', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('minMoveThrottle', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="minMoveThrottle-slider"
+          class="slider"
+          type="range"
+          name="minMoveThrottle"
+          min="0"
+          max="500"
+          step="1"
+          value="200"
+          oninput="syncFromSlider('minMoveThrottle', this.value)"
+        />
+      </div>
+
+      <!-- Max Steering -->
+      <div class="slider-container">
+        <label for="maxMoveSteering-slider">
+          Max Steering:
+          <input
+            type="number"
+            id="maxMoveSteering-input"
+            class="number-input"
+            min="0"
+            max="500"
+            step="1"
+            value="500"
+            onblur="syncFromNumber('maxMoveSteering', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('maxMoveSteering', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="maxMoveSteering-slider"
+          class="slider"
+          type="range"
+          name="maxMoveSteering"
+          min="0"
+          max="500"
+          step="1"
+          value="500"
+          oninput="syncFromSlider('maxMoveSteering', this.value)"
+        />
+      </div>
+
+      <!-- Min Steering (negative) -->
+      <div class="slider-container">
+        <label for="minMoveSteering-slider">
+          Min Steering:
+          <input
+            type="number"
+            id="minMoveSteering-input"
+            class="number-input"
+            min="-500"
+            max="0"
+            step="1"
+            value="-500"
+            onblur="syncFromNumber('minMoveSteering', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('minMoveSteering', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="minMoveSteering-slider"
+          class="slider"
+          type="range"
+          name="minMoveSteering"
+          min="0"
+          max="500"
+          step="1"
+          value="500"
+          oninput="syncFromSlider('minMoveSteering', this.value)"
+        />
+      </div>
+
+      <!-- Distance Smooth Factor -->
+      <div class="slider-container">
+        <label for="distanceSmoothFactor-slider">
+          Distance Smooth Factor:
+          <input
+            type="number"
+            id="distanceSmoothFactor-input"
+            class="number-input"
+            min="0.01"
+            max="1"
+            step="0.01"
+            value="0.10"
+            onblur="syncFromNumber('distanceSmoothFactor', this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); syncFromNumber('distanceSmoothFactor', this.value); }"
+            style="margin-left: 8px;"
+          />
+        </label>
+        <input
+          id="distanceSmoothFactor-slider"
+          class="slider"
+          type="range"
+          name="distanceSmoothFactor"
+          min="0.01"
+          max="1"
+          step="0.01"
+          value="0.10"
+          oninput="syncFromSlider('distanceSmoothFactor', this.value)"
+        />
+      </div>
+
+      <input type="submit" value="Update" />
+    </form>
+    <p id="status"></p>
+    <script>
+     // Clamp a value between min and max
+     function clamp(val, min, max, step) {
+         let num = parseFloat(val);
+         if (isNaN(num)) num = min;
+         if (num < min) num = min;
+         if (num > max) num = max;
+         // Round to nearest step increment
+         let steps = Math.round((num - min) / step);
+         return (min + steps * step).toFixed(
+             // Determine decimal places from step
+             (step.toString().split('.')[1] || '').length
+         );
+     }
+
+     // Called when a range slider moves
+     function syncFromSlider(id, sliderValue) {
+         const numberInput = document.getElementById(id + '-input');
+         let displayVal;
+
+         if (id === 'minMoveThrottle' || id === 'minMoveSteering') {
+             // sliderValue is positive; display is negative
+             displayVal = (-Math.abs(parseFloat(sliderValue))).toString();
+             numberInput.value = displayVal;
+         } else {
+             displayVal = sliderValue;
+             numberInput.value = sliderValue;
+         }
+     }
+
+     // Called when the user leaves (onblur) or presses Enter in the number input
+     function syncFromNumber(id, rawValue) {
+         const slider = document.getElementById(id + '-slider');
+         let min = parseFloat(slider.min);
+         let max = parseFloat(slider.max);
+         let step = parseFloat(slider.step);
+
+         let clamped = rawValue;
+         if (id === 'minMoveThrottle' || id === 'minMoveSteering') {
+             // For negative sliders, number range is [-max, 0]
+             min = -parseFloat(slider.max);
+             max = 0;
+             clamped = clamp(rawValue, min, max, step);
+             slider.value = Math.abs(parseFloat(clamped));
+         } else {
+             clamped = clamp(rawValue, min, max, step);
+             slider.value = clamped;
+         }
+
+         document.getElementById(id + '-input').value = clamped;
+     }
+
+     // Reset everything to the initial HTML defaults
+     function resetAll() {
+         document.getElementById('parameters-form').reset();
+         const sliders = [
+             'distanceDelta',
+             'headingDelta',
+             'cinemaLeadingHeadingDelta',
+             'maxIntegralLimit_t',
+             'maxIntegralLimit_s',
+             'Kp_t',
+             'Ki_t',
+             'Kd_t',
+             'Kp_s',
+             'Ki_s',
+             'Kd_s',
+             'maxMoveThrottle',
+             'minMoveThrottle',
+             'maxMoveSteering',
+             'minMoveSteering',
+             'distanceSmoothFactor',
+         ];
+
+         sliders.forEach((id) => {
+             const slider = document.getElementById(id + '-slider');
+             syncFromSlider(id, slider.value);
+         });
+
+         document.getElementById('status').textContent = '';
+     }
+
+     // Fetch current parameters from the server and populate both slider & number inputs
+     function fetchParameters() {
+         fetch('/get_parameters')
+             .then((response) => response.json())
+             .then((data) => {
+                 const mapping = {
+                     distanceDelta: data.distanceDelta,
+                     headingDelta: data.headingDelta,
+                     cinemaLeadingHeadingDelta: data.cinemaLeadingHeadingDelta,
+                     maxIntegralLimit_t: data.maxIntegralLimit_t,
+                     maxIntegralLimit_s: data.maxIntegralLimit_s,
+                     Kp_t: data.Kp_t,
+                     Ki_t: data.Ki_t,
+                     Kd_t: data.Kd_t,
+                     Kp_s: data.Kp_s,
+                     Ki_s: data.Ki_s,
+                     Kd_s: data.Kd_s,
+                     maxMoveThrottle: data.maxMoveThrottle,
+                     minMoveThrottle: data.minMoveThrottle,
+                     maxMoveSteering: data.maxMoveSteering,
+                     minMoveSteering: data.minMoveSteering,
+                     distanceSmoothFactor: data.distanceSmoothFactor,
+                 };
+
+                 Object.keys(mapping).forEach((id) => {
+                     let rawVal = mapping[id].toString();
+                     const slider = document.getElementById(id + '-slider');
+                     const numberInput = document.getElementById(id + '-input');
+
+                     if (id === 'minMoveThrottle' || id === 'minMoveSteering') {
+                         numberInput.value = rawVal;
+                         slider.value = Math.abs(parseFloat(rawVal));
+                     } else {
+                         numberInput.value = rawVal;
+                         slider.value = rawVal;
+                     }
+                 });
+             })
+             .catch((err) => {
+                 console.error('Error fetching parameters:', err);
+             });
+     }
+
+     // On form submit, send adjusted formData to server
+     document.getElementById('parameters-form').onsubmit = (e) => {
+         e.preventDefault();
+         const formData = new FormData(e.target);
+
+         // Convert min sliders back to negative when posting
+         if (formData.has('minMoveThrottle')) {
+             let val = Number(formData.get('minMoveThrottle'));
+             if (val <= 0) {
+                 formData.set('minMoveThrottle', val);
+             } else {
+                 formData.set('minMoveThrottle', -Math.abs(val));
+             }
+         }
+         if (formData.has('minMoveSteering')) {
+             let val = Number(formData.get('minMoveSteering'));
+             if (val <= 0) {
+                 formData.set('minMoveSteering', val);
+             } else {
+                 formData.set('minMoveSteering', -Math.abs(val));
+             }
+         }
+
+         fetch('/update_parameters', {
+             method: 'POST',
+             body: formData,
+         })
+             .then((response) => response.text())
+             .then(() => {
+                 document.getElementById('status').textContent = 'Parameters updated successfully';
+                 fetchParameters();
+             })
+             .catch((err) => {
+                 console.error('Error updating parameters:', err);
+             });
+     };
+
+     // On load, fetch current values
+     window.onload = function () {
+         fetchParameters();
+     };
+    </script>
+  </body>
+</html>

@@ -44,14 +44,14 @@ Servo throttleServo;
 Servo steeringServo;
 
 // Define throttle and steering ranges
-const int minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
-const int minSteering = 1000, maxSteering = 2000, midSteering = 1500; // 1000 = max right turn, 2000 = max left turn.
-const int minSteeringThrottle = 50;
+const int16_t minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
+const int16_t minSteering = 1000, maxSteering = 2000, midSteering = 1500; // 1000 = max right turn, 2000 = max left turn.
+const int16_t minSteeringThrottle = 50;
 
 const float fieldOfViewRatio = 28 / 20; // Car length / car width (measured from the wheel).
 
-int minMoveThrottle = 1300, maxMoveThrottle = 1700;
-int minMoveSteering = 1000, maxMoveSteering = 2000;
+int16_t minMoveThrottle = 1300, maxMoveThrottle = 1700;
+int16_t minMoveSteering = 1000, maxMoveSteering = 2000;
 
 // Heartbeat tracking
 unsigned long lastWebSocketDataMillis = 0;
@@ -66,18 +66,18 @@ const unsigned long heartbeatTimeout = 1000; // 1 second timeout
 const unsigned long CONNECT_GRACE_MS = 2000; // 2000ms grace after BLE_CONNECTED
 
 struct GlobalState {
-  int throttleValue;       // e.g., servo pulse width for throttle
-  int steeringValue;       // e.g., servo pulse width for steering
-  int state;               // overall state (e.g., SERVER_STATE_NOT_READY, etc.)
-  int driveMode;           // e.g., DRIVE_MODE_MANUAL, DRIVE_MODE_FOLLOW, DRIVE_MODE_CINEMA
+  int16_t throttleValue;       // e.g., servo pulse width for throttle
+  int16_t steeringValue;       // e.g., servo pulse width for steering
+  uint8_t state;               // overall state (e.g., SERVER_STATE_NOT_READY, etc.)
+  uint8_t driveMode;           // e.g., DRIVE_MODE_MANUAL, DRIVE_MODE_FOLLOW, DRIVE_MODE_CINEMA
   float distance;          // distance from the Tag/Remote to the Sensor
   float targetDistance;    // desired distance
   float heading;           // measured heading in degrees [0, 360)  Front = 0/360, Left = 90, Back = 180, Right = 270
   float targetHeading;     // desired heading in degrees
   float yawSpeed;          // Yaw speed
   float pitchSpeed;        // Pitch speed
-  int toggleState;         // Flag to store all the toggle button value (activeTrack, gimbalRecenter, cameraRecording)
-  uint16_t uwbSelector;    // UWB selector value
+  uint8_t toggleState;         // Flag to store all the toggle button value (activeTrack, gimbalRecenter, cameraRecording)
+  uint8_t uwbSelector;    // UWB selector value
   float currentX;          // The tag's current coordinates.
   float currentY;          // The tag's current coordinates.
   float targetX;           // The tag's target coordinates.
@@ -726,7 +726,7 @@ void getAutocamRemoteData() {
   setUWBSelector(data.uwbSelector);
 }
 
-void updateState(int newState) {
+void updateState(uint8_t newState) {
   if (globalState.state == newState) {
     return;
   }
@@ -739,13 +739,13 @@ void updateAutocamRemoteStatus() {
     return;
   }
 
-  RemoteDataRecv data = {.driveMode = globalState.driveMode, .toggleState = globalState.toggleState, .uwbSelector = globalState.uwbSelector, .state = globalState.state};
+  RemoteDataRecv data = { .state = globalState.state, .driveMode = globalState.driveMode, .toggleState = globalState.toggleState, .uwbSelector = globalState.uwbSelector };
   AutocamRemoteDataRecv.writeValue((uint8_t *)&data, sizeof(RemoteDataRecv));
   LOGF("Sent status to remote via BLE: driveMode = %d, state=%d\n", globalState.driveMode, globalState.state);
   return;
 }
 
-void setDriveMode(int newDriveMode) {
+void setDriveMode(uint8_t newDriveMode) {
   if (globalState.driveMode == newDriveMode) {
     return;
   }
@@ -770,7 +770,7 @@ void resetPIDValues() {
   lastDeltaTimeMillis = 0;
 }
 
-void setUWBSelector(uint16_t newUWBSelector) {
+void setUWBSelector(uint8_t newUWBSelector) {
   if (globalState.uwbSelector == newUWBSelector) {
     return;
   }
@@ -1067,17 +1067,17 @@ void calculateCoordinates() {
 }
 
 void setSteering(float steeringCoeff) {
-  int steering = midSteering + (int) (steeringCoeff * steeringConstant);
+  int16_t steering = midSteering + (int16_t) (steeringCoeff * steeringConstant);
   globalState.steeringValue = constrain(steering, minMoveSteering, maxMoveSteering);
 }
 
 void setMoveForward(float throttleCoeff) {
-  int throttle = midThrottle + (int) (throttleCoeff * throttleConstant);
+  int16_t throttle = midThrottle + (int16_t) (throttleCoeff * throttleConstant);
   globalState.throttleValue = constrain(throttle, minMoveThrottle, maxMoveThrottle);
 }
 
 void setMoveBackward(float throttleCoeff) {
-  int throttle = midThrottle - (int) (throttleCoeff * throttleConstant);
+  int16_t throttle = midThrottle - (int16_t) (throttleCoeff * throttleConstant);
   globalState.throttleValue = constrain(throttle, minMoveThrottle, maxMoveThrottle);
 }
 

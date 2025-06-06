@@ -42,18 +42,18 @@ Anchor uwbAnchors[] = {
   {0x0001, false}
 };
 
-uint16_t uwbSelector = 1;
+uint8_t uwbSelector = 1;
 
 // TAG antenna delay defaults to 16384
 uint16_t Adelay = 16384;
 
 float distance = 0;
 float heading = 0;
-int state = SENSOR_STATE_TAG_CONNECTED;
+uint8_t state = SENSOR_STATE_TAG_CONNECTED;
 float yawSpeed = 0;
 float pitchSpeed = 0;
 
-int toggleState = 0; // Bit 0 = activeTrackToggled, bit 1 = gimbalRecenterToggled, bit 2 = cameraRecordingToggled.
+uint8_t toggleState = NO_GIMBAL_TOGGLE;
 
 DJIRoninController djiRoninController(CAN_TX, CAN_RX, CAN_RATE);
 
@@ -341,7 +341,7 @@ void applyUWBSelector() {
   }
 }
 
-void updateLED(int state) {
+void updateLED(uint8_t state) {
   if (state & SENSOR_STATE_TAG_CONNECTED) {
     LOGLN("tag, green");
     digitalWrite(TAG_LED_RED_PIN, HIGH);
@@ -363,7 +363,7 @@ void updateLED(int state) {
   }
 }
 
-void updateState(int newState) {
+void updateState(uint8_t newState) {
   if (state == newState) {
     return;
   }
