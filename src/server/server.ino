@@ -52,9 +52,15 @@ int minMoveSteering = 1000, maxMoveSteering = 2000;
 
 // Heartbeat tracking
 unsigned long lastWebSocketDataMillis = 0;
-unsigned long lastSensorDataMillis = 0;
-const unsigned long heartbeatTimeout = 1000; // 1 second timeout
 
+unsigned long lastSensorConnectedTime = 0;
+unsigned long lastSensorDataMillis = 0;
+
+unsigned long lastRemoteConnectedTime = 0;
+unsigned long lastRemoteDataMillis = 0;
+
+const unsigned long heartbeatTimeout = 1000; // 1 second timeout
+const unsigned long CONNECT_GRACE_MS = 2000; // 2000ms grace after BLE_CONNECTED
 
 struct GlobalState {
   int throttleValue;       // e.g., servo pulse width for throttle
@@ -132,10 +138,6 @@ bool            remoteRecvReady   = false;
 BleConnectState sensorState       = BLE_IDLE;
 bool            sensorSendReady   = false;
 bool            sensorRecvReady   = false;
-
-unsigned long lastSensorConnectedTime = 0;
-unsigned long lastRemoteConnectedTime = 0;
-const unsigned long CONNECT_GRACE_MS = 500;
 
 // For Websocket:
 enum WebSocketState {
@@ -487,7 +489,7 @@ void runHealthCheck() {
 
   // ----- Sensor health -----
   now = millis();
-  if ((AutocamSensor.connected() && sensorState == BLE_CONNECTED && now - lastSensorDataMillis > heartbeatTimeout) || (!AutocamSensor.connected() && sensorState != BLE_SCANNING)) {
+  if ((AutocamSensor.connected() && sensorState == BLE_CONNECTED && now - lastSensorConnectedTime > CONNECT_GRACE_MS && now - lastSensorDataMillis > heartbeatTimeout) || (!AutocamSensor.connected() && sensorState != BLE_SCANNING)) {
     LOGLN("Sensor disconnected → restarting non‐blocking scan");
     AutocamSensor.disconnect();
     sensorState = BLE_IDLE;
@@ -497,7 +499,8 @@ void runHealthCheck() {
   }
 
   // ----- Remote health -----
-  if (!AutocamRemote.connected() && remoteState != BLE_SCANNING) {
+  //LOGF("now: %ld, lastRemoteDataMillis: %ld\n", now, lastRemoteDataMillis);
+  if ((AutocamRemote.connected() && remoteState == BLE_CONNECTED && now - lastRemoteConnectedTime > CONNECT_GRACE_MS && now - lastRemoteDataMillis > heartbeatTimeout) || (!AutocamRemote.connected() && remoteState != BLE_SCANNING)) {
     LOGLN("Remote disconnected → restarting non‐blocking scan");
     AutocamRemote.disconnect();
     remoteState = BLE_IDLE;
@@ -566,6 +569,7 @@ void attemptConnectRemote() {
 
   if (remoteSendReady && remoteRecvReady && AutocamRemote.connected()) {
     remoteState = BLE_CONNECTED;
+    lastRemoteConnectedTime = millis();
     updateState(globalState.state | SERVER_STATE_REMOTE_READY);
   }
 }
@@ -604,6 +608,7 @@ void attemptConnectSensor() {
   }
   if (sensorSendReady && sensorRecvReady && AutocamSensor.connected()) {
     sensorState = BLE_CONNECTED;
+    lastSensorConnectedTime = millis();
     updateState(globalState.state | SERVER_STATE_SENSOR_READY);
   }
 }
@@ -683,6 +688,8 @@ void getAutocamRemoteData() {
 
   RemoteDataSend data;
   AutocamRemoteDataSend.readValue((uint8_t *)&data, sizeof(RemoteDataSend));
+
+  lastRemoteDataMillis = millis();
   //LOGF("Received throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, toggleState=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.toggleState, data.uwbSelector);
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
 

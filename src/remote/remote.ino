@@ -79,6 +79,8 @@ RemoteDataRecv receivedData;
 RemoteDataSend lastSentData = { midThrottle, midSteering, DRIVE_MODE_MANUAL, midPitch, midYaw, false, uwbSelector };
 
 unsigned int lastPingTime = 0;
+unsigned int lastHeartBeatMillis = 0;
+unsigned int heartBeatDuration = 200;
 
 //calibrated Antenna Delay setting for this anchor
 uint16_t Adelay = 16630;
@@ -471,6 +473,8 @@ bool dataChanged(const RemoteDataSend &oldData, const RemoteDataSend &newData) {
 }
 
 void sendInput() {
+  unsigned int now = millis();
+
   if (!(BLECentral && BLECentral.connected())) {
     updateState(SERVER_STATE_NOT_READY);
     resetInputButtonValues();
@@ -491,19 +495,18 @@ void sendInput() {
   };
 
   // Send update only if there is a change.
-  static bool firstUpdate = true;
-  if (firstUpdate || buttonIsPressed || dataChanged(lastSentData, data)) {
+  if (buttonIsPressed || dataChanged(lastSentData, data) || now - lastHeartBeatMillis > heartBeatDuration) {
     AutocamRemoteDataSend.writeValue((uint8_t *)&data, sizeof(RemoteDataSend));
     lastSentData = data;
     lastSentData.toggleState = NO_GIMBAL_TOGGLE; // Do not resend zero toggleState, because it's an no-op anyway.
     toggleState = NO_GIMBAL_TOGGLE;
-    firstUpdate = false;
     buttonIsPressed = false;
 
-    LOGF("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, toggleState=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.toggleState, data.uwbSelector);
+    lastHeartBeatMillis = now;
+    //LOGF("Sent via BLE: throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, toggleState=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.toggleState, data.uwbSelector);
   }
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
-  lastPingTime = millis();
+  lastPingTime = now;
 }
 
 void checkDriveModeLED() {

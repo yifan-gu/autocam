@@ -35,8 +35,9 @@ Arduino files for my auto-following camera car!
 - [ ] (optimize) Refactor the sensor LED control with LED controller
 - [ ] (optimize) Reorganize shared code into libraries, add external dependencies 
 
-- [ ] heartbeat for the remote controller.
+- [x] heartbeat for the remote controller.
 - [ ] <s> Nice to have, detect active track failure</s> Turns out there's no API support for that
+- [ ] Smart Phone APP for the remote (BLE version).
 
 ## KNOWN ISSUES
 - [ ] Webserver stabability.
