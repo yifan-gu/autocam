@@ -36,6 +36,9 @@ const char* hostname = "autocam"; // mDNS hostname
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
+// A small buffer to hold incoming fragments
+static String wsBuffer;
+
 // Servo objects
 Servo throttleServo;
 Servo steeringServo;
@@ -146,7 +149,6 @@ enum WebSocketState {
 };
 
 WebSocketState wsState = WEBSOCKET_DISCONNECTED;
-
 
 //////////////////////////////////////////////////////////////////////////////////
 //
@@ -414,50 +416,66 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
       break;
 
     case WS_EVT_DATA: {
-      String message = String((char*)data).substring(0, len);
-      lastWebSocketDataMillis = millis();
+      AwsFrameInfo *info = (AwsFrameInfo*)arg;
 
-      if (message == "REQUEST_DATA") {
-        // Respond with the current state as a JSON string
-        String response = "{";
-        response += "\"throttle\":" + String(globalState.throttleValue) + ",";
-        response += "\"steering\":" + String(globalState.steeringValue) + ",";
-        response += "\"distance\":" + String(globalState.distance, 2) + ",";
-        response += "\"heading\":" + String(globalState.heading, 2) + ",";
-        response += "\"currentX\":" + String(globalState.currentX, 2) + ",";
-        response += "\"currentY\":" + String(globalState.currentY, 2 ) + ",";
-        response += "\"targetX\":" + String(globalState.targetX, 2) + ",";
-        response += "\"targetY\":" + String(globalState.targetY, 2) + ",";
-        response += "\"state\":" + String(globalState.state) + ",";
-        response += "\"driveMode\":" + String(globalState.driveMode);
-        response += "}";
+      // If this is the first fragment (index == 0), clear our buffer
+      if (info->index == 0) {
+        wsBuffer = "";
+      }
+      // Append this fragment’s payload
+      wsBuffer += String((char*)data).substring(0, len);
 
-        client->text(response); // Send the JSON response to the client
-        //LOGLN("Sent data: " + response);
-        break;
-      }
+      // If fin == true, this is the last fragment: process the full message
+      if (info->final) {
+        String message = wsBuffer;  // complete text
 
-      if (message == "driveMode=0") {
-        setDriveMode(DRIVE_MODE_MANUAL);
-        break;
+        // Reset the buffer for the next frame
+        wsBuffer = "";
+
+        // Now handle the full payload exactly once
+        if (message == "REQUEST_DATA") {
+          String response = "{";
+          response += "\"throttle\":" + String(globalState.throttleValue) + ",";
+          response += "\"steering\":" + String(globalState.steeringValue) + ",";
+          response += "\"distance\":" + String(globalState.distance, 2) + ",";
+          response += "\"heading\":" + String(globalState.heading, 2) + ",";
+          response += "\"currentX\":" + String(globalState.currentX, 2) + ",";
+          response += "\"currentY\":" + String(globalState.currentY, 2 ) + ",";
+          response += "\"targetX\":" + String(globalState.targetX, 2) + ",";
+          response += "\"targetY\":" + String(globalState.targetY, 2) + ",";
+          response += "\"state\":" + String(globalState.state) + ",";
+          response += "\"driveMode\":" + String(globalState.driveMode);
+          response += "}";
+
+          client->text(response);
+        }
+        else if (message == "driveMode=0") {
+          setDriveMode(DRIVE_MODE_MANUAL);
+        }
+        else if (message == "driveMode=1") {
+          setDriveMode(DRIVE_MODE_FOLLOW);
+        }
+        else if (message == "driveMode=2") {
+          setDriveMode(DRIVE_MODE_CINEMA);
+        }
+        else if (message.startsWith("throttle=")) {
+          globalState.throttleValue = map(
+            message.substring(9).toInt(),
+            1000, 2000,
+            minMoveThrottle, maxMoveThrottle
+          );
+        }
+        else if (message.startsWith("steering=")) {
+          globalState.steeringValue = map(
+            message.substring(9).toInt(),
+            1000, 2000,
+            minMoveSteering, maxMoveSteering
+          );
+        }
+        else {
+          LOGF("Unknown Websocket message: %s\n", message);
+        }
       }
-      if (message == "driveMode=1") {
-        setDriveMode(DRIVE_MODE_FOLLOW);
-        break;
-      }
-      if (message == "driveMode=2") {
-        setDriveMode(DRIVE_MODE_CINEMA);
-        break;
-      }
-      if (message.startsWith("throttle=")) {
-        globalState.throttleValue = map(message.substring(9).toInt(), 1000, 2000, minMoveThrottle, maxMoveThrottle);
-        break;
-      }
-      if (message.startsWith("steering=")) {
-        globalState.steeringValue = map(message.substring(9).toInt(), 1000, 2000, minMoveSteering, maxMoveSteering);
-        break;
-      }
-      LOGF("Unknown Websocket message: %s\n", message);
       break;
     }
 
@@ -490,8 +508,8 @@ void runHealthCheck() {
   // ----- Sensor health -----
   now = millis();
   if ((AutocamSensor.connected() && sensorState == BLE_CONNECTED && now - lastSensorConnectedTime > CONNECT_GRACE_MS && now - lastSensorDataMillis > heartbeatTimeout) || (!AutocamSensor.connected() && sensorState != BLE_SCANNING)) {
-    LOGLN("Sensor disconnected → restarting non‐blocking scan");
-    AutocamSensor.disconnect();
+    LOGF("Sensor disconnected → restarting non‐blocking scan, now: %ld, lastSensorConnectedTime: %ld, lastSensorDataMillis: %ld\n", now, lastSensorConnectedTime, lastSensorDataMillis);
+    disconnectPeripheral(AutocamSensor, AutocamSensorServiceUUID);
     sensorState = BLE_IDLE;
     emergencyStop();
     updateState(globalState.state & ~SERVER_STATE_SENSOR_READY);
@@ -501,8 +519,8 @@ void runHealthCheck() {
   // ----- Remote health -----
   //LOGF("now: %ld, lastRemoteDataMillis: %ld\n", now, lastRemoteDataMillis);
   if ((AutocamRemote.connected() && remoteState == BLE_CONNECTED && now - lastRemoteConnectedTime > CONNECT_GRACE_MS && now - lastRemoteDataMillis > heartbeatTimeout) || (!AutocamRemote.connected() && remoteState != BLE_SCANNING)) {
-    LOGLN("Remote disconnected → restarting non‐blocking scan");
-    AutocamRemote.disconnect();
+    LOGF("Remote disconnected → restarting non‐blocking scan, now: %ld, lastRemoteConnectedTime: %ld, lastRemoteDataMillis: %ld\n", now, lastRemoteConnectedTime, lastRemoteDataMillis);
+    disconnectPeripheral(AutocamRemote, AutocamRemoteServiceUUID);
     remoteState = BLE_IDLE;
     emergencyStop();
     updateState(globalState.state & ~SERVER_STATE_REMOTE_READY);
@@ -549,7 +567,9 @@ void attemptConnectRemote() {
     if (okSend) {
       // Successfully discovered “Send” characteristic:
       remoteSendReady = true;
+
     }
+    return; // One characteristic at a time to avoid long blocking.
   }
 
   // Step 2: If Send is ready but Recv is not, try Recv immediately (no delay):
@@ -591,6 +611,7 @@ void attemptConnectSensor() {
     if (okSend) {
       sensorSendReady = true;
     }
+    return; // One characteristic at a time to avoid long blocking.
   }
 
   // Step 2: If Send is ready but Recv not yet, attempt Recv immediately

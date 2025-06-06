@@ -1,5 +1,6 @@
 #include "BLE_setup.hpp"
 #include "util.h"
+#include <map>
 
 BLEDevice BLECentral;
 
@@ -22,10 +23,25 @@ BLECharacteristic AutocamRemoteDataSend(AutocamRemoteDataSendCharacteristicUUID,
 BLECharacteristic AutocamRemoteDataRecv(AutocamRemoteDataRecvCharacteristicUUID, BLEWrite, sizeof(RemoteDataRecv));
 
 unsigned long scanIntervalMillis = 1000;
+unsigned long bleBlockingLimitMillis = 500; // This ensures the BLE operation will not block the server.
+
+// Map from service UUID (as String) to whether attributes have been discovered
+static std::map<String, bool> attributesDiscovered;
 
 void panic(const char *message) {
   LOGLN(message);
   while (1) {};
+}
+
+// Helper to mark a service UUID as “discovered” or not
+void setAttributesDiscovered(const char* serviceUUID, bool discovered) {
+  attributesDiscovered[String(serviceUUID)] = discovered;
+}
+
+// Helper to check if a service UUID has already been discovered
+bool isAttributesDiscovered(const char* serviceUUID) {
+  auto it = attributesDiscovered.find(String(serviceUUID));
+  return (it != attributesDiscovered.end()) ? it->second : false;
 }
 
 void setupBLECentral() {
@@ -39,11 +55,11 @@ void setupBLECentral() {
 bool scanForPeripheral(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID) {
   static unsigned long lastScanMillis = 0;
 
-  unsigned long currentMillis = millis();
-  if (currentMillis - lastScanMillis < scanIntervalMillis ) {
+  unsigned long now = millis();
+  if (now - lastScanMillis < scanIntervalMillis) {
     return false;
   }
-  lastScanMillis = currentMillis;
+  lastScanMillis = now;
 
     // If we already had a device but it is no longer connected, clear it:
   if (device && !device.connected()) {
@@ -62,10 +78,14 @@ bool scanForPeripheral(BLEDevice &device, BLEService &service, BLECharacteristic
   }
   LOGF("Found BLE peripheral, local name: [%s]\n", device.localName());
   BLE.stopScan();
+  if (millis() - now > bleBlockingLimitMillis) {
+    return false;
+  }
   return connectToBLEDevice(device, service, characteristic, serviceUUID, characteristicUUID);
 }
 
 bool connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristic &characteristic, const char *serviceUUID, const char *characteristicUUID) {
+  unsigned long now = millis();
   if (!device.connected()) {
     if (!device.connect()) {
       LOGF("Failed to connect to [%s].\n", device.localName());
@@ -73,16 +93,33 @@ bool connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristi
     }
   }
 
+  LOGF("here1: %ld\n", millis() - now);
+
   LOGF("Connected to [%s]!\n", device.localName());
-  if (!device.discoverAttributes()) {
+  if (millis() - now > bleBlockingLimitMillis) {
+    return false;
+  }
+
+  if (!isAttributesDiscovered(serviceUUID) && !device.discoverAttributes()) {
     LOGF("Attribute discovery failed for [%s]! Disconnecting...\n", device.localName());
     device.disconnect();
+    return false;
+  }
+  setAttributesDiscovered(serviceUUID, true);
+
+  LOGF("here2: %ld\n", millis() - now);
+  if (millis() - now > bleBlockingLimitMillis) {
     return false;
   }
 
   service = device.service(serviceUUID);
   LOGF("BLE device name: [%s], advertised svc count: [%d], Real svc count: [%d], characteristics count: [%d]\n", device.deviceName(), device.advertisedServiceUuidCount(), device.serviceCount(), device.characteristicCount());
   characteristic = service.characteristic(characteristicUUID);
+
+  LOGF("here3: %ld\n", millis() - now);
+  if (millis() - now > bleBlockingLimitMillis) {
+    return false;
+  }
 
   if (!characteristic) {
     LOGF("Failed to find characteristic [%s] for device [%s]! Disconnecting...\n", characteristicUUID, device.deviceName());
@@ -97,6 +134,8 @@ bool connectToBLEDevice(BLEDevice &device, BLEService &service, BLECharacteristi
       return false;
     }
   }
+
+  LOGF("here4: %ld\n", millis() - now);
   LOGF("Found characteristic [%s] on device [%s] and successfully subscribed!\n", characteristicUUID, device.deviceName());
   return true;
 }
@@ -122,14 +161,15 @@ void setupBLEPeripheral(const char *localName, const char *deviceName, BLEServic
 bool connectToCentral() {
   static unsigned long lastScanMillis = 0;
 
-  unsigned long currentMillis = millis();
-  if (currentMillis - lastScanMillis < scanIntervalMillis) {
+  unsigned long now = millis();
+  if (now - lastScanMillis < scanIntervalMillis) {
     return false;
   }
-  lastScanMillis = currentMillis;
+  lastScanMillis = now;
 
   LOGLN("Waiting for BLE central to connect...");
 
+  BLECentral = BLEDevice();
   BLECentral = BLE.central();
   if (!(BLECentral && BLECentral.connected())) {
     return false;
@@ -137,4 +177,10 @@ bool connectToCentral() {
 
   LOGF("BLE central[%s] connected!\n", BLECentral.address());
   return true;
+}
+
+void disconnectPeripheral(BLEDevice& service, const char *serviceUUID) {
+  service.disconnect();
+  // Once we disconnect, clear the “discovered” flag for that UUID:
+  setAttributesDiscovered(serviceUUID, false);
 }

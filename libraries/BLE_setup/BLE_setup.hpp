@@ -54,5 +54,6 @@ bool scanForPeripheral(BLEDevice &device, BLEService &service, BLECharacteristic
 
 void setupBLEPeripheral(const char *localName, const char *deviceName, BLEService& service);
 bool connectToCentral();
+void disconnectPeripheral(BLEDevice& service, const char *serviceUUID);
 
 #endif
