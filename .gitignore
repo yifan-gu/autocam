@@ -1,3 +1,8 @@
 .DS_Store
 *.zip
 *.FCBak
+
+# Xcode automatically generates these; don’t commit them
+**/xcuserdata/
+**/xcshareddata/swiftpm/
+**/*.xcuserstate
