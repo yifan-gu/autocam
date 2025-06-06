@@ -1091,8 +1091,8 @@ void emergencyStop() { //TODO(yifan): Refactor out this with a state machine.
 void stopCar() {
   globalState.throttleValue = midThrottle;
   globalState.steeringValue = midSteering;
-  setThrottlePWM(globalState.throttleValue);
-  setSteeringPWM(globalState.steeringValue);
+  throttleServo.writeMicroseconds(globalState.throttleValue);
+  steeringServo.writeMicroseconds(globalState.steeringValue);
 }
 
 void resetGlobalStateDistanceValues() {
