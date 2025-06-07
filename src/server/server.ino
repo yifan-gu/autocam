@@ -1,4 +1,3 @@
-#include <ESP32Servo.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
 #include <math.h>
@@ -9,21 +8,29 @@
 #include "LED_controller.hpp"
 #include "util.h"
 
-// Pin configuration
-#define STEERING_PIN D8  //  D8 for steering
-#define THROTTLE_PIN D7  //  D7 for throttle
+// Use 50Hz for servos/ESCs, 12-bit resolution
+#define PWM_FREQ 50
+#define PWM_RESOLUTION 12  // 12-bit (0–4095)
 
-#define SENSOR_LED_RED_PIN D6 // D6
-#define SENSOR_LED_GREEN_PIN D5 // D5
+// ESC output PWM channels
+#define THROTTLE_PWM_CHANNEL 0
+#define STEERING_PWM_CHANNEL 1
+
+// Pin configuration
+#define STEERING_PIN A6  //  A6 for steering
+#define THROTTLE_PIN A5  //  A5 for throttle
+
+#define SENSOR_LED_RED_PIN A4 // A4
+#define SENSOR_LED_GREEN_PIN A3 // A3
 #define SENSOR_LED_BLUE_PIN -1
 
-#define REMOTE_LED_RED_PIN D4 // D4
-#define REMOTE_LED_GREEN_PIN D3 // D3
+#define REMOTE_LED_RED_PIN A2 // A2
+#define REMOTE_LED_GREEN_PIN A1 // A1
 #define REMOTE_LED_BLUE_PIN -1
 
 #define DRIVE_MODE_LED_RED_PIN -1
 #define DRIVE_MODE_LED_GREEN_PIN -1
-#define DRIVE_MODE_LED_BLUE_PIN D2 // D2
+#define DRIVE_MODE_LED_BLUE_PIN A0 // A0
 
 LEDController ledController;
 
@@ -38,10 +45,6 @@ AsyncWebSocket ws("/ws");
 
 // A small buffer to hold incoming fragments
 static String wsBuffer;
-
-// Servo objects
-Servo throttleServo;
-Servo steeringServo;
 
 // Define throttle and steering ranges
 const int16_t minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
@@ -263,13 +266,16 @@ void setupESC() {
   LOGLN("Initializing ESC...");
   delay(1000); // Wait 1 seconds to ensure the ESC ready to arm.
 
-  // Attach servos
-  throttleServo.attach(THROTTLE_PIN, minThrottle, maxThrottle);
-  steeringServo.attach(STEERING_PIN, minSteering, maxSteering);
+  // Setup PWM
+  ledcSetup(THROTTLE_PWM_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
+  ledcAttachPin(THROTTLE_PIN, THROTTLE_PWM_CHANNEL);
 
-  // Initialize to neutral positions to arm the ESC.
-  throttleServo.writeMicroseconds(midThrottle);
-  steeringServo.writeMicroseconds(midSteering);
+  ledcSetup(STEERING_PWM_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
+  ledcAttachPin(STEERING_PIN, STEERING_PWM_CHANNEL);
+
+  // Send neutral signals
+  setThrottle(midThrottle);
+  setSteering(midSteering);
 
   LOGLN("ESC Initialized!");
 }
@@ -497,10 +503,20 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
   }
 }
 
+void setThrottle(int microseconds) {
+  uint32_t duty = microseconds * ((1 << PWM_RESOLUTION) - 1) / 20000;
+  ledcWrite(THROTTLE_PWM_CHANNEL, duty);
+}
+
+void setSteering(int microseconds) {
+  uint32_t duty = microseconds * ((1 << PWM_RESOLUTION) - 1) / 20000;
+  ledcWrite(STEERING_PWM_CHANNEL, duty);
+}
+
 void runESCController() {
-  throttleServo.writeMicroseconds(globalState.throttleValue);
+  setThrottle(globalState.throttleValue);
   if (abs(globalState.throttleValue - midThrottle) > minSteeringThrottle) { // Prevent dry (stationary) steering: only drive steering when throttle exceeds a minimum value.
-    steeringServo.writeMicroseconds(globalState.steeringValue);
+    setSteering(globalState.steeringValue);
   }
 
   /*LOG("Throttle: ");
@@ -883,9 +899,9 @@ void calculateSteeringThrottleFollow() {
 
   float steeringCoeff = calculateSteeringCoeff(headingDiff, deltaTimeMillis);
   if (moveForward) {
-    setSteering(steeringCoeff);
+    setSteeringValue(steeringCoeff);
   } else if (moveBackward) {
-    setSteering(-steeringCoeff); // In reverse, we need to turn the other way around.
+    setSteeringValue(-steeringCoeff); // In reverse, we need to turn the other way around.
   }
 }
 
@@ -952,9 +968,9 @@ void calculateSteeringThrottleCinema() {
     }
     steeringCoeff = calculateSteeringCoeff(headingDiffError, deltaTimeMillis) * leadingTurningCoefficient;
     if (pushingLeft(globalState.currentX, globalState.targetX, distanceDelta)) {
-      setSteering(steeringCoeff);
+      setSteeringValue(steeringCoeff);
     } else if (pushingRight(globalState.currentX, globalState.targetX, distanceDelta)) {
-      setSteering(-steeringCoeff);
+      setSteeringValue(-steeringCoeff);
     }
   } else {
     // Tailing.
@@ -967,9 +983,9 @@ void calculateSteeringThrottleCinema() {
     }
     steeringCoeff = calculateSteeringCoeff(headingDiffError, deltaTimeMillis) * tailingTurningCoefficient;
     if (moveForward) {
-      setSteering(steeringCoeff);
+      setSteeringValue(steeringCoeff);
     } else if (moveBackward) {
-      setSteering(-steeringCoeff);
+      setSteeringValue(-steeringCoeff);
     }
   }
 }
@@ -1082,7 +1098,7 @@ void calculateCoordinates() {
   return;
 }
 
-void setSteering(float steeringCoeff) {
+void setSteeringValue(float steeringCoeff) {
   int16_t steering = midSteering + (int16_t) (steeringCoeff * steeringConstant);
   globalState.steeringValue = constrain(steering, minMoveSteering, maxMoveSteering);
 }
@@ -1107,8 +1123,8 @@ void emergencyStop() { //TODO(yifan): Refactor out this with a state machine.
 void stopCar() {
   globalState.throttleValue = midThrottle;
   globalState.steeringValue = midSteering;
-  throttleServo.writeMicroseconds(globalState.throttleValue);
-  steeringServo.writeMicroseconds(globalState.steeringValue);
+  setThrottle(globalState.throttleValue);
+  setSteering(globalState.steeringValue);
 }
 
 void resetGlobalStateDistanceValues() {
