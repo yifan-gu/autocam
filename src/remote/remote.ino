@@ -259,7 +259,6 @@ void updateState(uint8_t newState) {
   if ((newState & SERVER_STATE_SENSOR_READY) == 0 || (newState & SERVER_STATE_REMOTE_READY) == 0) {
     // Reset drive mode, because at this point the server must be in DRIVE_MODE_MANUAL.
     driveModeTriggerValue = DRIVE_MODE_MANUAL;
-    lastSentData.driveMode = DRIVE_MODE_MANUAL;
   }
 
   if (state == newState) {

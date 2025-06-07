@@ -27,6 +27,10 @@ struct ContentView: View {
     private var uwbSelector: Int {
         return blePeripheral.uwbSelectorReceived
     }
+    
+    private var isNotReady: Bool {
+        return !blePeripheral.sensorReady || !blePeripheral.remoteReady
+    }
 
     // Compute a one‐letter label for the current driveMode
     private var driveModeLetter: String {
@@ -238,6 +242,14 @@ struct ContentView: View {
         }
         .background(Color(red: 128/255, green: 0, blue: 128/255).ignoresSafeArea())
         .preferredColorScheme(.dark) // force dark appearance
+        .onChange(of: isNotReady) { newValue in
+          // newValue == true whenever *either* flag went false
+          if newValue {
+            print("🚨 Sensor or Remote dropped – resetting drive mode")
+            driveModeTrigger = 0
+            updateAutocamRemoteInputPacket()
+          }
+        }
     }
 
     // MARK: – Gimbal Multi-Click
