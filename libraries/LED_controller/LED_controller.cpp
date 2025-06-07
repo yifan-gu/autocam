@@ -159,7 +159,7 @@ void LEDController::initBatteryLED(int batteryRed, int batteryGreen, int battery
 }
 
 // Update LEDs based on state.
-void LEDController::updateStateLED(int state) {
+void LEDController::updateStateLED(uint8_t state) {
   // Sensor LED update
   if (state & SERVER_STATE_SENSOR_READY) {
     LOGLN("sensor, green");
@@ -180,7 +180,7 @@ void LEDController::updateStateLED(int state) {
 }
 
 // This needs to be called in every loop to have the "blinking" effect.
-void LEDController::updateDriveModeLED(int driveMode) {
+void LEDController::updateDriveModeLED(uint8_t driveMode) {
   static unsigned long lastToggleTime = millis();
   static int stateIndex = 0;  // state machine index for blinking pattern
   static int prevDriveMode = -1;  // to detect mode changes
@@ -295,14 +295,119 @@ void LEDController::updateDriveModeLED(int driveMode) {
   }
 }
 
-// Update LEDs based on UWB Selector
-void LEDController::updateUWBSelectorLED(uint16_t uwbSelector) {
-  if (uwbSelector == 1) {
-    LOGLN("UWB selector blue");
-    setLEDBlue(uwbSelectorR, uwbSelectorG, uwbSelectorB);
-  } else {
-    LOGLN("UWB selector off");
-    setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+// This needs to be called in every loop to have the "blinking" effect.
+void LEDController::updateUWBSelectorLED(uint8_t uwbSelector) {
+  static unsigned long lastToggleTime = millis();
+  static int stateIndex = 0;  // state machine index for blinking pattern
+  static int prevUwbSelector = -1;  // to detect uwb selector changes
+  unsigned long now = millis();
+
+  // Reset the state machine if the uwb selector changes.
+  if (uwbSelector != prevUwbSelector) {
+    stateIndex = 0;
+    lastToggleTime = now;
+    prevUwbSelector = uwbSelector;
+  }
+
+  switch (uwbSelector) {
+    case 0: {
+      // Steady
+      setLEDBlue(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+      break;
+    }
+    case 1: {
+      // 2 short blinks pattern:
+      // State 0: LED ON for 500ms
+      // State 1: LED OFF for 500ms
+      // State 2: LED ON for 500ms
+      // State 3: LED OFF for 1000ms (pause)
+      const unsigned long shortOn = 500;
+      const unsigned long shortOff = 500;
+      const unsigned long pause = 1500;
+      if (stateIndex == 0) {
+        setLEDBlue(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+        if (now - lastToggleTime >= shortOn) {
+          stateIndex = 1;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 1) {
+        setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+        if (now - lastToggleTime >= shortOff) {
+          stateIndex = 2;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 2) {
+        setLEDBlue(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+        if (now - lastToggleTime >= shortOn) {
+          stateIndex = 3;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 3) {
+        setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+        if (now - lastToggleTime >= pause) {
+          stateIndex = 0;
+          lastToggleTime = now;
+        }
+      }
+      break;
+    }
+
+    case 2: {
+      // 3 short blinks pattern:
+      // State 0: LED ON for 500ms
+      // State 1: LED OFF for 500ms
+      // State 2: LED ON for 500ms
+      // State 3: LED OFF for 500ms
+      // State 4: LED ON for 500ms
+      // State 5: LED OFF for 1000ms (pause)
+      const unsigned long shortOn = 500;
+      const unsigned long shortOff = 500;
+      const unsigned long pause = 1500;
+      if (stateIndex == 0) {
+        setLEDBlue(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+        if (now - lastToggleTime >= shortOn) {
+          stateIndex = 1;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 1) {
+        setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+        if (now - lastToggleTime >= shortOff) {
+          stateIndex = 2;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 2) {
+        setLEDBlue(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+        if (now - lastToggleTime >= shortOn) {
+          stateIndex = 3;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 3) {
+        setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+        if (now - lastToggleTime >= shortOff) {
+          stateIndex = 4;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 4) {
+        setLEDBlue(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+        if (now - lastToggleTime >= shortOn) {
+          stateIndex = 5;
+          lastToggleTime = now;
+        }
+      } else if (stateIndex == 5) {
+        setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+        if (now - lastToggleTime >= pause) {
+          stateIndex = 0;
+          lastToggleTime = now;
+        }
+      }
+      break;
+    }
+
+    default:
+      // For any unrecognized uwbSelector, turn off the LED.
+      setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
+      stateIndex = 0;
+      break;
   }
 }
 

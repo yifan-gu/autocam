@@ -53,7 +53,7 @@ const float minYaw = -4, maxYaw = 4, midYaw = 0;
 // State indicators.
 uint8_t state = SERVER_STATE_NOT_READY;
 uint8_t driveMode = DRIVE_MODE_MANUAL;
-uint8_t uwbSelector = 1;
+uint8_t uwbSelector = 0;
 bool uwbStarted = false;
 
 // Variables to store the drive mode button trigger events.
@@ -232,7 +232,7 @@ void stopUWB() {
 }
 
 void checkUWB() {
-  if (uwbSelector == 0) {
+  if (uwbSelector != 1) {
     if (!uwbStarted) {
       return; // Do nothing.
     }
@@ -241,6 +241,7 @@ void checkUWB() {
     return;
   }
 
+  // uwbSelector == 1
   if (!uwbStarted) {
     startUWB();
     uwbStarted = true;
@@ -397,7 +398,14 @@ bool lockSwitchLocked() {
 }
 
 uint8_t readUWBSelector() {
-  return digitalRead(UWB_SELECTOR_SWITCH_PIN) == LOW ? 1 : 0;
+  static uint8_t lastState = false;
+
+  uint8_t currentState = digitalRead(UWB_SELECTOR_SWITCH_PIN) == LOW;
+  if (lastState != currentState) {
+    lastState = currentState;
+    return currentState;
+  }
+  return 0;
 }
 
 float readJoystick(JoystickInput &joy) {
@@ -455,7 +463,7 @@ void readInput() {
 
   // Check buttons.
   checkButtons();
-  uwbSelectorTriggerValue = readUWBSelector();
+  uwbSelectorTriggerValue = (uwbSelectorTriggerValue + readUWBSelector()) % UWB_TAG_COUNT;
   readJoysticks();
 
   // Print all values, including gimbal joystick positions
@@ -511,6 +519,7 @@ void sendInput() {
 
 void checkDriveModeLED() {
   ledController.updateDriveModeLED(driveMode);
+  ledController.updateUWBSelectorLED(uwbSelector);
 }
 
 void checkBattery() {

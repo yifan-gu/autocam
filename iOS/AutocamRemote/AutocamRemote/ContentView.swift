@@ -294,7 +294,7 @@ struct ContentView: View {
                 } else if self.uwbSelectorClickCount == 2 {
                     self.uwbSelectorTrigger = 1
                 } else {
-                    self.uwbSelectorTrigger = 2 // CINEMA
+                    self.uwbSelectorTrigger = 2
                 }
                 self.updateAutocamRemoteInputPacket()
                 self.uwbSelectorClickCount = 0

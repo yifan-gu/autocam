@@ -27,7 +27,7 @@ final class BLEPeripheralManager: NSObject, ObservableObject {
         pitchSpeed: 0,
         driveMode: 0,
         toggleState: 0,
-        uwbSelector: 1,
+        uwbSelector: 0,
         padding: 0
     )
     private var lastRecvPacket: RemoteDataRecv?
@@ -219,7 +219,7 @@ extension BLEPeripheralManager: CBPeripheralManagerDelegate {
         continue
       }
 
-      // Expect 16 bytes: { state, driveMode, toggleState, uwbSelector } as UInt8 each
+      // Expect 16 bytes: { state, driveMode, uwbSelector, padding } as UInt8 each
       if data.count == MemoryLayout<UInt8>.size * 4 {
         var offset = 0
         func readUInt8() -> UInt8 {

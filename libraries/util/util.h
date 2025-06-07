@@ -20,6 +20,8 @@
 #define DATA_RATE 30 // The magic number.
 #define LOOP_PERIOD_MS (1000 / DATA_RATE) // Convert DATA_RATE to millis
 
+#define UWB_TAG_COUNT 3
+
 // Server state.
 #define SERVER_STATE_NOT_READY 0
 #define SERVER_STATE_SENSOR_READY 1

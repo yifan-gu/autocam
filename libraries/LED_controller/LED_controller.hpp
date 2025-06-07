@@ -51,11 +51,11 @@ public:
   void initUWBSelectorLED(int uwbSelectorRed, int uwbSelectorGreen, int uwbSelectorBlue);
   void initBatteryLED(int batteryRed, int batteryGreen, int batteryBlue, int battery_adc_pin, float battery_min_v, float battery_max_v, int R1 = 220000, int R2 = 100000);
   // Update LEDs based on state.
-  void updateStateLED(int state);
+  void updateStateLED(uint8_t state);
   // Update LEDs based on drive mode.
-  void updateDriveModeLED(int driveMode);
+  void updateDriveModeLED(uint8_t driveMode);
   // Update LEDs based on UWB Selector
-  void updateUWBSelectorLED(uint16_t uwbSelector);
+  void updateUWBSelectorLED(uint8_t uwbSelector);
   // Update battery LED based on battery percentage thresholds.
   void updateBatteryLED();
 };
