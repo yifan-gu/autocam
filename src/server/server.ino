@@ -61,9 +61,11 @@ unsigned long lastSensorDataMillis = 0;
 
 unsigned long lastRemoteConnectedTime = 0;
 unsigned long lastRemoteDataMillis = 0;
+unsigned long lastRemoteStatusUpdatedMillis = 0;
 
 const unsigned long heartbeatTimeout = 1000; // 1 second timeout
 const unsigned long CONNECT_GRACE_MS = 2000; // 2000ms grace after BLE_CONNECTED
+const unsigned long remoteStatusUpdateDuration = 300; // Update the remote's status every 300ms to keep the iOS app awake in the background even when the screen is locked.
 
 struct GlobalState {
   int16_t throttleValue;       // e.g., servo pulse width for throttle
@@ -221,22 +223,26 @@ void loop() {
 
   attemptConnectRemote();
   attemptConnectSensor();
-  yield();
+  //yield();
 
   getAutocamSensorData();
   getAutocamRemoteData();
+  //yield();
+
   //printGlobalState();
+
   sendGimbalControllerData();
-  yield();
+  updateAutocamRemoteStatus();
+  //yield();
 
   calculateCoordinates();
   calculateSteeringThrottle();
-  yield();
+  //yield();
 
   runESCController();
   checkDriveModeLED();
   runHealthCheck();
-  yield();
+  //yield();
 
   // Delay until the next period; this call ensures a steady 10 ms loop period.
   vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(LOOP_PERIOD_MS));
@@ -731,7 +737,6 @@ void updateState(uint8_t newState) {
   }
   globalState.state = newState;
   ledController.updateStateLED(globalState.state);
-  updateAutocamRemoteStatus();
 }
 
 void updateAutocamRemoteStatus() {
@@ -739,10 +744,16 @@ void updateAutocamRemoteStatus() {
     return;
   }
 
+  unsigned long now = millis();
+  if (lastRemoteStatusUpdatedMillis - now < remoteStatusUpdateDuration) {
+    return;
+  }
+
   RemoteDataRecv data = { .state = globalState.state, .driveMode = globalState.driveMode, .uwbSelector = globalState.uwbSelector };
   AutocamRemoteDataRecv.writeValue((uint8_t *)&data, sizeof(RemoteDataRecv));
-  LOGF("Sent status to remote via BLE: state=%d, driveMode=%d, uwbSelector=%d\n", globalState.state, globalState.driveMode, globalState.uwbSelector);
-  return;
+  lastRemoteStatusUpdatedMillis = now;
+
+  //LOGF("Sent status to remote via BLE: state=%d, driveMode=%d, uwbSelector=%d\n", globalState.state, globalState.driveMode, globalState.uwbSelector);
 }
 
 void setDriveMode(uint8_t newDriveMode) {
@@ -759,7 +770,6 @@ void setDriveMode(uint8_t newDriveMode) {
   globalState.steeringValue = midSteering;
   resetPIDValues();
   ledController.updateDriveModeLED(globalState.driveMode);
-  updateAutocamRemoteStatus();
 }
 
 void resetPIDValues() {
@@ -778,8 +788,6 @@ void setUWBSelector(uint8_t newUWBSelector) {
   globalState.uwbSelector = newUWBSelector;
   if (globalState.driveMode != DRIVE_MODE_MANUAL) { // Disable auto pilot when switching the target uwb tag.
     setDriveMode(DRIVE_MODE_MANUAL);
-  } else {
-    updateAutocamRemoteStatus();
   }
 }
 

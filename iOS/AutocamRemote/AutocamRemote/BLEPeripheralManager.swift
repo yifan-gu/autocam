@@ -39,7 +39,7 @@ final class BLEPeripheralManager: NSObject, ObservableObject {
 
     override init() {
         super.init()
-        peripheralManager = CBPeripheralManager(delegate: self, queue: DispatchQueue.main)
+        peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
     }
 
     // MARK: – Public API
@@ -107,6 +107,7 @@ final class BLEPeripheralManager: NSObject, ObservableObject {
         remoteReady         = (recv.state & SERVER_STATE_REMOTE_READY) != 0
         receivedDriveMode   = Int(recv.driveMode)
         uwbSelectorReceived = Int(recv.uwbSelector)
+        lastRecvPacket = nil
     }
 }
 
@@ -184,6 +185,8 @@ extension BLEPeripheralManager: CBPeripheralManagerDelegate {
                          didUnsubscribeFrom characteristic: CBCharacteristic) {
       if characteristic.uuid == AutocamSendCharUUID {
           centralIsSubscribed = false
+          sensorReady = false;
+          remoteReady = false;
           print("🔕 Central unsubscribed from Send characteristic.")
       }
   }

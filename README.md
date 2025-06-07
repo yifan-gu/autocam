@@ -37,7 +37,7 @@ Arduino files for my auto-following camera car!
 
 - [x] heartbeat for the remote controller.
 - [ ] <s> Nice to have, detect active track failure</s> Turns out there's no API support for that
-- [ ] Smart Phone APP for the remote (BLE version).
+- [x] Smart Phone APP for the remote (BLE version).
 
 ## KNOWN ISSUES
 - [ ] Webserver stabability.
