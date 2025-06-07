@@ -39,10 +39,11 @@ struct Anchor {
 
 Anchor uwbAnchors[] = {
   {0x0000, false}, // NOTE(yifan): Make the UWB short address same as the index, for quick looking up.
-  {0x0001, false}
+  {0x0001, false},
+  {0x0002, false}
 };
 
-uint8_t uwbSelector = 1;
+uint8_t uwbSelector = 0;
 
 // TAG antenna delay defaults to 16384
 uint16_t Adelay = 16384;

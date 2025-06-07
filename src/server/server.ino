@@ -96,7 +96,7 @@ GlobalState globalState = {
   0.0,                   // yawSpeed
   0.0,                   // pitchSpeed
   0,                     // toggleState
-  1,                     // uwbSelector
+  0,                     // uwbSelector
   0.0,                   // currentX
   0.0,                   // currentY
   0.0,                   // targetX
@@ -124,7 +124,7 @@ void printGlobalState() {
   );
 }
 
-bool autocamRemoteInputChanged = false;
+bool autocamRemoteDataUpdated = false;
 
 enum BleConnectState {
   BLE_IDLE = 0,
@@ -640,15 +640,15 @@ void sendGimbalControllerData() {
     return;
   }
 
-  if (!autocamRemoteInputChanged) {
+  if (!autocamRemoteDataUpdated) {
     return;
   }
 
   SensorDataRecv data = {.yawSpeed = globalState.yawSpeed, .pitchSpeed = globalState.pitchSpeed, .toggleState = globalState.toggleState, .uwbSelector = globalState.uwbSelector};
   AutocamSensorDataRecv.writeValue((uint8_t *)&data, sizeof(SensorDataRecv));
   globalState.toggleState = 0; // Reset toggle state after triggering it.
-  autocamRemoteInputChanged = false;
 
+  autocamRemoteDataUpdated = false;
   //LOGF("Sent via BLE: yawSpeed=%f, pitchSpeed=%f, toggleState=%d, uwbSelector=%d\n", data.yawSpeed, data.pitchSpeed, data.toggleState, data.uwbSelector);
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
 }
@@ -710,11 +710,10 @@ void getAutocamRemoteData() {
   RemoteDataSend data;
   AutocamRemoteDataSend.readValue((uint8_t *)&data, sizeof(RemoteDataSend));
 
+  autocamRemoteDataUpdated = true;
   lastRemoteDataMillis = millis();
   //LOGF("Received throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, toggleState=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.toggleState, data.uwbSelector);
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
-
-  autocamRemoteInputChanged = globalState.yawSpeed != data.yawSpeed || globalState.pitchSpeed != data.pitchSpeed || globalState.toggleState != data.toggleState || globalState.uwbSelector != data.uwbSelector;
 
   globalState.throttleValue = map(data.throttleValue, minThrottle, maxThrottle, minMoveThrottle, maxMoveThrottle);
   globalState.steeringValue = map(data.steeringValue, minSteering, maxSteering, minMoveSteering, maxMoveSteering);
@@ -734,6 +733,7 @@ void updateState(uint8_t newState) {
   ledController.updateStateLED(globalState.state);
   updateAutocamRemoteStatus();
 }
+
 void updateAutocamRemoteStatus() {
   if (remoteState != BLE_CONNECTED) {
     return;
@@ -1109,7 +1109,7 @@ void resetGlobalStateDistanceValues() {
 void resetGlobalStateGimbalValues() {
   globalState.yawSpeed = 0;
   globalState.pitchSpeed = 0;
-  autocamRemoteInputChanged = true; // Force gimbal to stop.
+  autocamRemoteDataUpdated = true; // Force gimbal to stop.
 }
 
 void checkDriveModeLED() {
