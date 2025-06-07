@@ -12,13 +12,8 @@ struct ContentView: View {
 
     // Other UI state
     @State private var driveModeTrigger: Int = 0          // 0=Manual, 1=Follow, 2=Cinema
-    @State private var uwbSelectorTrigger: Bool = false
+    @State private var uwbSelectorTrigger: Int = 0
     @State private var toggleState: Int = 0
-
-    // MARK: – Drive Mode Multi-Click State
-    @State private var driveModeLastClickTime: Date = Date.distantPast
-    @State private var driveModeClickCount: Int = 0
-    private let driveModeClickTimeout: TimeInterval = 0.5
 
     // Placeholder for sensor connectivity.
     private var sensorReady: Bool {
@@ -152,18 +147,20 @@ struct ContentView: View {
 
                     Spacer()
 
-                    // UWB selector toggle (no “0/1” text)
-                    VStack(alignment: .leading, spacing: 4) {
+                    // UWB selector button
+                    VStack(alignment: .center, spacing: 4) {
                         Text("UWB Selector")
                             .font(.subheadline)
                             .foregroundColor(.white)
-                        Toggle("", isOn: $uwbSelectorTrigger)
-                            .labelsHidden()
-                            .onChange(of: uwbSelectorTrigger) { _ in
-                                updateAutocamRemoteInputPacket()
-                            }
-                            .toggleStyle(.switch)
-                            .frame(width: 100)
+                        Button("Tap") {
+                            // Haptic feedback
+                            let generator = UIImpactFeedbackGenerator(style: .medium)
+                            generator.impactOccurred()
+                            registerUwbSelectorClick()
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(accentColor) // set text to #FFAC1C
+                        .frame(width: 100, height: 40)
                     }
 
                     Spacer()
@@ -273,8 +270,43 @@ struct ContentView: View {
             }
         }
     }
+    
+    // MARK: – UWB Selector Multi-Click
+    
+    @State private var uwbSelectorLastClickTime: Date = Date.distantPast
+    @State private var uwbSelectorClickCount: Int = 0
+    private let uwbSelectorClickTimeout: TimeInterval = 0.5
+
+    private func registerUwbSelectorClick() {
+        let now = Date()
+        if now.timeIntervalSince(uwbSelectorLastClickTime) < uwbSelectorClickTimeout {
+            uwbSelectorClickCount += 1
+        } else {
+            uwbSelectorClickCount = 1
+        }
+        uwbSelectorLastClickTime = now
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + uwbSelectorClickTimeout) {
+            if Date().timeIntervalSince(self.uwbSelectorLastClickTime) >= self.uwbSelectorClickTimeout {
+                // 1 tap → 0, 2 taps → 1, 3+ taps → 2
+                if self.uwbSelectorClickCount == 1 {
+                    self.uwbSelectorTrigger = 0
+                } else if self.uwbSelectorClickCount == 2 {
+                    self.uwbSelectorTrigger = 1
+                } else {
+                    self.uwbSelectorTrigger = 2 // CINEMA
+                }
+                self.updateAutocamRemoteInputPacket()
+                self.uwbSelectorClickCount = 0
+            }
+        }
+    }
 
     // MARK: – Drive Mode Multi-Click
+    
+    @State private var driveModeLastClickTime: Date = Date.distantPast
+    @State private var driveModeClickCount: Int = 0
+    private let driveModeClickTimeout: TimeInterval = 0.5
 
     private func registerDriveModeClick() {
         let now = Date()
@@ -330,7 +362,7 @@ struct ContentView: View {
             pitchSpeed:     Float32(pVal),
             driveMode:      UInt8(driveModeTrigger),
             toggleState:    UInt8(toggleState),
-            uwbSelector:    uwbSelectorTrigger ? 1 : 0,
+            uwbSelector:    UInt8(uwbSelectorTrigger),
             padding: 0,
         )
 
