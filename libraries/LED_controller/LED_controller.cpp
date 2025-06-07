@@ -200,35 +200,20 @@ void LEDController::updateDriveModeLED(uint8_t driveMode) {
       break;
     }
     case DRIVE_MODE_FOLLOW: {
-      // 2 short blinks pattern:
-      // State 0: LED ON for 500ms
-      // State 1: LED OFF for 500ms
-      // State 2: LED ON for 500ms
-      // State 3: LED OFF for 1000ms (pause)
-      const unsigned long shortOn = 500;
-      const unsigned long shortOff = 500;
-      const unsigned long pause = 1500;
+      // 2 long blinks pattern:
+      // State 0: LED ON for 1500ms
+      // State 1: LED OFF for 1500ms
+      const unsigned long longOn = 1500;
+      const unsigned long longOff = 1500;
       if (stateIndex == 0) {
         setLEDBlue(driveR, driveG, driveB);
-        if (now - lastToggleTime >= shortOn) {
+        if (now - lastToggleTime >= longOn) {
           stateIndex = 1;
           lastToggleTime = now;
         }
       } else if (stateIndex == 1) {
         setLEDOff(driveR, driveG, driveB);
-        if (now - lastToggleTime >= shortOff) {
-          stateIndex = 2;
-          lastToggleTime = now;
-        }
-      } else if (stateIndex == 2) {
-        setLEDBlue(driveR, driveG, driveB);
-        if (now - lastToggleTime >= shortOn) {
-          stateIndex = 3;
-          lastToggleTime = now;
-        }
-      } else if (stateIndex == 3) {
-        setLEDOff(driveR, driveG, driveB);
-        if (now - lastToggleTime >= pause) {
+        if (now - lastToggleTime >= longOff) {
           stateIndex = 0;
           lastToggleTime = now;
         }
@@ -237,13 +222,11 @@ void LEDController::updateDriveModeLED(uint8_t driveMode) {
     }
 
     case DRIVE_MODE_CINEMA: {
-      // 3 short blinks pattern:
+      // 2 short blinks pattern:
       // State 0: LED ON for 500ms
       // State 1: LED OFF for 500ms
       // State 2: LED ON for 500ms
-      // State 3: LED OFF for 500ms
-      // State 4: LED ON for 500ms
-      // State 5: LED OFF for 1000ms (pause)
+      // State 3: LED OFF for 1500ms (pause)
       const unsigned long shortOn = 500;
       const unsigned long shortOff = 500;
       const unsigned long pause = 1500;
@@ -266,18 +249,6 @@ void LEDController::updateDriveModeLED(uint8_t driveMode) {
           lastToggleTime = now;
         }
       } else if (stateIndex == 3) {
-        setLEDOff(driveR, driveG, driveB);
-        if (now - lastToggleTime >= shortOff) {
-          stateIndex = 4;
-          lastToggleTime = now;
-        }
-      } else if (stateIndex == 4) {
-        setLEDBlue(driveR, driveG, driveB);
-        if (now - lastToggleTime >= shortOn) {
-          stateIndex = 5;
-          lastToggleTime = now;
-        }
-      } else if (stateIndex == 5) {
         setLEDOff(driveR, driveG, driveB);
         if (now - lastToggleTime >= pause) {
           stateIndex = 0;
@@ -316,35 +287,20 @@ void LEDController::updateUWBSelectorLED(uint8_t uwbSelector) {
       break;
     }
     case 1: {
-      // 2 short blinks pattern:
-      // State 0: LED ON for 500ms
-      // State 1: LED OFF for 500ms
-      // State 2: LED ON for 500ms
-      // State 3: LED OFF for 1000ms (pause)
-      const unsigned long shortOn = 500;
-      const unsigned long shortOff = 500;
-      const unsigned long pause = 1500;
+      // 1 long blinks pattern:
+      // State 0: LED ON for 1500ms
+      // State 1: LED OFF for 1500ms
+      const unsigned long longOn = 1500;
+      const unsigned long longOff = 1500;
       if (stateIndex == 0) {
         setLEDBlue(uwbSelectorR, uwbSelectorG, uwbSelectorB);
-        if (now - lastToggleTime >= shortOn) {
+        if (now - lastToggleTime >= longOn) {
           stateIndex = 1;
           lastToggleTime = now;
         }
       } else if (stateIndex == 1) {
         setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
-        if (now - lastToggleTime >= shortOff) {
-          stateIndex = 2;
-          lastToggleTime = now;
-        }
-      } else if (stateIndex == 2) {
-        setLEDBlue(uwbSelectorR, uwbSelectorG, uwbSelectorB);
-        if (now - lastToggleTime >= shortOn) {
-          stateIndex = 3;
-          lastToggleTime = now;
-        }
-      } else if (stateIndex == 3) {
-        setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
-        if (now - lastToggleTime >= pause) {
+        if (now - lastToggleTime >= longOff) {
           stateIndex = 0;
           lastToggleTime = now;
         }
@@ -353,13 +309,11 @@ void LEDController::updateUWBSelectorLED(uint8_t uwbSelector) {
     }
 
     case 2: {
-      // 3 short blinks pattern:
+      // 2 short blinks pattern:
       // State 0: LED ON for 500ms
       // State 1: LED OFF for 500ms
       // State 2: LED ON for 500ms
-      // State 3: LED OFF for 500ms
-      // State 4: LED ON for 500ms
-      // State 5: LED OFF for 1000ms (pause)
+      // State 3: LED OFF for 1500ms (pause)
       const unsigned long shortOn = 500;
       const unsigned long shortOff = 500;
       const unsigned long pause = 1500;
@@ -382,18 +336,6 @@ void LEDController::updateUWBSelectorLED(uint8_t uwbSelector) {
           lastToggleTime = now;
         }
       } else if (stateIndex == 3) {
-        setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
-        if (now - lastToggleTime >= shortOff) {
-          stateIndex = 4;
-          lastToggleTime = now;
-        }
-      } else if (stateIndex == 4) {
-        setLEDBlue(uwbSelectorR, uwbSelectorG, uwbSelectorB);
-        if (now - lastToggleTime >= shortOn) {
-          stateIndex = 5;
-          lastToggleTime = now;
-        }
-      } else if (stateIndex == 5) {
         setLEDOff(uwbSelectorR, uwbSelectorG, uwbSelectorB);
         if (now - lastToggleTime >= pause) {
           stateIndex = 0;
