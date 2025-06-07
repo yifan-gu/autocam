@@ -739,9 +739,9 @@ void updateAutocamRemoteStatus() {
     return;
   }
 
-  RemoteDataRecv data = { .state = globalState.state, .driveMode = globalState.driveMode, .toggleState = globalState.toggleState, .uwbSelector = globalState.uwbSelector };
+  RemoteDataRecv data = { .state = globalState.state, .driveMode = globalState.driveMode, .uwbSelector = globalState.uwbSelector };
   AutocamRemoteDataRecv.writeValue((uint8_t *)&data, sizeof(RemoteDataRecv));
-  LOGF("Sent status to remote via BLE: driveMode = %d, state=%d\n", globalState.driveMode, globalState.state);
+  LOGF("Sent status to remote via BLE: state=%d, driveMode=%d, uwbSelector=%d\n", globalState.state, globalState.driveMode, globalState.uwbSelector);
   return;
 }
 

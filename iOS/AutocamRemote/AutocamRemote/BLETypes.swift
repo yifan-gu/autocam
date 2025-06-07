@@ -58,8 +58,8 @@ extension RemoteDataSend {
 ///   uint8_t uwbSelector;
 /// Total = 1 + 1 + 1 + 1 = 4 bytes, little-endian.
 struct RemoteDataRecv {
-  var state: UInt8
-  var driveMode: UInt8
-  var toggleState: UInt8
-  var uwbSelector: UInt8
+    var state: UInt8
+    var driveMode: UInt8
+    var uwbSelector: UInt8
+    var padding: UInt8
 }

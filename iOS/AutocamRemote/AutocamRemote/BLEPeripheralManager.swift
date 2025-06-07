@@ -12,7 +12,6 @@ final class BLEPeripheralManager: NSObject, ObservableObject {
     @Published var sensorReady          = false
     @Published var remoteReady          = false
     @Published var receivedDriveMode    = 0
-    @Published var receivedToggleState  = 0
     @Published var uwbSelectorReceived  = 0
 
     // MARK: – CoreBluetooth
@@ -107,7 +106,6 @@ final class BLEPeripheralManager: NSObject, ObservableObject {
         sensorReady         = (recv.state & SERVER_STATE_SENSOR_READY) != 0
         remoteReady         = (recv.state & SERVER_STATE_REMOTE_READY) != 0
         receivedDriveMode   = Int(recv.driveMode)
-        receivedToggleState = Int(recv.toggleState)
         uwbSelectorReceived = Int(recv.uwbSelector)
     }
 }
@@ -231,17 +229,17 @@ extension BLEPeripheralManager: CBPeripheralManagerDelegate {
         }
         let stateVal     = readUInt8()
         let driveModeVal = readUInt8()
-        let toggleVal    = readUInt8()
         let uwbVal       = readUInt8()
+        let padding      = readUInt8()
 
-        print("✍️ Received RemoteDataRecv— state=\(stateVal), driveMode=\(driveModeVal), toggle=\(toggleVal), uwb=\(uwbVal)")
+        print("✍️ Received RemoteDataRecv— state=\(stateVal), driveMode=\(driveModeVal), uwb=\(uwbVal)")
           
         // Package it and store it so our next tick() can publish it
         let recv = RemoteDataRecv(
             state:       UInt8(stateVal),
             driveMode:   UInt8(driveModeVal),
-            toggleState: UInt8(toggleVal),
-            uwbSelector: UInt8(uwbVal)
+            uwbSelector: UInt8(uwbVal),
+            padding:     UInt8(padding)
         )
         // still on main queue, so:
         lastRecvPacket = recv

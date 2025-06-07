@@ -299,7 +299,7 @@ void readStatusData() {
 
   if (AutocamRemoteDataRecv.written()) {
     AutocamRemoteDataRecv.readValue((uint8_t *)&receivedData, sizeof(RemoteDataRecv));
-    LOGF("Received state=%d, driveMode=%d, toggleState=%d, uwbSelector=%d\n", receivedData.state, receivedData.driveMode, receivedData.toggleState, receivedData.uwbSelector);
+    LOGF("Received state=%d, driveMode=%d, uwbSelector=%d\n", receivedData.state, receivedData.driveMode, receivedData.uwbSelector);
     updateState(receivedData.state);
     updateDriveMode(receivedData.driveMode);
     updateUWBSelector(receivedData.uwbSelector);

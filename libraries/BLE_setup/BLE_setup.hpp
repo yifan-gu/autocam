@@ -53,8 +53,8 @@ static_assert(sizeof(RemoteDataSend) == 16, "Size mismatch");
 struct RemoteDataRecv {
   uint8_t state;
   uint8_t driveMode;
-  uint8_t toggleState;
   uint8_t uwbSelector;
+  uint8_t padding;
 };
 
 // This ensures the iOS and ESP32 agree on byte order and length.
