@@ -16,7 +16,7 @@ let AutocamRecvCharUUID       = CBUUID(string: "B331")
 ///   uint8_t  driveMode;
 ///   uint8_t  toggleState;
 ///   uint8_t uwbSelector;
-/// Total = 2 + 2 + 1 + 4 + 4 + 1 + 1 + padding(1) = 16 bytes, little-endian.
+/// Total = 2 + 2 + 1 + 4 + 4 + 1 + 1 + 1 = 16 bytes, little-endian.
 struct RemoteDataSend {
   var throttleValue: Int16   // 1000…2000
   var steeringValue: Int16   // 1000…2000
@@ -24,7 +24,8 @@ struct RemoteDataSend {
   var pitchSpeed: Float32    // –4…+4
   var driveMode: UInt8       // 0=manual,1=follow,2=cinema
   var toggleState: UInt8     // multi-click code
-  var uwbSelector: UInt8      // 0 or 1
+  var uwbSelector: UInt8     // 0 or 1
+  var padding: UInt8         // To make it align with the arduino packet size.
 }
 
 extension RemoteDataSend {
@@ -37,6 +38,7 @@ extension RemoteDataSend {
     var d   = driveMode
     var tgl = toggleState
     var u   = uwbSelector.littleEndian
+    var pa  = padding.littleEndian
 
     return Data(bytes: &t,   count: MemoryLayout.size(ofValue: t))
          + Data(bytes: &s,   count: MemoryLayout.size(ofValue: s))
@@ -45,6 +47,7 @@ extension RemoteDataSend {
          + Data(bytes: &d,   count: MemoryLayout.size(ofValue: d))
          + Data(bytes: &tgl, count: MemoryLayout.size(ofValue: tgl))
          + Data(bytes: &u,   count: MemoryLayout.size(ofValue: u))
+         + Data(bytes: &pa,  count: MemoryLayout.size(ofValue: pa))
   }
 }
 

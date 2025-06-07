@@ -11,8 +11,8 @@ struct ContentView: View {
     @State private var pitchNorm: CGFloat = 0       // center joystick Y
 
     // Other UI state
-    @State private var driveMode: Int = 0          // 0=Manual, 1=Follow, 2=Cinema
-    @State private var uwbSelector: Bool = true
+    @State private var driveModeTrigger: Int = 0          // 0=Manual, 1=Follow, 2=Cinema
+    @State private var uwbSelectorTrigger: Bool = false
     @State private var toggleState: Int = 0
 
     // MARK: – Drive Mode Multi-Click State
@@ -21,14 +21,21 @@ struct ContentView: View {
     private let driveModeClickTimeout: TimeInterval = 0.5
 
     // Placeholder for sensor connectivity.
-    private var sensorConnected: Bool {
-        // TODO: bind to actual sensor state in BLEPeripheralManager
-        return false
+    private var sensorReady: Bool {
+        return blePeripheral.sensorReady
+    }
+    
+    private var remoteReady: Bool {
+        return blePeripheral.remoteReady
+    }
+    
+    private var uwbSelector: Int {
+        return blePeripheral.uwbSelectorReceived
     }
 
     // Compute a one‐letter label for the current driveMode
     private var driveModeLetter: String {
-        switch driveMode {
+        switch blePeripheral.receivedDriveMode {
         case 0: return "M"  // Manual
         case 1: return "F"  // Follow
         default: return "C" // Cinema
@@ -47,7 +54,7 @@ struct ContentView: View {
                 // 1) Sensor column
                 VStack(spacing: 4) {
                     Circle()
-                        .fill(sensorConnected ? Color.green : Color.red)
+                        .fill(sensorReady ? Color.green : Color.red)
                         .frame(width: 24, height: 24)
                     Text("Sensor")
                         .font(.caption)
@@ -57,7 +64,7 @@ struct ContentView: View {
                 // 2) Remote column
                 VStack(spacing: 4) {
                     Circle()
-                        .fill(blePeripheral.centralIsSubscribed ? Color.green : Color.red)
+                        .fill(remoteReady ? Color.green : Color.red)
                         .frame(width: 24, height: 24)
                     Text("Remote")
                         .font(.caption)
@@ -90,7 +97,7 @@ struct ContentView: View {
                         Circle()
                             .fill(Color.blue)
                             .frame(width: 24, height: 24)
-                        Text(uwbSelector ? "1" : "0")
+                        Text("\(uwbSelector)")
                             .font(.caption2)
                             .foregroundColor(.white)
                     }
@@ -150,10 +157,10 @@ struct ContentView: View {
                         Text("UWB Selector")
                             .font(.subheadline)
                             .foregroundColor(.white)
-                        Toggle("", isOn: $uwbSelector)
+                        Toggle("", isOn: $uwbSelectorTrigger)
                             .labelsHidden()
-                            .onChange(of: uwbSelector) { _ in
-                                sendFromCurrentJoysticks()
+                            .onChange(of: uwbSelectorTrigger) { _ in
+                                updateAutocamRemoteInputPacket()
                             }
                             .toggleStyle(.switch)
                             .frame(width: 100)
@@ -199,7 +206,7 @@ struct ContentView: View {
                     is2D: true
                 )
                 .onChange(of: steeringNorm) { _ in
-                    sendFromCurrentJoysticks()
+                    updateAutocamRemoteInputPacket()
                 }
 
                 Spacer()
@@ -212,8 +219,8 @@ struct ContentView: View {
                     knobSize: 50,
                     is2D: true
                 )
-                .onChange(of: yawNorm) { _ in sendFromCurrentJoysticks() }
-                .onChange(of: pitchNorm) { _ in sendFromCurrentJoysticks() }
+                .onChange(of: yawNorm) { _ in updateAutocamRemoteInputPacket() }
+                .onChange(of: pitchNorm) { _ in updateAutocamRemoteInputPacket() }
 
                 Spacer()
 
@@ -226,7 +233,7 @@ struct ContentView: View {
                     is2D: true
                 )
                 .onChange(of: throttleNorm) { _ in
-                    sendFromCurrentJoysticks()
+                    updateAutocamRemoteInputPacket()
                 }
             }
             .padding(.horizontal, 20)
@@ -260,8 +267,9 @@ struct ContentView: View {
                 } else {
                     self.toggleState = 3 // CAMERA_RECORDING_TOGGLED
                 }
-                self.sendFromCurrentJoysticks()
+                self.updateAutocamRemoteInputPacket()
                 self.gimbalClickCount = 0
+                self.toggleState = 0
             }
         }
     }
@@ -281,13 +289,13 @@ struct ContentView: View {
             if Date().timeIntervalSince(self.driveModeLastClickTime) >= self.driveModeClickTimeout {
                 // 1 tap → Manual, 2 taps → Follow, 3+ taps → Cinema
                 if self.driveModeClickCount == 1 {
-                    self.driveMode = 0 // MANUAL
+                    self.driveModeTrigger = 0 // MANUAL
                 } else if self.driveModeClickCount == 2 {
-                    self.driveMode = 1 // FOLLOW
+                    self.driveModeTrigger = 1 // FOLLOW
                 } else {
-                    self.driveMode = 2 // CINEMA
+                    self.driveModeTrigger = 2 // CINEMA
                 }
-                self.sendFromCurrentJoysticks()
+                self.updateAutocamRemoteInputPacket()
                 self.driveModeClickCount = 0
             }
         }
@@ -298,52 +306,35 @@ struct ContentView: View {
     private func steeringNormToValue() -> Double {
         let mid: Double = 1500
         let range: Double = 500
-        return min(max(mid + Double(steeringNorm) * range, 1000), 2000)
+        // Invert so “left” gives higher steering
+        return min(max(mid + Double(steeringNorm) * range * -1, 1000), 2000)
     }
 
     private func throttleNormToValue() -> Double {
         let mid: Double = 1500
         let range: Double = 500
-        // Invert so “up” gives higher throttle
-        return min(max(mid + Double(throttleNorm) * range * -1, 1000), 2000)
+        return min(max(mid + Double(throttleNorm) * range, 1000), 2000)
     }
 
-    private func sendFromCurrentJoysticks() {
+    private func updateAutocamRemoteInputPacket() {
         let tVal = Int(throttleNormToValue())
         let sVal = Int(steeringNormToValue())
         let yVal = Float(yawNorm * 4.0)    // map from –1…+1 to –4…+4
-        let pVal = Float(pitchNorm * 4.0)  // map from –1…+1 to –4…+4
+        let pVal = Float(pitchNorm * -4.0)  // map from –1…+1 to +4…-4
 
-        sendCurrentPacket(
-            throttle:  tVal,
-            steering:  sVal,
-            yaw:       yVal,
-            pitch:     pVal,
-            driveMode: driveMode,
-            uwbSel:    uwbSelector,
-            toggle:    toggleState
-        )
-        toggleState = 0
-    }
-
-    private func sendCurrentPacket(
-        throttle: Int,
-        steering: Int,
-        yaw: Float,
-        pitch: Float,
-        driveMode: Int,
-        uwbSel: Bool,
-        toggle: Int
-    ) {
+        // build packet
         let packet = RemoteDataSend(
-            throttleValue: Int16(throttle),
-            steeringValue: Int16(steering),
-            yawSpeed: Float32(yaw),
-            pitchSpeed: Float32(pitch),
-            driveMode: UInt8(driveMode),
-            toggleState: UInt8(toggle),
-            uwbSelector: uwbSel ? 1 : 0
+            throttleValue: Int16(tVal),
+            steeringValue: Int16(sVal),
+            yawSpeed:       Float32(yVal),
+            pitchSpeed:     Float32(pVal),
+            driveMode:      UInt8(driveModeTrigger),
+            toggleState:    UInt8(toggleState),
+            uwbSelector:    uwbSelectorTrigger ? 1 : 0,
+            padding: 0,
         )
+
+        // **only** update the packet—no BLE send here
         blePeripheral.updateSendPacket(packet)
     }
 }

@@ -2,16 +2,25 @@ import Foundation
 import CoreBluetooth
 import Combine
 
+// You’ll need these bit-masks to interpret `state`:
+let SERVER_STATE_SENSOR_READY: UInt8 = 1 << 0
+let SERVER_STATE_REMOTE_READY: UInt8 = 1 << 1
+
 final class BLEPeripheralManager: NSObject, ObservableObject {
-    // MARK: – Published state for SwiftUI
-    @Published var centralIsSubscribed = false
-    
-    // MARK: – Underlying CBPeripheralManager & GATT handles
-    private var peripheralManager:     CBPeripheralManager!
-    private var sendCharacteristic:    CBMutableCharacteristic!
-    private var recvCharacteristic:    CBMutableCharacteristic!
-    
-    /// Store the latest “send” packet (so a future read or notify can return it).
+    // MARK: – Published state for SwiftUI LEDs
+    @Published var centralIsSubscribed  = false
+    @Published var sensorReady          = false
+    @Published var remoteReady          = false
+    @Published var receivedDriveMode    = 0
+    @Published var receivedToggleState  = 0
+    @Published var uwbSelectorReceived  = 0
+
+    // MARK: – CoreBluetooth
+    private var peripheralManager:  CBPeripheralManager!
+    private var sendCharacteristic: CBMutableCharacteristic!
+    private var recvCharacteristic: CBMutableCharacteristic!
+
+    // MARK: – Send buffering + loop
     private var currentSendPacket = RemoteDataSend(
         throttleValue: 1500,
         steeringValue: 1500,
@@ -19,35 +28,90 @@ final class BLEPeripheralManager: NSObject, ObservableObject {
         pitchSpeed: 0,
         driveMode: 0,
         toggleState: 0,
-        uwbSelector: 1
+        uwbSelector: 1,
+        padding: 0
     )
-    
+    private var lastRecvPacket: RemoteDataRecv?
+    private var loopCancellable: AnyCancellable?
+    private let loopInterval      = 1.0 / 50.0    // 50 Hz
+    private let heartbeatInterval = 0.2           // 200 ms
+    private var lastSendTime      = Date.distantPast
+    private var inputDirty = false
+
     override init() {
         super.init()
-        // Instantiate a CBPeripheralManager on the main queue.
-        peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
+        peripheralManager = CBPeripheralManager(delegate: self, queue: DispatchQueue.main)
     }
-    
-    // MARK: – Public API for UI to update “send” data
-    func updateSendPacket(_ packet: RemoteDataSend) {
-        // Update our local copy:
-        currentSendPacket = packet
-        
-        // 1) If a Central has subscribed and notifications are allowed, push the update:
-        if centralIsSubscribed {
-            let data = packet.toData()
-            let didSend = peripheralManager.updateValue(
-                data,
-                for: sendCharacteristic,
-                onSubscribedCentrals: nil // push to all subscribed centrals
-            )
-            if !didSend {
-                // If it returns false, the transmit queue is full. You can buffer & retry in didSubscribe/didUnsubscribe.
-                print("🔔 Failed to send notify (queue full). Will retry in didSubscribe/didReceiveRead)…")
+
+    // MARK: – Public API
+    /// Call this from your SwiftUI whenever you want to change the outgoing packet.
+    func updateSendPacket(_ pkt: RemoteDataSend) {
+        currentSendPacket = pkt
+        inputDirty = true
+        // no immediate send — our loop will pick it up
+    }
+
+    // MARK: – Loop startup
+    private func startMainLoop() {
+        guard loopCancellable == nil else { return }
+        loopCancellable = Timer.publish(every: loopInterval, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                self?.tick()
+            }
+    }
+
+    private func tick() {
+        // 1) send input every 20ms (50hz) if there's a new input, or every 200ms for heartbeat.
+        sendIfNeeded()
+
+        // 3) push any newly‐received status into @Published
+        updateUIFromRemoteDataRecv()
+    }
+
+    private func sendIfNeeded() {
+        guard centralIsSubscribed else { return }
+
+        let now = Date()
+        let interval = now.timeIntervalSince(lastSendTime)
+
+        // send immediately if UI changed, or as a heartbeat every 200 ms
+        if inputDirty || interval >= heartbeatInterval {
+            let data = currentSendPacket.toData()
+            if peripheralManager.updateValue(data,
+                                             for: sendCharacteristic,
+                                             onSubscribedCentrals: nil) {
+                lastSendTime = now
+                inputDirty   = false
+                currentSendPacket.toggleState = 0
             }
         }
     }
+
+    private func sendHeartbeatIfNeeded() {
+        let now = Date()
+        guard centralIsSubscribed,
+              now.timeIntervalSince(lastSendTime) >= heartbeatInterval
+        else { return }
+        
+
+        let data = currentSendPacket.toData()
+        if peripheralManager.updateValue(data, for: sendCharacteristic, onSubscribedCentrals: nil) {
+            lastSendTime = now
+        }
+    }
+
+    private func updateUIFromRemoteDataRecv() {
+        guard let recv = lastRecvPacket else { return }
+        // map bits → published LEDs
+        sensorReady         = (recv.state & SERVER_STATE_SENSOR_READY) != 0
+        remoteReady         = (recv.state & SERVER_STATE_REMOTE_READY) != 0
+        receivedDriveMode   = Int(recv.driveMode)
+        receivedToggleState = Int(recv.toggleState)
+        uwbSelectorReceived = Int(recv.uwbSelector)
+    }
 }
+
 
 // MARK: – CBPeripheralManagerDelegate
 
@@ -55,9 +119,10 @@ extension BLEPeripheralManager: CBPeripheralManagerDelegate {
   func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
     switch peripheral.state {
     case .poweredOn:
-      print("🟢 Peripheral Manager powered on. Setting up GATT…")
+      print("🟢 Peripheral Manager powered on. Setting up GATT and starting the main loop…")
       setupServiceAndCharacteristics()
       startAdvertising()
+      startMainLoop()
     default:
       print("⚠️ Peripheral Manager state: \(peripheral.state.rawValue)")
     }
@@ -109,20 +174,20 @@ extension BLEPeripheralManager: CBPeripheralManagerDelegate {
   func peripheralManager(_ peripheral: CBPeripheralManager,
                          central: CBCentral,
                          didSubscribeTo characteristic: CBCharacteristic) {
-    if characteristic.uuid == AutocamSendCharUUID {
-      centralIsSubscribed = true
-      print("🔔 Central subscribed for notifications on Send characteristic.")
-    }
+      if characteristic.uuid == AutocamSendCharUUID {
+          centralIsSubscribed = true
+          print("🔔 Central subscribed for notifications on Send characteristic.")
+      }
   }
 
   /// Called when Central unsubscribes
   func peripheralManager(_ peripheral: CBPeripheralManager,
                          central: CBCentral,
                          didUnsubscribeFrom characteristic: CBCharacteristic) {
-    if characteristic.uuid == AutocamSendCharUUID {
-      centralIsSubscribed = false
-      print("🔕 Central unsubscribed from Send characteristic.")
-    }
+      if characteristic.uuid == AutocamSendCharUUID {
+          centralIsSubscribed = false
+          print("🔕 Central unsubscribed from Send characteristic.")
+      }
   }
 
   /// Handle read requests on the “Send” characteristic: return currentSendPacket
@@ -156,20 +221,30 @@ extension BLEPeripheralManager: CBPeripheralManagerDelegate {
         continue
       }
 
-      // Expect 16 bytes: { state, driveMode, toggleState, uwbSelector } as Int32 each
-      if data.count == MemoryLayout<Int32>.size * 4 {
+      // Expect 16 bytes: { state, driveMode, toggleState, uwbSelector } as UInt8 each
+      if data.count == MemoryLayout<UInt8>.size * 4 {
         var offset = 0
-        func readInt32() -> Int32 {
-          let slice = data.subdata(in: offset..<(offset+4))
-          offset += 4
-          return Int32(littleEndian: slice.withUnsafeBytes { $0.load(as: Int32.self) })
+        func readUInt8() -> UInt8 {
+          let slice = data.subdata(in: offset..<(offset+1))
+          offset += 1
+          return UInt8(littleEndian: slice.withUnsafeBytes { $0.load(as: UInt8.self) })
         }
-        let stateVal     = readInt32()
-        let driveModeVal = readInt32()
-        let toggleVal    = readInt32()
-        let uwbVal       = readInt32()
+        let stateVal     = readUInt8()
+        let driveModeVal = readUInt8()
+        let toggleVal    = readUInt8()
+        let uwbVal       = readUInt8()
 
         print("✍️ Received RemoteDataRecv— state=\(stateVal), driveMode=\(driveModeVal), toggle=\(toggleVal), uwb=\(uwbVal)")
+          
+        // Package it and store it so our next tick() can publish it
+        let recv = RemoteDataRecv(
+            state:       UInt8(stateVal),
+            driveMode:   UInt8(driveModeVal),
+            toggleState: UInt8(toggleVal),
+            uwbSelector: UInt8(uwbVal)
+        )
+        // still on main queue, so:
+        lastRecvPacket = recv
 
         // Update your @Published properties or post a Notification so SwiftUI can react:
         DispatchQueue.main.async {

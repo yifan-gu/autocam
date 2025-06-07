@@ -16,20 +16,25 @@ extern const char *AutocamSensorDataRecvCharacteristicUUID;
 extern const char *AutocamRemoteDataSendCharacteristicUUID;
 extern const char *AutocamRemoteDataRecvCharacteristicUUID;
 
+// Size = 12 bytes.
 struct SensorDataSend {
   float distance;
   float heading;
   uint8_t state; // 1 = ready, 0 = not ready.
+  uint8_t padding[3];
 };
 
+// Size = 12 bytes.
 struct SensorDataRecv {
   // Values below are written by the central (server).
   float yawSpeed;
   float pitchSpeed;
   uint8_t toggleState; // Bit 0 = activeTrackToggled, bit 1 = gimbalRecenterToggled, bit 2 = cameraRecordingToggled.activeTrackToggled;
   uint8_t uwbSelector;
+  uint8_t padding[2];
 };
 
+// Size = 16 bytes.
 struct RemoteDataSend {
   int16_t throttleValue;
   int16_t steeringValue;
@@ -38,11 +43,13 @@ struct RemoteDataSend {
   uint8_t driveMode;
   uint8_t toggleState;
   uint8_t uwbSelector;
+  uint8_t padding;
 };
 
 // This ensures the iOS and ESP32 agree on byte order and length.
 static_assert(sizeof(RemoteDataSend) == 16, "Size mismatch");
 
+// Size = 4 bytes.
 struct RemoteDataRecv {
   uint8_t state;
   uint8_t driveMode;
