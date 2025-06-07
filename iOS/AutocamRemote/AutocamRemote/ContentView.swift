@@ -198,47 +198,65 @@ struct ContentView: View {
             // │  Bottom area: 3 Joysticks    │
             // └──────────────────────────────┘
             HStack {
-                // Left joystick → steering
-                JoystickView(
-                    xValue: $steeringNorm,
-                    yValue: .constant(0),
-                    size: 120,
-                    knobSize: 50,
-                    is2D: true
-                )
-                .onChange(of: steeringNorm) { _ in
-                    updateAutocamRemoteInputPacket()
+                // Steering joystick + label
+                VStack(spacing: 8) {
+                    JoystickView(
+                        xValue: $steeringNorm,
+                        yValue: .constant(0),
+                        size: 120,
+                        knobSize: 50,
+                        is2D: true
+                    )
+                    .onChange(of: steeringNorm) { _ in
+                        updateAutocamRemoteInputPacket()
+                    }
+                    Text("Steering")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                        .frame(width: 120)
                 }
 
                 Spacer()
 
-                // Middle joystick → yaw/pitch
-                JoystickView(
-                    xValue: $yawNorm,
-                    yValue: $pitchNorm,
-                    size: 120,
-                    knobSize: 50,
-                    is2D: true
-                )
-                .onChange(of: yawNorm) { _ in updateAutocamRemoteInputPacket() }
-                .onChange(of: pitchNorm) { _ in updateAutocamRemoteInputPacket() }
+                // Gimbal (yaw/pitch) joystick + label
+                VStack(spacing: 8) {
+                    JoystickView(
+                        xValue: $yawNorm,
+                        yValue: $pitchNorm,
+                        size: 120,
+                        knobSize: 50,
+                        is2D: true
+                    )
+                    .onChange(of: yawNorm) { _ in updateAutocamRemoteInputPacket() }
+                    .onChange(of: pitchNorm) { _ in updateAutocamRemoteInputPacket() }
+                    Text("Gimbal")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                        .frame(width: 120)
+                }
 
                 Spacer()
 
-                // Right joystick → throttle
-                JoystickView(
-                    xValue: .constant(0),
-                    yValue: $throttleNorm,
-                    size: 120,
-                    knobSize: 50,
-                    is2D: true
-                )
-                .onChange(of: throttleNorm) { _ in
-                    updateAutocamRemoteInputPacket()
+                // Throttle joystick + label
+                VStack(spacing: 8) {
+                    JoystickView(
+                        xValue: .constant(0),
+                        yValue: $throttleNorm,
+                        size: 120,
+                        knobSize: 50,
+                        is2D: true
+                    )
+                    .onChange(of: throttleNorm) { _ in
+                        updateAutocamRemoteInputPacket()
+                    }
+                    Text("Throttle")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                        .frame(width: 120)
                 }
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+            .padding(.bottom, 25)
         }
         .background(Color(red: 128/255, green: 0, blue: 128/255).ignoresSafeArea())
         .preferredColorScheme(.dark) // force dark appearance
