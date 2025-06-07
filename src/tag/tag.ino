@@ -7,6 +7,8 @@
 #include "LED_controller.hpp"
 #include "util.h"
 
+#define TAG_ID_0
+
 // SPI pins
 #define SPI_SCK 18
 #define SPI_MISO 19
@@ -17,6 +19,8 @@
 #define PIN_RST 27 // reset pin
 #define PIN_IRQ 34 // irq pin
 #define PIN_SS 4   // spi select pin
+
+#if defined(TAG_ID_0)
 
 #define BATTERY_LED_RED_PIN 14
 #define BATTERY_LED_GREEN_PIN 25
@@ -31,6 +35,27 @@ uint16_t Adelay = 16630;
 
 // leftmost two bytes below will become the "short address"
 char uwb_addr[] = "00:00:8D:99:3A:47:55:1C";
+
+#elif defined(TAG_ID_2)
+
+#define BATTERY_LED_RED_PIN 2
+#define BATTERY_LED_GREEN_PIN 12
+#define BATTERY_LED_BLUE_PIN -1
+#define BATTERY_ADC_PIN 32
+#define SENSOR_LED_RED_PIN 13
+#define SENSOR_LED_GREEN_PIN 14
+#define SENSOR_LED_BLUE_PIN -1
+
+//calibrated Antenna Delay setting for this anchor
+uint16_t Adelay = 16630;
+
+// leftmost two bytes below will become the "short address"
+char uwb_addr[] = "02:00:8D:99:3A:47:55:1C";
+
+#else
+  #error "Must define either TAG_ID_0 or TAG_ID_2"
+#endif
+
 
 LEDController ledController;
 
@@ -87,7 +112,15 @@ void loop() {
 
 void setupLED() {
   ledController.initSensorLED(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN);
+
+#if defined(TAG_ID_0)
   ledController.initBatteryLED(BATTERY_LED_RED_PIN, BATTERY_LED_GREEN_PIN, BATTERY_LED_BLUE_PIN, BATTERY_ADC_PIN, minVoltage, maxVoltage);
+#elif defined(TAG_ID_2)
+  ledController.initBatteryLED(BATTERY_LED_RED_PIN, BATTERY_LED_GREEN_PIN, BATTERY_LED_BLUE_PIN, BATTERY_ADC_PIN, minVoltage, maxVoltage, 31000, 10000); // Measured battery ratio.
+#else
+  #error "Must define either TAG_ID_0 or TAG_ID_2"
+#endif
+
   ledController.setLEDRed(SENSOR_LED_RED_PIN, SENSOR_LED_GREEN_PIN, SENSOR_LED_BLUE_PIN);
   ledController.updateBatteryLED();
 }
@@ -114,7 +147,7 @@ void setupUWB() {
 }
 
 void newRange() {
-  LOGF("Autocam Sensor address=%X, distance=%f(m)\n", DW1000Ranging.getDistantDevice()->getShortAddress(), DW1000Ranging.getDistantDevice()->getRange());
+  //LOGF("Autocam Sensor address=%X, distance=%f(m)\n", DW1000Ranging.getDistantDevice()->getShortAddress(), DW1000Ranging.getDistantDevice()->getRange());
   updateState(TAG_STATE_SENSOR_CONNECTED);
 }
 
