@@ -353,14 +353,10 @@ bool DJIRoninController::_execute_command(uint8_t cmd_type, uint8_t cmd_set, uin
     parse_response_metadata(recv_message, &return_cmd_type, &response_seq, &return_cmd_set, &return_cmd_id, &return_code);
     if (cmd_type & 0x20 == 0) {
       WARNF("Invalid response type, not a reply frame, cmd_type=0x%02F\n", return_cmd_type);
-      continue;
+      return false;
     }
     if (seq_num != response_seq) {
       WARNF("Invalid response SEQ, expect 0x%02X, got 0x%02X\n", seq_num, response_seq);
-      if (response_seq < seq_num) {
-        WARNF("response SEQ is smaller than seq_num, discard this response\n");
-        continue;
-      }
       return false;
     }
     if (return_cmd_set != cmd_set || return_cmd_id != cmd_id) {
@@ -368,6 +364,7 @@ bool DJIRoninController::_execute_command(uint8_t cmd_type, uint8_t cmd_set, uin
       return false;
     }
     memcpy(recv_data, recv_message+data_offset, DATA_BUFFER_SIZE-data_offset);
+    return_code = (uint8_t)(recv_data[0]);
     if (return_code != 0) {
       WARNF("Unexpected return_code, expect 0x00, got 0x%02X\n", return_code);
       return false;
@@ -529,7 +526,7 @@ bool DJIRoninController::check_camera_recording_state(bool *result) {
 //        *result = true;
 //        return true;
 //    }
-//    WARNF("Invalied recv_data %02X %02X\n", recv_data[0], recv_data[1]);
+//    WARNF("Invalid recv_data %02X %02X\n", recv_data[0], recv_data[1]);
 //    return false;
 //}
 
