@@ -49,6 +49,7 @@ const int16_t minSteering = 1000, maxSteering = 2000, midSteering = 1500; // 100
 const int16_t minSteeringThrottle = 50;
 
 const float fieldOfViewRatio = 28 / 20; // Car length / car width (measured from the wheel).
+const float SAFETY_DISTANCE = 5.0; // Maximum distance allowed, if current distance goes beyond this value, the car will stop.
 
 int16_t minMoveThrottle = 1300, maxMoveThrottle = 1700;
 int16_t minMoveSteering = 1000, maxMoveSteering = 2000;
@@ -519,7 +520,7 @@ void runHealthCheck() {
     disconnectPeripheral(AutocamSensor, AutocamSensorServiceUUID);
     sensorState = BLE_IDLE;
     emergencyStop();
-    updateState(globalState.state  & ~SERVER_STATE_SENSOR_CONNECTED & ~SERVER_STATE_SENSOR_READY);
+    updateState(globalState.state & ~SERVER_STATE_SENSOR_CONNECTED & ~SERVER_STATE_SENSOR_READY);
     establishAutocamSensorBLEConnection();
   }
 
@@ -541,6 +542,12 @@ void runHealthCheck() {
   //  ws.closeAll();                     // Close every WebSocket client
   //  wsState = WEBSOCKET_DISCONNECTED;
   //}
+}
+
+void runSafetyCheck() {
+  if (globalState.distance >= SAFETY_DISTANCE) {
+    emergencyStop();
+  }
 }
 
 void establishAutocamRemoteBLEConnection() {
@@ -1093,8 +1100,8 @@ void setMoveBackward(float throttleCoeff) {
 void emergencyStop() { //TODO(yifan): Refactor out this with a state machine.
   stopCar();
   setDriveMode(DRIVE_MODE_MANUAL);
-  resetGlobalStateDistanceValues();
-  resetGlobalStateGimbalValues();
+  //resetGlobalStateDistanceValues();
+  //resetGlobalStateGimbalValues();
 }
 
 void stopCar() {
