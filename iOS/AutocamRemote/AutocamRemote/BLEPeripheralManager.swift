@@ -3,14 +3,20 @@ import CoreBluetooth
 import Combine
 
 // You’ll need these bit-masks to interpret `state`:
-let SERVER_STATE_SENSOR_READY: UInt8 = 1 << 0
-let SERVER_STATE_REMOTE_READY: UInt8 = 1 << 1
+let SERVER_STATE_NOT_READY:        UInt8 = 0
+let SERVER_STATE_SENSOR_CONNECTED: UInt8 = 1
+let SERVER_STATE_SENSOR_READY:     UInt8 = 2
+let SERVER_STATE_REMOTE_CONNECTED: UInt8 = 4
+let SERVER_STATE_REMOTE_READY:     UInt8 = 8
+
 
 final class BLEPeripheralManager: NSObject, ObservableObject {
     // MARK: – Published state for SwiftUI LEDs
     @Published var centralIsSubscribed  = false
     @Published var sensorReady          = false
+    @Published var sensorConnected      = false
     @Published var remoteReady          = false
+    @Published var remoteConnected      = false
     @Published var receivedDriveMode    = 0
     @Published var uwbSelectorReceived  = 0
 
@@ -103,7 +109,9 @@ final class BLEPeripheralManager: NSObject, ObservableObject {
     private func updateUIFromRemoteDataRecv() {
         guard let recv = lastRecvPacket else { return }
         // map bits → published LEDs
+        sensorConnected     = (recv.state & SERVER_STATE_SENSOR_CONNECTED) != 0
         sensorReady         = (recv.state & SERVER_STATE_SENSOR_READY) != 0
+        remoteConnected     = (recv.state & SERVER_STATE_REMOTE_CONNECTED) != 0
         remoteReady         = (recv.state & SERVER_STATE_REMOTE_READY) != 0
         receivedDriveMode   = Int(recv.driveMode)
         uwbSelectorReceived = Int(recv.uwbSelector)
@@ -185,7 +193,9 @@ extension BLEPeripheralManager: CBPeripheralManagerDelegate {
                          didUnsubscribeFrom characteristic: CBCharacteristic) {
       if characteristic.uuid == AutocamSendCharUUID {
           centralIsSubscribed = false
+          sensorConnected = false;
           sensorReady = false;
+          remoteConnected = false;
           remoteReady = false;
           print("🔕 Central unsubscribed from Send characteristic.")
       }

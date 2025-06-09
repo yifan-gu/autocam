@@ -162,19 +162,25 @@ void LEDController::initBatteryLED(int batteryRed, int batteryGreen, int battery
 void LEDController::updateStateLED(uint8_t state) {
   // Sensor LED update
   if (state & SERVER_STATE_SENSOR_READY) {
-    LOGLN("sensor, green");
+    LOGLN("Update Sensor LED to GREEN");
     setLEDGreen(sensorR, sensorG, sensorB);
+  } else if (state & SERVER_STATE_SENSOR_CONNECTED) {
+    LOGLN("Update Sensor LED to YELLOW");
+    setLEDYellow(sensorR, sensorG, sensorB);
   } else {
-    LOGLN("sensor, red");
+    LOGLN("Update Sensor LED to RED");
     setLEDRed(sensorR, sensorG, sensorB);
   }
 
   // Remote Controller LED update
   if (state & SERVER_STATE_REMOTE_READY) {
-    LOGLN("remote, green");
+    LOGLN("Update Remote LED to GREEN");
     setLEDGreen(remoteR, remoteG, remoteB);
-  } else {
-    LOGLN("remote, red");
+  } else if (state & SERVER_STATE_REMOTE_CONNECTED) {
+    LOGLN("Update Remote LED to YELLOW");
+    setLEDYellow(sensorR, sensorG, sensorB);
+  } else  {
+    LOGLN("Update Remote LED to RED");
     setLEDRed(remoteR, remoteG, remoteB);
   }
 }

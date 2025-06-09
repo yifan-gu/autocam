@@ -294,12 +294,12 @@ void readStatusData() {
     if (!connectToCentral()) {
       return;
     }
-    updateState(state | SERVER_STATE_REMOTE_READY);
+    updateState(state | SERVER_STATE_REMOTE_CONNECTED | SERVER_STATE_REMOTE_READY);
   }
 
   if (AutocamRemoteDataRecv.written()) {
     AutocamRemoteDataRecv.readValue((uint8_t *)&receivedData, sizeof(RemoteDataRecv));
-    LOGF("Received state=%d, driveMode=%d, uwbSelector=%d\n", receivedData.state, receivedData.driveMode, receivedData.uwbSelector);
+    //LOGF("Received state=%d, driveMode=%d, uwbSelector=%d\n", receivedData.state, receivedData.driveMode, receivedData.uwbSelector);
     updateState(receivedData.state);
     updateDriveMode(receivedData.driveMode);
     updateUWBSelector(receivedData.uwbSelector);
@@ -488,7 +488,7 @@ void sendInput() {
     if (!connectToCentral()) {
       return;
     }
-    updateState(state | SERVER_STATE_REMOTE_READY);
+    updateState(state | SERVER_STATE_REMOTE_CONNECTED | SERVER_STATE_REMOTE_READY);
   }
 
   RemoteDataSend data = {

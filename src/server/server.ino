@@ -519,7 +519,7 @@ void runHealthCheck() {
     disconnectPeripheral(AutocamSensor, AutocamSensorServiceUUID);
     sensorState = BLE_IDLE;
     emergencyStop();
-    updateState(globalState.state & ~SERVER_STATE_SENSOR_READY);
+    updateState(globalState.state  & ~SERVER_STATE_SENSOR_CONNECTED & ~SERVER_STATE_SENSOR_READY);
     establishAutocamSensorBLEConnection();
   }
 
@@ -530,7 +530,7 @@ void runHealthCheck() {
     disconnectPeripheral(AutocamRemote, AutocamRemoteServiceUUID);
     remoteState = BLE_IDLE;
     emergencyStop();
-    updateState(globalState.state & ~SERVER_STATE_REMOTE_READY);
+    updateState(globalState.state & ~SERVER_STATE_REMOTE_CONNECTED & ~SERVER_STATE_REMOTE_READY);
     establishAutocamRemoteBLEConnection();
   }
 
@@ -597,7 +597,7 @@ void attemptConnectRemote() {
   if (remoteSendReady && remoteRecvReady && AutocamRemote.connected()) {
     remoteState = BLE_CONNECTED;
     lastRemoteConnectedTime = millis();
-    updateState(globalState.state | SERVER_STATE_REMOTE_READY);
+    updateState(globalState.state | SERVER_STATE_REMOTE_CONNECTED | SERVER_STATE_REMOTE_READY);
   }
 }
 
@@ -637,7 +637,7 @@ void attemptConnectSensor() {
   if (sensorSendReady && sensorRecvReady && AutocamSensor.connected()) {
     sensorState = BLE_CONNECTED;
     lastSensorConnectedTime = millis();
-    updateState(globalState.state | SERVER_STATE_SENSOR_READY);
+    updateState(globalState.state | SERVER_STATE_SENSOR_CONNECTED);
   }
 }
 
@@ -688,7 +688,7 @@ void getAutocamSensorData() {
                          (1.0 - distanceSmoothFactor) * globalState.distance;
 
   globalState.heading = data.heading;
-  if (data.state & SENSOR_STATE_TAG_CONNECTED && data.state & SENSOR_STATE_SERVER_CONNECTED) {
+  if (data.state & SENSOR_STATE_TAG_CONNECTED && data.state & SENSOR_STATE_SERVER_CONNECTED && data.state & SENSOR_STATE_CAN_CONNECTED) {
     updateState(globalState.state | SERVER_STATE_SENSOR_READY);
   } else {
     if (globalState.driveMode != DRIVE_MODE_MANUAL) {

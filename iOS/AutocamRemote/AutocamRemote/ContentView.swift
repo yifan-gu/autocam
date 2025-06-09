@@ -16,8 +16,16 @@ struct ContentView: View {
     @State private var toggleState: Int = 0
 
     // Placeholder for sensor connectivity.
+    private var sensorConnected: Bool {
+        return blePeripheral.sensorConnected
+    }
+    
     private var sensorReady: Bool {
         return blePeripheral.sensorReady
+    }
+    
+    private var remoteConnected: Bool {
+        return blePeripheral.remoteConnected
     }
     
     private var remoteReady: Bool {
@@ -53,7 +61,7 @@ struct ContentView: View {
                 // 1) Sensor column
                 VStack(spacing: 4) {
                     Circle()
-                        .fill(sensorReady ? Color.green : Color.red)
+                        .fill(sensorReady ? Color.green : sensorConnected ? Color.yellow : Color.red)
                         .frame(width: 24, height: 24)
                     Text("Sensor")
                         .font(.caption)
@@ -63,7 +71,7 @@ struct ContentView: View {
                 // 2) Remote column
                 VStack(spacing: 4) {
                     Circle()
-                        .fill(remoteReady ? Color.green : Color.red)
+                        .fill(remoteReady ? Color.green : remoteConnected ? Color.yellow : Color.red)
                         .frame(width: 24, height: 24)
                     Text("Remote")
                         .font(.caption)

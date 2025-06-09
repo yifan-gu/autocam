@@ -50,7 +50,7 @@ uint16_t Adelay = 16384;
 
 float distance = 0;
 float heading = 0;
-uint8_t state = SENSOR_STATE_TAG_CONNECTED;
+uint8_t state = SENSOR_STATE_NOT_READY;
 float yawSpeed = 0;
 float pitchSpeed = 0;
 
@@ -274,6 +274,7 @@ void setupDJIRoninController() {
   }
 
   LOGF("DJI R SDK Version=%d.%d.%d.%d\n", SDK_version[0], SDK_version[1], SDK_version[2], SDK_version[3]);
+  updateState(state | SENSOR_STATE_CAN_CONNECTED);
 }
 
 void getDistance() {
@@ -346,21 +347,21 @@ void applyUWBSelector() {
 
 void updateLED(uint8_t state) {
   if (state & SENSOR_STATE_TAG_CONNECTED) {
-    LOGLN("tag, green");
+    LOGLN("Update Tag LED to GREEN");
     digitalWrite(TAG_LED_RED_PIN, HIGH);
     digitalWrite(TAG_LED_GREEN_PIN, LOW);
   } else {
-    LOGLN("tag, red");
+    LOGLN("Update Tag LED to RED");
     digitalWrite(TAG_LED_RED_PIN, LOW);
     digitalWrite(TAG_LED_GREEN_PIN, HIGH);
   }
 
   if (state & SENSOR_STATE_SERVER_CONNECTED) {
-    LOGLN("server, green");
+    LOGLN("Update Server LED to GREEN");
     digitalWrite(SERVER_LED_RED_PIN, HIGH);
     digitalWrite(SERVER_LED_GREEN_PIN, LOW);
   } else {
-    LOGLN("server, red");
+    LOGLN("Update Server LED to RED");
     digitalWrite(SERVER_LED_RED_PIN, LOW);
     digitalWrite(SERVER_LED_GREEN_PIN, HIGH);
   }
