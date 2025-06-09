@@ -80,7 +80,7 @@ RemoteDataSend lastSentData = { midThrottle, midSteering, DRIVE_MODE_MANUAL, mid
 
 unsigned int lastPingTime = 0;
 unsigned int lastHeartBeatMillis = 0;
-unsigned int heartBeatDuration = 200;
+unsigned int heartBeatDuration = 300;
 
 //calibrated Antenna Delay setting for this anchor
 uint16_t Adelay = 16630;

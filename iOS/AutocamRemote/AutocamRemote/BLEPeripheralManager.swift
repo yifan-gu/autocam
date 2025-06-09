@@ -33,7 +33,7 @@ final class BLEPeripheralManager: NSObject, ObservableObject {
     private var lastRecvPacket: RemoteDataRecv?
     private var loopCancellable: AnyCancellable?
     private let loopInterval      = 1.0 / 50.0    // 50 Hz
-    private let heartbeatInterval = 0.2           // 200 ms
+    private let heartbeatInterval = 0.3           // 300 ms
     private var lastSendTime      = Date.distantPast
     private var inputDirty = false
 

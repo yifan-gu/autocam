@@ -63,7 +63,8 @@ unsigned long lastRemoteConnectedTime = 0;
 unsigned long lastRemoteDataMillis = 0;
 unsigned long lastRemoteStatusUpdatedMillis = 0;
 
-const unsigned long heartbeatTimeout = 1000; // 1 second timeout
+const unsigned long sensorHeartbeatTimeout = 1500; // 1.5 second timeout to tolerate CAN communication failure.
+const unsigned long remoteHeartbeatTimeout = 1000; // 1 second timeout
 const unsigned long CONNECT_GRACE_MS = 2000; // 2000ms grace after BLE_CONNECTED
 const unsigned long remoteStatusUpdateDuration = 300; // Update the remote's status every 300ms to keep the iOS app awake in the background even when the screen is locked.
 
@@ -513,7 +514,7 @@ void runHealthCheck() {
 
   // ----- Sensor health -----
   now = millis();
-  if ((AutocamSensor.connected() && sensorState == BLE_CONNECTED && now - lastSensorConnectedTime > CONNECT_GRACE_MS && now - lastSensorDataMillis > heartbeatTimeout) || (!AutocamSensor.connected() && sensorState != BLE_SCANNING)) {
+  if ((AutocamSensor.connected() && sensorState == BLE_CONNECTED && now - lastSensorConnectedTime > CONNECT_GRACE_MS && now - lastSensorDataMillis > sensorHeartbeatTimeout) || (!AutocamSensor.connected() && sensorState != BLE_SCANNING)) {
     LOGF("Sensor disconnected → restarting non‐blocking scan, now: %ld, lastSensorConnectedTime: %ld, lastSensorDataMillis: %ld\n", now, lastSensorConnectedTime, lastSensorDataMillis);
     disconnectPeripheral(AutocamSensor, AutocamSensorServiceUUID);
     sensorState = BLE_IDLE;
@@ -524,7 +525,7 @@ void runHealthCheck() {
 
   // ----- Remote health -----
   //LOGF("now: %ld, lastRemoteDataMillis: %ld\n", now, lastRemoteDataMillis);
-  if ((AutocamRemote.connected() && remoteState == BLE_CONNECTED && now - lastRemoteConnectedTime > CONNECT_GRACE_MS && now - lastRemoteDataMillis > heartbeatTimeout) || (!AutocamRemote.connected() && remoteState != BLE_SCANNING)) {
+  if ((AutocamRemote.connected() && remoteState == BLE_CONNECTED && now - lastRemoteConnectedTime > CONNECT_GRACE_MS && now - lastRemoteDataMillis > remoteHeartbeatTimeout) || (!AutocamRemote.connected() && remoteState != BLE_SCANNING)) {
     LOGF("Remote disconnected → restarting non‐blocking scan, now: %ld, lastRemoteConnectedTime: %ld, lastRemoteDataMillis: %ld\n", now, lastRemoteConnectedTime, lastRemoteDataMillis);
     disconnectPeripheral(AutocamRemote, AutocamRemoteServiceUUID);
     remoteState = BLE_IDLE;

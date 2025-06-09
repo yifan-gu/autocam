@@ -107,8 +107,9 @@ void nonUWBTask(void * parameter) {
     previousIteration = currentIteration;
     //LOGF("Interval since last iteration: %u ms\n", intervalMs);
 
-    getHeading();
-    sendSensorDataSend();
+    if (getHeading()) {
+      sendSensorDataSend();
+    }
     getSensorDataRecv();
     applyUWBSelector();
     setGimbalPosition();
@@ -279,16 +280,17 @@ void getDistance() {
   DW1000Ranging.loop();
 }
 
-void getHeading() {
+bool getHeading() {
   float yaw, roll, pitch;
   if (!djiRoninController.get_position(&yaw, &roll, &pitch)) {
     LOGLN("Failed to get DJI Ronin position");
-    return;
+    return false;
   }
   heading = -yaw;
   if (heading < 0) {
     heading += 360;
   }
+  return true;
 }
 
 void sendSensorDataSend() {
