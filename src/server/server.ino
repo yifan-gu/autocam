@@ -1,3 +1,4 @@
+#include <ESP32Servo.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
 #include <math.h>
@@ -8,29 +9,21 @@
 #include "LED_controller.hpp"
 #include "util.h"
 
-// Use 50Hz for servos/ESCs, 12-bit resolution
-#define PWM_FREQ 50
-#define PWM_RESOLUTION 12  // 12-bit (0–4095)
-
-// ESC output PWM channels
-#define THROTTLE_PWM_CHANNEL 0
-#define STEERING_PWM_CHANNEL 1
-
 // Pin configuration
-#define STEERING_PIN A6  //  A6 for steering
-#define THROTTLE_PIN A5  //  A5 for throttle
+#define STEERING_PIN D8  //  D8 for steering
+#define THROTTLE_PIN D7  //  D7 for throttle
 
-#define SENSOR_LED_RED_PIN A4 // A4
-#define SENSOR_LED_GREEN_PIN A3 // A3
+#define SENSOR_LED_RED_PIN D6 // D6
+#define SENSOR_LED_GREEN_PIN D5 // D5
 #define SENSOR_LED_BLUE_PIN -1
 
-#define REMOTE_LED_RED_PIN A2 // A2
-#define REMOTE_LED_GREEN_PIN A1 // A1
+#define REMOTE_LED_RED_PIN D4 // D4
+#define REMOTE_LED_GREEN_PIN D3 // D3
 #define REMOTE_LED_BLUE_PIN -1
 
 #define DRIVE_MODE_LED_RED_PIN -1
 #define DRIVE_MODE_LED_GREEN_PIN -1
-#define DRIVE_MODE_LED_BLUE_PIN A0 // A0
+#define DRIVE_MODE_LED_BLUE_PIN D2 // D2
 
 LEDController ledController;
 
@@ -45,6 +38,10 @@ AsyncWebSocket ws("/ws");
 
 // A small buffer to hold incoming fragments
 static String wsBuffer;
+
+// Servo objects
+Servo throttleServo;
+Servo steeringServo;
 
 // Define throttle and steering ranges
 const int16_t minThrottle = 1000, maxThrottle = 2000, midThrottle = 1500;
@@ -266,12 +263,9 @@ void setupESC() {
   LOGLN("Initializing ESC...");
   delay(1000); // Wait 1 seconds to ensure the ESC ready to arm.
 
-  // Setup PWM
-  ledcSetup(THROTTLE_PWM_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
-  ledcAttachPin(THROTTLE_PIN, THROTTLE_PWM_CHANNEL);
-
-  ledcSetup(STEERING_PWM_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
-  ledcAttachPin(STEERING_PIN, STEERING_PWM_CHANNEL);
+  // Attach servos
+  throttleServo.attach(THROTTLE_PIN, minThrottle, maxThrottle);
+  steeringServo.attach(STEERING_PIN, minSteering, maxSteering);
 
   // Send neutral signals
   setThrottle(midThrottle);
@@ -504,13 +498,11 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 }
 
 void setThrottle(int microseconds) {
-  uint32_t duty = microseconds * ((1 << PWM_RESOLUTION) - 1) / 20000;
-  ledcWrite(THROTTLE_PWM_CHANNEL, duty);
+  throttleServo.writeMicroseconds(globalState.throttleValue);
 }
 
 void setSteering(int microseconds) {
-  uint32_t duty = microseconds * ((1 << PWM_RESOLUTION) - 1) / 20000;
-  ledcWrite(STEERING_PWM_CHANNEL, duty);
+  throttleServo.writeMicroseconds(globalState.throttleValue);
 }
 
 void runESCController() {
