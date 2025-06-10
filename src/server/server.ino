@@ -70,7 +70,7 @@ unsigned long lastRemoteStatusUpdatedMillis = 0;
 const unsigned long sensorHeartbeatTimeout = 2000; // 2 seconds timeout to tolerate CAN communication failure.
 const unsigned long remoteHeartbeatTimeout = 3000; // 3 seconds timeout
 const unsigned long CONNECT_GRACE_MS = 2000; // 2000ms grace after BLE_CONNECTED
-const unsigned long remoteStatusUpdateDuration = 300; // Update the remote's status every 300ms to keep the iOS app awake in the background even when the screen is locked.
+const unsigned long remoteStatusUpdateDuration = 400; // Update the remote's status every 400ms to keep the iOS app awake in the background even when the screen is locked.
 
 struct GlobalState {
   int16_t throttleValue;       // e.g., servo pulse width for throttle
