@@ -745,8 +745,11 @@ void getAutocamRemoteData() {
   //LOGF("Received throttle=%d, steering=%d, driveMode=%d, yawSpeed=%f, pitchSpeed=%f, toggleState=%d, uwbSelector=%d\n", data.throttleValue, data.steeringValue, data.driveMode, data.yawSpeed, data.pitchSpeed, data.toggleState, data.uwbSelector);
   //LOGF("Data interval: %d(ms)\n", millis() - lastPingTime);
 
-  globalState.throttleValue = map(data.throttleValue, minThrottle, maxThrottle, minMoveThrottle, maxMoveThrottle);
-  globalState.steeringValue = map(data.steeringValue, minSteering, maxSteering, minMoveSteering, maxMoveSteering);
+  if (globalState.driveMode == DRIVE_MODE_MANUAL) {
+    globalState.throttleValue = map(data.throttleValue, minThrottle, maxThrottle, minMoveThrottle, maxMoveThrottle);
+    globalState.steeringValue = map(data.steeringValue, minSteering, maxSteering, minMoveSteering, maxMoveSteering);
+  }
+
   globalState.yawSpeed = data.yawSpeed;
   globalState.pitchSpeed = data.pitchSpeed;
   globalState.toggleState = data.toggleState;
@@ -903,6 +906,7 @@ void calculateSteeringThrottleFollow() {
   } else if (moveBackward) {
     setSteeringValue(-steeringCoeff); // In reverse, we need to turn the other way around.
   }
+  //LOGF("Throttle / steering coeff follow mode: %lf ; %lf\n", throttleCoeff, steeringCoeff);
 }
 
 void calculateSteeringThrottleCinema() {
@@ -984,14 +988,7 @@ void calculateSteeringThrottleCinema() {
       setSteeringValue(-steeringCoeff);
     }
   }
-}
-
-bool pushingRight(float currentX, float targetX, float distanceDelta) {
-  return currentX > targetX + distanceDelta;
-}
-
-bool pushingLeft(float currentX, float targetX, float distanceDelta) {
-  return currentX < targetX - distanceDelta;
+  //LOGF("Throttle / steering coeff cinema mode: %lf ; %lf\n", throttleCoeff, steeringCoeff);
 }
 
 bool isInRearTriangle(float currentX, float currentY, float fieldOfViewRatio, bool moveForward, bool moveBackward) {
