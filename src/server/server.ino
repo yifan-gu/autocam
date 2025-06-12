@@ -947,10 +947,10 @@ void calculateSteeringThrottleCinema() {
 
   bool moveForward = false;
   bool moveBackward = false;
-  if (yDiff > 0) { // In front of the center of the car.
+  if (yDiff > 0) {
     setMoveForward(throttleCoeff);
     moveForward = true;
-  } else { // Behind the center of the car.
+  } else {
     setMoveBackward(-throttleCoeff); // throttleCoeff < 0.
     moveBackward = true;
   }
@@ -967,11 +967,7 @@ void calculateSteeringThrottleCinema() {
       }
     }
     steeringCoeff = calculateSteeringCoeff(headingDiffError, deltaTimeMillis) * leadingTurningCoefficient;
-    if (pushingLeft(globalState.currentX, globalState.targetX, distanceDelta)) {
-      setSteeringValue(steeringCoeff);
-    } else if (pushingRight(globalState.currentX, globalState.targetX, distanceDelta)) {
-      setSteeringValue(-steeringCoeff);
-    }
+    setSteeringValue(-steeringCoeff);
   } else {
     // Tailing.
     if (abs(headingDiff) > headingDelta) {
