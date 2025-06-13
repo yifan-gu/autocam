@@ -52,9 +52,9 @@ const int16_t minSteering = 1000, maxSteering = 2000, midSteering = 1500; // 100
 const int16_t minSteeringThrottle = 50;
 
 const float fieldOfViewRatio = 28 / 20; // Car length / car width (measured from the wheel).
-const float SAFETY_DISTANCE = 5.0; // Maximum distance allowed, if current distance goes beyond this value, the car will stop.
+const float SAFETY_DISTANCE = 10.0; // Maximum distance allowed, if current distance goes beyond this value, the car will stop.
 
-int16_t minMoveThrottle = 1300, maxMoveThrottle = 1700;
+int16_t minMoveThrottle = 1100, maxMoveThrottle = 1900;
 int16_t minMoveSteering = 1000, maxMoveSteering = 2000;
 
 // Heartbeat tracking
@@ -167,7 +167,7 @@ float cinemaLeadingHeadingDelta = 0; // The heading tolerance in cinema leading 
 float throttleConstant = 100;
 float steeringConstant = 10;
 
-float Kp_t = 0.5;  // Proportional gain. Diff = Kp_t * distance
+float Kp_t = 1.5;  // Proportional gain. Diff = Kp_t * distance
 float Ki_t = 4;  // Integral gain. Diff = Ki_t * distance * 1000 * second, Ki_t * maxIntegralLimit_t * throttleConstant = IntegramThrottle
 float Kd_t = 0.5;  // Derivative gain. Diff = Kd_t / (speed m/s * 1000 ms)
 
@@ -190,7 +190,7 @@ float deltaTimeThreshold = 1000; // If the delay is more than the threshold, ski
 float distanceSmoothFactor = 0.1; // Smoothing factor for distance readings (0 < alpha <= 1; lower values are smoother but slower to converge).
 
 float leadingTurningCoefficient = 10;
-float tailingTurningCoefficient = 1;
+float tailingTurningCoefficient = 0.5;
 
 
 //
