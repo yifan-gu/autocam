@@ -208,7 +208,7 @@
                  return;
              }
 
-             let deltaTime = 16; // Assuming ~60fps; refine as needed
+             let deltaTime = 33; // Assuming 30fps; refine as needed
              let error_t = distanceError;
              throttle = calculateThrottleDiff(error_t, deltaTime);
              console.log("throttle", throttle);
@@ -268,7 +268,7 @@
              let moveForward = false;
              let moveBackward = false;
 
-             let deltaTime = 16; // Assuming ~60fps; refine as needed
+             let deltaTime = 33; // Assuming 30fps; refine as needed
              let error_t = yDiff;
              throttle = calculateThrottleDiff(yDiff, deltaTime);
              console.log("throttle", throttle);
