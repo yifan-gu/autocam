@@ -18,8 +18,8 @@
 #define PIN_SS 4   // spi select pin
 
 // DJI Can pins
-#define CAN_TX 12  // Connects to CTX
-#define CAN_RX 2  // Connects to CRX
+#define CAN_TX 5  // Connects to CTX
+#define CAN_RX 16  // Connects to CRX
 #define CAN_RATE 1000 // Speed rate in kbps
 
 #define SERVER_LED_RED_PIN 25
